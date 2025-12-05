@@ -17,5 +17,8 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/review",
     },
+    {
+      resolve: "./src/modules/brand",
+    },
   ],
 })
