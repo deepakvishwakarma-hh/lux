@@ -5,6 +5,8 @@ import type {
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { BRAND_MODULE } from "../../../../../modules/brand"
 import { z } from "zod"
+import { container } from "@medusajs/framework"
+import { LinkDefinition } from "@medusajs/framework/types"
 
 export const LinkBrandProductsSchema = z.object({
     product_ids: z.array(z.string()),
@@ -17,21 +19,22 @@ export async function POST(
     try {
         const { id } = req.params
         const { product_ids } = req.validatedBody
-        const link = req.scope.resolve(ContainerRegistrationKeys.LINK)
 
-        // Link products to brand
-        await Promise.all(
-            product_ids.map((product_id) =>
-                link.create({
-                    [BRAND_MODULE]: {
-                        brand_id: id,
-                    },
-                    [Modules.PRODUCT]: {
-                        product_id,
-                    },
-                })
-            )
-        )
+        const link = container.resolve(ContainerRegistrationKeys.LINK)
+        const links: LinkDefinition[] = []
+
+        for (const product of product_ids) {
+            links.push({
+                [Modules.PRODUCT]: {
+                    product_id: product,
+                },
+                [BRAND_MODULE]: {
+                    brand_id: id,
+                },
+            })
+        }
+
+        await link.create(links)
 
         res.json({ success: true })
     } catch (error) {

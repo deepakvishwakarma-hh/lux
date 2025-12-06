@@ -11,6 +11,10 @@ import { GetStoreReviewsSchema } from "./store/products/[id]/reviews/route";
 import { CreateBrandSchema } from "./admin/brands/route";
 import { UpdateBrandSchema } from "./admin/brands/[id]/route";
 import { LinkBrandProductsSchema } from "./admin/brands/[id]/products/route";
+// import { GetAdminBrandsSchema } from "./admin/brands/route";
+import { createFindParams } from "@medusajs/medusa/api/utils/validators"
+
+export const GetBrandsSchema = createFindParams();
 
 export default defineMiddlewares({
   routes: [
@@ -95,6 +99,21 @@ export default defineMiddlewares({
         // @ts-ignore
         validateAndTransformBody(CreateBrandSchema),
       ],
+    },
+    {
+      matcher: "/admin/brands",
+      method: ["GET"],
+      middlewares: [
+        validateAndTransformQuery(GetBrandsSchema, {
+          defaults: [
+            "id",
+            "name",
+            "products.*", // include linked products by default
+          ],
+          isList: true,
+        }),
+      ],
+
     },
     {
       matcher: "/admin/brands/:id",

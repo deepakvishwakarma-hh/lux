@@ -63,15 +63,15 @@ const BrandsPage = () => {
         );
       },
     }),
-    columnHelper.accessor("products", {
-      header: "Products",
-      cell: ({ row }) => {
-        const productCount = row.original.products?.length || 0;
-        return (
-          <Text className="text-ui-fg-subtle">{productCount} products</Text>
-        );
-      },
-    }),
+    // columnHelper.accessor("products", {
+    //   header: "Products",
+    //   cell: ({ row }) => {
+    //     const productCount = row.original.products?.length || 0;
+    //     return (
+    //       <Text className="text-ui-fg-subtle">{productCount} products</Text>
+    //     );
+    //   },
+    // }),
     columnHelper.display({
       id: "actions",
       header: "",
@@ -111,6 +111,16 @@ const BrandsPage = () => {
               >
                 Edit
               </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(row.original);
+                }}
+                className="text-ui-fg-destructive"
+              >
+                Delete
+              </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu>
         );
@@ -146,7 +156,7 @@ const BrandsPage = () => {
           offset: pagination.pageIndex * pagination.pageSize,
           limit: pagination.pageSize,
           order: "-created_at",
-          fields: ["*", "products.*"],
+          // fields: ["*", "products.*"],
         },
       }),
   });
@@ -164,6 +174,27 @@ const BrandsPage = () => {
       resetForm();
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return sdk.client.fetch(`/admin/brands/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["brands"] });
+    },
+  });
+
+  const handleDelete = (brand: Brand) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${brand.name}"? This action cannot be undone.`
+      )
+    ) {
+      deleteMutation.mutate(brand.id);
+    }
+  };
 
   const resetForm = () => {
     setFormData({

@@ -66,7 +66,7 @@ const BrandEditPage = () => {
     queryFn: () =>
       sdk.client.fetch(`/admin/brands/${id}`, {
         query: {
-          fields: ["*"],
+          fields: "*,products.*",
         },
       }),
     enabled: !!id,
@@ -84,7 +84,7 @@ const BrandEditPage = () => {
           limit: 100,
           offset: 0,
           q: searchQuery || undefined,
-          fields: ["id", "title"],
+          fields: "id,title",
         },
       }),
   });
@@ -220,6 +220,7 @@ const BrandEditPage = () => {
 
   return (
     <Container>
+      {/* {JSON.stringify(brandData)} */}
       <div className="mb-6">
         <Button
           variant="secondary"
@@ -307,10 +308,69 @@ const BrandEditPage = () => {
 
       {/* Product Selection */}
       <div className="mt-8 bg-white rounded-lg shadow p-6">
-        <Heading className="mb-4">Products</Heading>
-        <Text className="text-ui-fg-subtle mb-4">
-          Select products to associate with this brand
-        </Text>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <Heading className="mb-2">Products</Heading>
+            <Text className="text-ui-fg-subtle">
+              Select multiple products to associate with this brand (
+              {selectedProducts.size} selected)
+            </Text>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={async () => {
+                const allProductIds = filteredProducts.map((p) => p.id);
+                const unselectedIds = allProductIds.filter(
+                  (id) => !selectedProducts.has(id)
+                );
+                if (unselectedIds.length > 0) {
+                  await linkProductsMutation.mutateAsync(unselectedIds);
+                  setSelectedProducts(
+                    (prev) => new Set([...prev, ...unselectedIds])
+                  );
+                }
+              }}
+              disabled={
+                linkProductsMutation.isPending ||
+                unlinkProductMutation.isPending ||
+                filteredProducts.length === 0
+              }
+            >
+              Select All
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={async () => {
+                const selectedInFiltered = filteredProducts
+                  .map((p) => p.id)
+                  .filter((id) => selectedProducts.has(id));
+                if (selectedInFiltered.length > 0) {
+                  await Promise.all(
+                    selectedInFiltered.map((id) =>
+                      unlinkProductMutation.mutateAsync(id)
+                    )
+                  );
+                  setSelectedProducts((prev) => {
+                    const newSet = new Set(prev);
+                    selectedInFiltered.forEach((id) => newSet.delete(id));
+                    return newSet;
+                  });
+                }
+              }}
+              disabled={
+                linkProductsMutation.isPending ||
+                unlinkProductMutation.isPending ||
+                filteredProducts.filter((p) => selectedProducts.has(p.id))
+                  .length === 0
+              }
+            >
+              Deselect All
+            </Button>
+          </div>
+        </div>
 
         <div className="mb-4">
           <Input

@@ -23,10 +23,12 @@ export async function GET(
         const query = req.scope.resolve("query")
         const { id } = req.params
 
+        console.log("params", req.params)
+
         // Query brand without products first to avoid link errors
         const { data: brands } = await query.graph({
             entity: "brand",
-            fields: ["*"],
+            fields: ["*", "products.*"],
             filters: {
                 id,
             },

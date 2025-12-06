@@ -15,6 +15,7 @@ export const CreateBrandSchema = z.object({
     description: z.string().optional(),
     meta_title: z.string().optional(),
     meta_desc: z.string().optional(),
+
 })
 
 export const GET = async (
@@ -25,17 +26,31 @@ export const GET = async (
         // Use queryConfig if available, otherwise use raw query parameters
         const queryConfig = req.queryConfig || req.query || {}
 
-        const { result } = await getBrandsWorkflow(req.scope).run({
-            input: {
-                queryConfig,
-            },
+
+        // const { result } = await getBrandsWorkflow(req.scope).run({
+        //     input: {
+        //         queryConfig,
+        //     },
+        // })
+        const query = req.scope.resolve("query")
+
+        const {
+            data: brands,
+            metadata: { count, take, skip } = {},
+        } = await query.graph({
+            entity: "brand",
+            // This will return brand data and its linked products
+            ...req.queryConfig, // allows pagination & field overrides
+            // If you want to force fields explicitly instead of using req.queryConfig:
+
         })
 
-        res.json({
-            brands: result.brands,
-            count: result.count,
-            limit: result.limit,
-            offset: result.offset,
+
+        return res.json({
+            brands: brands,
+            count,
+            limit: take,
+            offset: skip,
         })
     } catch (error) {
         res.status(500).json({
