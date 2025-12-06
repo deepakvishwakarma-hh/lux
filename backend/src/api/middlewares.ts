@@ -9,9 +9,12 @@ import { GetAdminReviewsSchema } from "./admin/reviews/route";
 import { PostAdminUpdateReviewsStatusSchema } from "./admin/reviews/status/route";
 import { GetStoreReviewsSchema } from "./store/products/[id]/reviews/route";
 import { GetStoreBrandsSchema } from "./store/brands/route";
+import { GetStoreCarouselsSchema } from "./store/carousels/route";
 import { CreateBrandSchema } from "./admin/brands/route";
 import { UpdateBrandSchema } from "./admin/brands/[id]/route";
 import { LinkBrandProductsSchema } from "./admin/brands/[id]/products/route";
+import { GetAdminCarouselsSchema, CreateCarouselSchema } from "./admin/carousels/route";
+import { UpdateCarouselSchema } from "./admin/carousels/[id]/route";
 // import { GetAdminBrandsSchema } from "./admin/brands/route";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators"
 
@@ -160,6 +163,56 @@ export default defineMiddlewares({
       matcher: "/admin/upload",
       method: ["POST"],
       // No body validation for file uploads - handled in route
+    },
+    {
+      matcher: "/store/carousels",
+      method: ["GET"],
+      middlewares: [
+        validateAndTransformQuery(GetStoreCarouselsSchema, {
+          isList: true,
+          defaults: [
+            "id",
+            "image_url1",
+            "image_url2",
+            "link",
+            "order",
+          ],
+        }),
+      ],
+    },
+    {
+      matcher: "/admin/carousels",
+      method: ["POST"],
+      middlewares: [
+        // @ts-ignore
+        validateAndTransformBody(CreateCarouselSchema),
+      ],
+    },
+    {
+      matcher: "/admin/carousels",
+      method: ["GET"],
+      middlewares: [
+        validateAndTransformQuery(GetAdminCarouselsSchema, {
+          defaults: [
+            "id",
+            "image_url1",
+            "image_url2",
+            "link",
+            "order",
+            "created_at",
+            "updated_at",
+          ],
+          isList: true,
+        }),
+      ],
+    },
+    {
+      matcher: "/admin/carousels/:id",
+      method: ["PUT"],
+      middlewares: [
+        // @ts-ignore
+        validateAndTransformBody(UpdateCarouselSchema),
+      ],
     },
 
 

@@ -20,6 +20,9 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/brand",
     },
+    {
+      resolve: "./src/modules/carousel",
+    },
   ],
   plugins: [
     {
