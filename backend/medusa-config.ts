@@ -23,6 +23,9 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/carousel",
     },
+    {
+      resolve: "./src/modules/liked_product",
+    },
   ],
   plugins: [
     {
