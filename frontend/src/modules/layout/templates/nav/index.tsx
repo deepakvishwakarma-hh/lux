@@ -1,52 +1,60 @@
 import { Suspense } from "react"
+import Image from "next/image"
 
 import { listRegions } from "@lib/data/regions"
+import { retrieveCustomer } from "@lib/data/customer"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
-import SideMenu from "@modules/layout/components/side-menu"
+import NavSearch from "@modules/layout/components/nav-search"
+import AccountDropdown from "@modules/layout/components/account-dropdown"
+import CompareButton from "@modules/layout/components/compare-button"
+import LikedButton from "@modules/layout/components/liked-button"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
+  const customer = await retrieveCustomer()
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
-          <div className="flex-1 basis-0 h-full flex items-center">
-            <div className="h-full">
-              <SideMenu regions={regions} />
-            </div>
+      <header className="relative h-20  border-b duration-200 bg-white border-ui-border-base">
+        <nav className="px-10 txt-xsmall-plus text-ui-fg-subtle flex items-center gap-10 w-full h-full text-small-regular ">
+          {/* Left: Logo */}
+          <LocalizedClientLink
+            href="/"
+            className="flex flex-col items-start justify-center h-full hover:opacity-80 transition-opacity"
+            data-testid="nav-store-link"
+          >
+            <Image
+              src="/logo.avif"
+              alt="Luxurious Mart"
+              width={205}
+              height={66}
+              className="object-contain"
+            />
+          </LocalizedClientLink>
+
+          {/* Center: Search */}
+          <div className="flex-1 flex justify-center">
+            <NavSearch />
           </div>
 
-          <div className="flex items-center h-full">
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
-              data-testid="nav-store-link"
-            >
-              Medusa Store
-            </LocalizedClientLink>
-          </div>
+          {/* Right: Account, Compare, Liked, Cart */}
+          <div className="flex items-center gap-x-6 h-full">
+            <AccountDropdown customer={customer} />
 
-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
-            <div className="hidden small:flex items-center gap-x-6 h-full">
-              <LocalizedClientLink
-                className="hover:text-ui-fg-base"
-                href="/account"
-                data-testid="nav-account-link"
-              >
-                Account
-              </LocalizedClientLink>
-            </div>
+            <CompareButton />
+
+            <LikedButton />
+
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
+                  className="hover:text-ui-fg-base flex gap-2 items-center relative"
                   href="/cart"
                   data-testid="nav-cart-link"
                 >
-                  Cart (0)
+                  <span className="text-small-regular">Cart (0)</span>
                 </LocalizedClientLink>
               }
             >

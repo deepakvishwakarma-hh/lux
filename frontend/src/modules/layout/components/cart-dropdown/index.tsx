@@ -14,6 +14,7 @@ import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
+import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
 
@@ -36,6 +37,8 @@ const CartDropdown = ({
     }, 0) || 0
 
   const subtotal = cartState?.subtotal ?? 0
+  const total = cartState?.total ?? cartState?.subtotal ?? 0
+  const currencyCode = cartState?.currency_code ?? "USD"
   const itemRef = useRef<number>(totalItems || 0)
 
   const timedOpen = () => {
@@ -80,12 +83,22 @@ const CartDropdown = ({
       onMouseLeave={close}
     >
       <Popover className="relative h-full">
-        <PopoverButton className="h-full">
-          <LocalizedClientLink
-            className="hover:text-ui-fg-base"
-            href="/cart"
-            data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+        <PopoverButton className="h-full flex items-center">
+          <div className="flex items-center gap-4">
+            <LocalizedClientLink
+              className="hover:text-ui-fg-base flex items-center relative"
+              href="/cart"
+              data-testid="nav-cart-link"
+            >
+              <WoodMartIcon iconContent="f126" size={20} badge={totalItems} />
+            </LocalizedClientLink>
+            <span className="text-sm font-bold text-ui-fg-base text-[13px]">
+              {convertToLocale({
+                amount: total || 0,
+                currency_code: currencyCode,
+              })}
+            </span>
+          </div>
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}

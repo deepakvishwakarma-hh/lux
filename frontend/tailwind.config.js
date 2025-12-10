@@ -60,6 +60,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          "var(--font-inter)",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -69,6 +70,7 @@ module.exports = {
           "Ubuntu",
           "sans-serif",
         ],
+        woodmart: ["woodmart-font", "sans-serif"],
       },
       keyframes: {
         ring: {

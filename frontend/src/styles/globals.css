@@ -1,3 +1,6 @@
+/* WoodMart Font - Icon Font */
+@import url(https://db.onlinewebfonts.com/c/f890eea2e91e1270ce7109e36a42260a?family=woodmart-font);
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
@@ -108,5 +111,56 @@
 
   .text-3xl-semi {
     @apply text-[32px] leading-[44px] font-semibold;
+  }
+
+  /* Swiper Carousel Styles */
+  .hero-carousel {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-carousel .swiper-pagination-bullet {
+    background: white;
+    opacity: 0.5;
+    width: 12px;
+    height: 12px;
+  }
+
+  .hero-carousel .swiper-pagination-bullet-active {
+    opacity: 1;
+    background: white;
+  }
+
+  .hero-carousel .swiper-button-next,
+  .hero-carousel .swiper-button-prev {
+    color: white;
+    background: rgba(0, 0, 0, 0.3);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    transition: background 0.3s;
+  }
+
+  .hero-carousel .swiper-button-next:hover,
+  .hero-carousel .swiper-button-prev:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .hero-carousel .swiper-button-next::after,
+  .hero-carousel .swiper-button-prev::after {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  /* WoodMart Icon Font Utility */
+  .woodmart-icon {
+    font-family: "woodmart-font", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
