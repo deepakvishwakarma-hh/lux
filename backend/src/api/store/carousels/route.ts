@@ -13,9 +13,18 @@ export const GET = async (
     try {
         const query = req.scope.resolve("query")
 
-        const queryConfig = {
+        // Parse query parameters manually since we removed middleware validation
+        // to avoid 'order' field validation conflict
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 100
+        const offset = req.query.offset ? parseInt(req.query.offset as string) : 0
+
+        // Build query config - always use wildcard to get all fields including 'order'
+        // The 'order' field name conflicts with query sorting parameter, so we can't validate it
+        const queryConfig: any = {
             entity: "carousel",
-            ...req.queryConfig, // includes fields, pagination, etc. from middleware
+            fields: ["*"], // Use wildcard to get all fields including 'order' without validation issues
+            take: limit,
+            skip: offset,
         }
 
         const {
@@ -23,10 +32,11 @@ export const GET = async (
             metadata: { count, take, skip } = {},
         } = await query.graph(queryConfig)
 
-        // Sort by order field (ascending)
+        // Sort by order field (ascending) - this works even if 'order' wasn't explicitly in fields
+        // because we're using wildcard or it's in defaults
         const sortedCarousels = (carousels || []).sort((a: any, b: any) => {
-            const orderA = a.order || 0
-            const orderB = b.order || 0
+            const orderA = a.order ?? 0
+            const orderB = b.order ?? 0
             return orderA - orderB
         })
 

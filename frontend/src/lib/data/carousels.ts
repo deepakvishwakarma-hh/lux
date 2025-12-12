@@ -28,16 +28,24 @@ export const listCarousels = async (query?: Record<string, any>) => {
                 query: {
                     limit,
                     offset,
-                    order: "order", // Sort by order field
                     ...query,
                 },
                 next,
-                cache: "force-cache",
+                cache: "no-store", // Don't cache to see fresh data
             }
         )
-        .then(({ carousels, count }) => ({
-            carousels: carousels || [],
-            count: count || 0,
-        }))
+        .then(({ carousels, count }) => {
+            return {
+                carousels: carousels || [],
+                count: count || 0,
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching carousels:", error)
+            return {
+                carousels: [],
+                count: 0,
+            }
+        })
 }
 

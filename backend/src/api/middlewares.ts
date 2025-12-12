@@ -168,18 +168,8 @@ export default defineMiddlewares({
     {
       matcher: "/store/carousels",
       method: ["GET"],
-      middlewares: [
-        validateAndTransformQuery(GetStoreCarouselsSchema, {
-          isList: true,
-          defaults: [
-            "id",
-            "image_url1",
-            "image_url2",
-            "link",
-            "order",
-          ],
-        }),
-      ],
+      // No middleware validation - handled in route to avoid 'order' field validation conflict
+      // The 'order' field name conflicts with query sorting parameter
     },
     {
       matcher: "/admin/carousels",
