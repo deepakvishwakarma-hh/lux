@@ -1,12 +1,12 @@
 import "server-only"
 import { cookies as nextCookies } from "next/headers"
-import { getAuthHeaders } from "./cookies"
+import { getCustomerId } from "./cookies"
 import { sdk } from "@lib/config"
 
 const LIKED_COOKIE_NAME = "_medusa_liked_ids"
 
 /**
- * Get liked product IDs from cookies (server-side)
+ * Get liked product IDs from cookies (server-side) - fallback for legacy support
  */
 export async function getLikedProductIds(): Promise<string[]> {
   try {
@@ -32,31 +32,29 @@ export async function getLikedProductIds(): Promise<string[]> {
 }
 
 /**
- * Get liked product IDs from backend API (for logged in users)
+ * Get liked product IDs from backend API using customer_id
  */
-export async function getLikedProductIdsFromAPI(): Promise<string[]> {
+export async function getLikedProductIdsFromAPI(customerId?: string): Promise<string[]> {
   try {
-    const authHeaders = await getAuthHeaders()
+    const customer_id = customerId || await getCustomerId()
 
-    if (!authHeaders || Object.keys(authHeaders).length === 0) {
-      // User is not logged in, return empty array
+    if (!customer_id) {
       return []
     }
 
-    const response = await sdk.client.fetch<{ products: any[]; count: number }>(
-      `/store/liked-products`,
+    const response = await sdk.client.fetch<{ product_ids: string[]; count: number }>(
+      `/store/liked-products?customer_id=${encodeURIComponent(customer_id)}`,
       {
         method: "GET",
-        headers: authHeaders,
       }
     )
 
-    if (!response.products || response.products.length === 0) {
+    if (!response.product_ids || response.product_ids.length === 0) {
       return []
     }
 
-    // Extract product IDs from the products array
-    return response.products.map((product: any) => product.id)
+    // Return product IDs directly
+    return response.product_ids
   } catch (error) {
     console.error("Error fetching liked products from API:", error)
     return []
@@ -64,17 +62,20 @@ export async function getLikedProductIdsFromAPI(): Promise<string[]> {
 }
 
 /**
- * Get all liked product IDs (checks API first if logged in, then cookies)
+ * Get all liked product IDs (uses API with customer_id - works for both logged in and guest users)
  */
 export async function getAllLikedProductIds(): Promise<string[]> {
-  const authHeaders = await getAuthHeaders()
-
-  // If user is logged in, get from API
-  if (authHeaders && Object.keys(authHeaders).length > 0) {
-    return await getLikedProductIdsFromAPI()
+  try {
+    const customerId = await getCustomerId()
+    if (customerId) {
+      return await getLikedProductIdsFromAPI(customerId)
+    }
+    // Fallback to cookies if customer ID cannot be determined
+    return await getLikedProductIds()
+  } catch (error) {
+    console.error("Error getting liked product IDs:", error)
+    // Fallback to cookies on error
+    return await getLikedProductIds()
   }
-
-  // Otherwise, get from cookies
-  return await getLikedProductIds()
 }
 

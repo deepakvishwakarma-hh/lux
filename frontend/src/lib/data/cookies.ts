@@ -87,3 +87,47 @@ export const removeCartId = async () => {
     maxAge: -1,
   })
 }
+
+/**
+ * Get or create a guest customer ID for non-logged in users
+ */
+export const getOrCreateGuestCustomerId = async (): Promise<string> => {
+  const cookies = await nextCookies()
+  let guestCustomerId = cookies.get("_medusa_guest_customer_id")?.value
+
+  if (!guestCustomerId) {
+    // Generate a unique guest customer ID
+    guestCustomerId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+    cookies.set("_medusa_guest_customer_id", guestCustomerId, {
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    })
+  }
+
+  return guestCustomerId
+}
+
+/**
+ * Get customer ID - returns logged in customer ID or guest customer ID
+ */
+export const getCustomerId = async (): Promise<string | null> => {
+  const authHeaders = await getAuthHeaders()
+  
+  // If user is logged in, get customer ID from customer object
+  if (authHeaders && Object.keys(authHeaders).length > 0) {
+    try {
+      const { retrieveCustomer } = await import("./customer")
+      const customer = await retrieveCustomer()
+      if (customer?.id) {
+        return customer.id
+      }
+    } catch (error) {
+      console.error("Error retrieving customer:", error)
+    }
+  }
+
+  // For guests, use guest customer ID
+  return await getOrCreateGuestCustomerId()
+}

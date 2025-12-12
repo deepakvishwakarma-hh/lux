@@ -1,19 +1,74 @@
 "use client"
 
 /**
- * Client-side utility for managing liked products via API (for logged in users)
+ * Client-side utility for managing liked products via API
  */
 
-function getApiBaseUrl(): string {
-  // Try to get from environment variable (for client-side)
-  if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
-    return process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+import { sdk } from "@lib/config"
+
+const GUEST_CUSTOMER_ID_COOKIE = "_medusa_guest_customer_id"
+
+/**
+ * Get or create a guest customer ID for non-logged in users (client-side)
+ */
+function getOrCreateGuestCustomerId(): string {
+  if (typeof document === "undefined") {
+    return ""
   }
-  // Fallback to default
-  return "http://localhost:9000"
+
+  const cookies = document.cookie.split(";")
+  const guestIdCookie = cookies.find((cookie) =>
+    cookie.trim().startsWith(`${GUEST_CUSTOMER_ID_COOKIE}=`)
+  )
+
+  if (guestIdCookie) {
+    try {
+      return guestIdCookie.split("=")[1]
+    } catch {
+      // Continue to create new one
+    }
+  }
+
+  // Generate a unique guest customer ID
+  const guestCustomerId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+  const maxAge = 60 * 60 * 24 * 365 // 1 year
+  document.cookie = `${GUEST_CUSTOMER_ID_COOKIE}=${guestCustomerId}; max-age=${maxAge}; path=/; SameSite=Strict`
+
+  return guestCustomerId
 }
 
-const API_BASE_URL = getApiBaseUrl()
+/**
+ * Get customer ID - returns logged in customer ID or guest customer ID
+ */
+async function getCustomerId(): Promise<string | null> {
+  try {
+    // Try to get customer info if logged in
+    const authHeaders = getAuthHeaders()
+    if (authHeaders && Object.keys(authHeaders).length > 0) {
+      try {
+        const { customer } = await sdk.client.fetch<{ customer: { id: string } }>(
+          `/store/customers/me`,
+          {
+            method: "GET",
+            headers: authHeaders,
+          }
+        )
+        if (customer?.id) {
+          return customer.id
+        }
+      } catch (error) {
+        // Not logged in or error, continue to guest
+      }
+    }
+
+    // For guests, use guest customer ID
+    return getOrCreateGuestCustomerId()
+  } catch (error) {
+    console.error("Error getting customer ID:", error)
+    // Fallback to guest ID
+    return getOrCreateGuestCustomerId()
+  }
+}
 
 /**
  * Get authorization headers from cookies
@@ -53,24 +108,28 @@ export function isLoggedIn(): boolean {
  */
 export async function addToLikedAPI(productId: string): Promise<boolean> {
   try {
-    const authHeaders = getAuthHeaders()
-    
-    if (!authHeaders || Object.keys(authHeaders).length === 0) {
+    const customerId = await getCustomerId()
+
+    if (!customerId) {
+      console.error("Unable to get customer ID")
       return false
     }
 
-    const response = await fetch(`${API_BASE_URL}/store/liked-products`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders,
-      },
-      body: JSON.stringify({ product_id: productId }),
-      credentials: "include",
-    })
+    await sdk.client.fetch(
+      `/store/liked-products?customer_id=${encodeURIComponent(customerId)}`,
+      {
+        method: "POST",
+        body: { product_id: productId },
+      }
+    )
 
-    if (!response.ok) {
-      throw new Error(`Failed to like product: ${response.statusText}`)
+    // Dispatch custom event for other components to listen
+    if (typeof window !== "undefined") {
+      // Fetch updated count to dispatch with event
+      const updatedIds = await getLikedProductIdsFromAPI()
+      window.dispatchEvent(
+        new CustomEvent("likedUpdated", { detail: { count: updatedIds.length } })
+      )
     }
 
     return true
@@ -85,25 +144,27 @@ export async function addToLikedAPI(productId: string): Promise<boolean> {
  */
 export async function removeFromLikedAPI(productId: string): Promise<boolean> {
   try {
-    const authHeaders = getAuthHeaders()
-    
-    if (!authHeaders || Object.keys(authHeaders).length === 0) {
+    const customerId = await getCustomerId()
+
+    if (!customerId) {
+      console.error("Unable to get customer ID")
       return false
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/store/liked-products?product_id=${productId}`,
+    await sdk.client.fetch(
+      `/store/liked-products?customer_id=${encodeURIComponent(customerId)}&product_id=${encodeURIComponent(productId)}`,
       {
         method: "DELETE",
-        headers: {
-          ...authHeaders,
-        },
-        credentials: "include",
       }
     )
 
-    if (!response.ok) {
-      throw new Error(`Failed to unlike product: ${response.statusText}`)
+    // Dispatch custom event for other components to listen
+    if (typeof window !== "undefined") {
+      // Fetch updated count to dispatch with event
+      const updatedIds = await getLikedProductIdsFromAPI()
+      window.dispatchEvent(
+        new CustomEvent("likedUpdated", { detail: { count: updatedIds.length } })
+      )
     }
 
     return true
@@ -118,31 +179,24 @@ export async function removeFromLikedAPI(productId: string): Promise<boolean> {
  */
 export async function getLikedProductIdsFromAPI(): Promise<string[]> {
   try {
-    const authHeaders = getAuthHeaders()
-    
-    if (!authHeaders || Object.keys(authHeaders).length === 0) {
+    const customerId = await getCustomerId()
+
+    if (!customerId) {
       return []
     }
 
-    const response = await fetch(`${API_BASE_URL}/store/liked-products`, {
-      method: "GET",
-      headers: {
-        ...authHeaders,
-      },
-      credentials: "include",
-    })
+    const data = await sdk.client.fetch<{ product_ids: string[]; count: number }>(
+      `/store/liked-products?customer_id=${encodeURIComponent(customerId)}`,
+      {
+        method: "GET",
+      }
+    )
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch liked products: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    
-    if (!data.products || data.products.length === 0) {
+    if (!data.product_ids || data.product_ids.length === 0) {
       return []
     }
 
-    return data.products.map((product: any) => product.id)
+    return data.product_ids
   } catch (error) {
     console.error("Error fetching liked products from API:", error)
     return []

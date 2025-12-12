@@ -1,10 +1,10 @@
 import type {
-    AuthenticatedMedusaRequest,
+    MedusaRequest,
     MedusaResponse,
 } from "@medusajs/framework/http"
 import { createLikedProductWorkflow } from "../../../workflows/create-liked-product"
 import { deleteLikedProductWorkflow } from "../../../workflows/delete-liked-product"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { getLikedProductsWorkflow } from "../../../workflows/get-liked-products"
 import { z } from "zod"
 
 export const CreateLikedProductSchema = z.object({
@@ -12,19 +12,27 @@ export const CreateLikedProductSchema = z.object({
 })
 
 export const POST = async (
-    req: AuthenticatedMedusaRequest<z.infer<typeof CreateLikedProductSchema>>,
+    req: MedusaRequest<z.infer<typeof CreateLikedProductSchema>>,
     res: MedusaResponse
 ) => {
     try {
-        const customer_id = req.auth_context?.actor_id
+        const customer_id = req.query.customer_id as string
 
         if (!customer_id) {
-            return res.status(401).json({
-                message: "Unauthorized",
+            return res.status(400).json({
+                message: "customer_id is required",
             })
         }
 
-        const { product_id } = req.validatedBody
+        // Use validatedBody if available, otherwise fallback to body
+        const body = req.validatedBody || req.body
+        const product_id = body?.product_id
+
+        if (!product_id) {
+            return res.status(400).json({
+                message: "product_id is required",
+            })
+        }
 
         const { result } = await createLikedProductWorkflow(req.scope).run({
             input: {
@@ -43,95 +51,41 @@ export const POST = async (
 }
 
 export const GET = async (
-    req: AuthenticatedMedusaRequest,
+    req: MedusaRequest,
     res: MedusaResponse
 ) => {
     try {
-        const customer_id = req.auth_context?.actor_id
+        const customer_id = req.query.customer_id as string
 
         if (!customer_id) {
-            return res.status(401).json({
-                message: "Unauthorized",
+            return res.status(400).json({
+                message: "customer_id is required",
             })
         }
 
-        const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-
-        // Get all liked products for this customer
-
-        // @ts-ignore
-        const { data: likedProducts } = await query.graph({
-            entity: "liked_product",
-            filters: {
+        const { result } = await getLikedProductsWorkflow(req.scope).run({
+            input: {
                 customer_id,
             },
         })
 
+        const likedProducts = result.liked_products || []
+
         if (!likedProducts || likedProducts.length === 0) {
             return res.json({
-                products: [],
+                product_ids: [],
                 count: 0,
             })
         }
 
-        // Extract product IDs
-        const productIds = likedProducts.map((lp: any) => lp.product_id)
-
-        // Fetch products - try array filter first, fallback to individual queries if needed
-        let products: any[] = []
-
-        if (productIds.length > 0) {
-            try {
-                // Try using array filter
-                const result = await query.graph({
-                    entity: "product",
-                    filters: {
-                        id: productIds,
-                    },
-                    fields: [
-                        "*",
-                        "variants.*",
-                        "variants.calculated_price.*",
-                        "images.*",
-                        "tags.*",
-                        "categories.*",
-                    ],
-                })
-                products = result.data || []
-            } catch (error) {
-                // Fallback: fetch products individually if array filter doesn't work
-                console.warn("Array filter failed, fetching products individually:", error)
-                const productPromises = productIds.map(async (productId: string) => {
-                    try {
-                        const result = await query.graph({
-                            entity: "product",
-                            filters: {
-                                id: productId,
-                            },
-                            fields: [
-                                "*",
-                                "variants.*",
-                                "variants.calculated_price.*",
-                                "images.*",
-                                "tags.*",
-                                "categories.*",
-                            ],
-                        })
-                        return result.data?.[0] || null
-                    } catch (err) {
-                        console.error(`Error fetching product ${productId}:`, err)
-                        return null
-                    }
-                })
-
-                const fetchedProducts = await Promise.all(productPromises)
-                products = fetchedProducts.filter((p) => p !== null)
-            }
-        }
+        // Extract product IDs only, filtering out any undefined/null values
+        const productIds = likedProducts
+            .filter((lp: any) => lp && lp.product_id)
+            .map((lp: any) => lp.product_id)
 
         return res.json({
-            products: products || [],
-            count: products?.length || 0,
+            product_ids: productIds,
+            count: productIds.length,
         })
     } catch (error) {
         console.error("Error fetching liked products:", error)
@@ -142,15 +96,15 @@ export const GET = async (
 }
 
 export const DELETE = async (
-    req: AuthenticatedMedusaRequest,
+    req: MedusaRequest,
     res: MedusaResponse
 ) => {
     try {
-        const customer_id = req.auth_context?.actor_id
+        const customer_id = req.query.customer_id as string
 
         if (!customer_id) {
-            return res.status(401).json({
-                message: "Unauthorized",
+            return res.status(400).json({
+                message: "customer_id is required",
             })
         }
 

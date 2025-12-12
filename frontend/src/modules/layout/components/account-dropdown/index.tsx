@@ -32,7 +32,7 @@ export default function AccountDropdown({ customer }: AccountDropdownProps) {
   if (!customer) {
     return (
       <LocalizedClientLink
-        href="/account/login"
+        href="/account"
         className="hover:text-ui-fg-base uppercase  font-bold text-ui-fg-base
         text-[13px]
         "

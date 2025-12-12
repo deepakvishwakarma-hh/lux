@@ -10,12 +10,6 @@ import {
   removeFromCompare,
 } from "@lib/util/compare-cookies"
 import {
-  isLiked as isLikedCookie,
-  addToLiked as addToLikedCookie,
-  removeFromLiked as removeFromLikedCookie,
-} from "@lib/util/liked-cookies"
-import {
-  isLoggedIn,
   addToLikedAPI,
   removeFromLikedAPI,
   getLikedProductIdsFromAPI,
@@ -40,18 +34,12 @@ export default function HoverActions({ product }: HoverActionsProps) {
     const checkLikedStatus = async () => {
       setIsCheckingLiked(true)
       try {
-        if (isLoggedIn()) {
-          // User is logged in, check API
-          const likedIds = await getLikedProductIdsFromAPI()
-          setIsLiked(likedIds.includes(product.id))
-        } else {
-          // User is not logged in, check cookies
-          setIsLiked(isLikedCookie(product.id))
-        }
+        // Always use API (works for both logged in and guest users)
+        const likedIds = await getLikedProductIdsFromAPI()
+        setIsLiked(likedIds.includes(product.id))
       } catch (error) {
         console.error("Error checking liked status:", error)
-        // Fallback to cookies if API fails
-        setIsLiked(isLikedCookie(product.id))
+        setIsLiked(false)
       } finally {
         setIsCheckingLiked(false)
       }
@@ -65,26 +53,15 @@ export default function HoverActions({ product }: HoverActionsProps) {
     e.stopPropagation()
 
     try {
-      if (isLoggedIn()) {
-        // User is logged in, use API
-        if (isLiked) {
-          const success = await removeFromLikedAPI(product.id)
-          if (success) {
-            setIsLiked(false)
-          }
-        } else {
-          const success = await addToLikedAPI(product.id)
-          if (success) {
-            setIsLiked(true)
-          }
+      // Always use API (works for both logged in and guest users)
+      if (isLiked) {
+        const success = await removeFromLikedAPI(product.id)
+        if (success) {
+          setIsLiked(false)
         }
       } else {
-        // User is not logged in, use cookies
-        if (isLiked) {
-          removeFromLikedCookie(product.id)
-          setIsLiked(false)
-        } else {
-          addToLikedCookie(product.id)
+        const success = await addToLikedAPI(product.id)
+        if (success) {
           setIsLiked(true)
         }
       }

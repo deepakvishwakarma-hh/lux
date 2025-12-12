@@ -16,6 +16,7 @@ import { LinkBrandProductsSchema } from "./admin/brands/[id]/products/route";
 import { GetAdminCarouselsSchema, CreateCarouselSchema } from "./admin/carousels/route";
 import { UpdateCarouselSchema } from "./admin/carousels/[id]/route";
 import { CreateLikedProductSchema, GetAdminLikedProductsSchema } from "./admin/liked-products/route";
+import { CreateLikedProductSchema as StoreCreateLikedProductSchema } from "./store/liked-products/route";
 // import { GetAdminBrandsSchema } from "./admin/brands/route";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators"
 
@@ -228,6 +229,22 @@ export default defineMiddlewares({
         // @ts-ignore
         validateAndTransformBody(CreateLikedProductSchema),
       ],
+    },
+    {
+      matcher: "/store/liked-products",
+      method: ["POST"],
+      middlewares: [
+        // @ts-ignore
+        validateAndTransformBody(StoreCreateLikedProductSchema),
+      ],
+    },
+    {
+      matcher: "/store/liked-products",
+      method: ["GET"],
+    },
+    {
+      matcher: "/store/liked-products",
+      method: ["DELETE"],
     },
 
 
