@@ -45,16 +45,22 @@ export const listProducts = async ({
     }
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
+  const authHeaders = await getAuthHeaders()
+  const headers: Record<string, string> = {
+    ...authHeaders,
+  }
+
+  // Ensure publishable API key is included if SDK doesn't add it automatically
+  if (process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY && !headers['x-publishable-api-key']) {
+    headers['x-publishable-api-key'] = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
   }
 
   const next = {
     ...(await getCacheOptions("products")),
   }
 
-  return sdk.client
-    .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
+  try {
+    const response = await sdk.client.fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
       `/store/products`,
       {
         method: "GET",
@@ -71,18 +77,45 @@ export const listProducts = async ({
         cache: "force-cache",
       }
     )
-    .then(({ products, count }) => {
-      const nextPage = count > offset + limit ? pageParam + 1 : null
 
-      return {
-        response: {
-          products,
-          count,
-        },
-        nextPage: nextPage,
-        queryParams,
-      }
+    const products = response?.products || []
+    const count = response?.count || 0
+
+    console.log("[listProducts] API Response:", {
+      productsCount: products.length,
+      totalCount: count,
+      regionId: region?.id,
+      limit,
+      offset,
+      queryParams,
     })
+
+    const nextPage = count > offset + limit ? pageParam + 1 : null
+
+    return {
+      response: {
+        products,
+        count,
+      },
+      nextPage: nextPage,
+      queryParams,
+    }
+  } catch (error: any) {
+    console.error("[listProducts] API Error:", {
+      message: error?.message,
+      status: error?.status,
+      regionId: region?.id,
+      countryCode,
+      error: error,
+    })
+
+    // Return empty response on error
+    return {
+      response: { products: [], count: 0 },
+      nextPage: null,
+      queryParams,
+    }
+  }
 }
 
 /**
@@ -90,7 +123,7 @@ export const listProducts = async ({
  * It will then return the paginated products based on the page and limit parameters.
  */
 export const listProductsWithSort = async ({
-  page = 0,
+  page = 1,
   queryParams,
   sortBy = "created_at",
   countryCode,
@@ -109,7 +142,7 @@ export const listProductsWithSort = async ({
   const {
     response: { products, count },
   } = await listProducts({
-    pageParam: 0,
+    pageParam: 1,
     queryParams: {
       ...queryParams,
       limit: 100,
@@ -119,7 +152,7 @@ export const listProductsWithSort = async ({
 
   const sortedProducts = sortProducts(products, sortBy)
 
-  const pageParam = (page - 1) * limit
+  const pageParam = Math.max((page - 1) * limit, 0)
 
   const nextPage = count > pageParam + limit ? pageParam + limit : null
 
