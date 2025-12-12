@@ -25,7 +25,6 @@ export default function HoverActions({ product }: HoverActionsProps) {
   const [isInCompareState, setIsInCompareState] = useState(false)
   const [isCheckingLiked, setIsCheckingLiked] = useState(true)
 
-  // Check if product is liked or in compare on mount
   useEffect(() => {
     // Check compare products from cookies
     setIsInCompareState(isInCompare(product.id))
@@ -45,28 +44,50 @@ export default function HoverActions({ product }: HoverActionsProps) {
       }
     }
 
+    // Check liked status on mount
     checkLikedStatus()
+
+    // Listen for liked updates from other components
+    const handleLikedUpdate = () => {
+      checkLikedStatus()
+    }
+
+    window.addEventListener("likedUpdated", handleLikedUpdate)
+
+    return () => {
+      window.removeEventListener("likedUpdated", handleLikedUpdate)
+    }
   }, [product.id])
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
+    // Optimistically update UI
+    const previousLikedState = isLiked
+    setIsLiked(!previousLikedState)
+
     try {
       // Always use API (works for both logged in and guest users)
-      if (isLiked) {
-        const success = await removeFromLikedAPI(product.id)
-        if (success) {
-          setIsLiked(false)
-        }
+      let success = false
+      if (previousLikedState) {
+        success = await removeFromLikedAPI(product.id)
       } else {
-        const success = await addToLikedAPI(product.id)
-        if (success) {
-          setIsLiked(true)
-        }
+        success = await addToLikedAPI(product.id)
+      }
+
+      if (!success) {
+        // Revert on failure
+        setIsLiked(previousLikedState)
+      } else {
+        // Re-check status to ensure sync with server
+        const likedIds = await getLikedProductIdsFromAPI()
+        setIsLiked(likedIds.includes(product.id))
       }
     } catch (error) {
       console.error("Failed to like/unlike product:", error)
+      // Revert on error
+      setIsLiked(previousLikedState)
     }
   }
 

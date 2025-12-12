@@ -15,9 +15,7 @@ export const deleteLikedProductWorkflow = createWorkflow(
         const result = deleteLikedProductStep(input)
 
         // @ts-ignore
-        return new WorkflowResponse({
-            success: true,
-        })
+        return new WorkflowResponse(result)
     }
 )
 

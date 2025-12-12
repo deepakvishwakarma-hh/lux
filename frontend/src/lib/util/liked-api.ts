@@ -44,19 +44,23 @@ async function getCustomerId(): Promise<string | null> {
   try {
     // Try to get customer info if logged in
     const authHeaders = getAuthHeaders()
+
+    console.log("authHeaders", authHeaders)
+
     if (authHeaders && Object.keys(authHeaders).length > 0) {
       try {
-        const { customer } = await sdk.client.fetch<{ customer: { id: string } }>(
+        const response = await sdk.client.fetch<{ customer: { id: string } }>(
           `/store/customers/me`,
           {
             method: "GET",
             headers: authHeaders,
           }
         )
-        if (customer?.id) {
-          return customer.id
+        if (response?.customer?.id) {
+          return response.customer.id
         }
       } catch (error) {
+        console.error("Error fetching customer:", error)
         // Not logged in or error, continue to guest
       }
     }
@@ -115,7 +119,7 @@ export async function addToLikedAPI(productId: string): Promise<boolean> {
       return false
     }
 
-    await sdk.client.fetch(
+    const response = await sdk.client.fetch(
       `/store/liked-products?customer_id=${encodeURIComponent(customerId)}`,
       {
         method: "POST",
@@ -133,8 +137,15 @@ export async function addToLikedAPI(productId: string): Promise<boolean> {
     }
 
     return true
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error adding product to liked:", error)
+    // Log more details for debugging
+    if (error?.response) {
+      console.error("API Error Response:", {
+        status: error.response.status,
+        data: error.response.data,
+      })
+    }
     return false
   }
 }
@@ -151,12 +162,17 @@ export async function removeFromLikedAPI(productId: string): Promise<boolean> {
       return false
     }
 
-    await sdk.client.fetch(
+    const response = await sdk.client.fetch<{ success: boolean; message?: string }>(
       `/store/liked-products?customer_id=${encodeURIComponent(customerId)}&product_id=${encodeURIComponent(productId)}`,
       {
         method: "DELETE",
       }
     )
+
+    if (!response.success) {
+      console.error("Failed to remove liked product:", response.message || "Unknown error")
+      return false
+    }
 
     // Dispatch custom event for other components to listen
     if (typeof window !== "undefined") {
@@ -168,8 +184,15 @@ export async function removeFromLikedAPI(productId: string): Promise<boolean> {
     }
 
     return true
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error removing product from liked:", error)
+    // Log more details for debugging
+    if (error?.response) {
+      console.error("API Error Response:", {
+        status: error.response.status,
+        data: error.response.data,
+      })
+    }
     return false
   }
 }

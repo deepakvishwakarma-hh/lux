@@ -116,15 +116,30 @@ export const DELETE = async (
             })
         }
 
-        await deleteLikedProductWorkflow(req.scope).run({
+        const { result } = await deleteLikedProductWorkflow(req.scope).run({
             input: {
                 customer_id,
                 product_id,
             },
         })
 
-        res.json({ success: true })
+        // Check if the deletion was successful
+        // If result.success is true, it means either:
+        // 1. The product was successfully deleted
+        // 2. The product was not found (already deleted/never existed) - which is also success
+        if (result && result.success === true) {
+            return res.json({
+                success: true,
+                message: result.message || "Liked product deleted successfully"
+            })
+        }
+
+        // If success is explicitly false, return 404
+        return res.status(404).json({
+            message: result?.message || "Liked product not found",
+        })
     } catch (error) {
+        console.error("Error deleting liked product:", error)
         const statusCode = error instanceof Error && error.message.includes("not found") ? 404 : 400
         res.status(statusCode).json({
             message: error instanceof Error ? error.message : "An error occurred while deleting the liked product",
