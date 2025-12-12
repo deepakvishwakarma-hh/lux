@@ -3,6 +3,9 @@ import { getRegion } from "@lib/data/regions"
 import { listProducts } from "@lib/data/products"
 import { getCompareProductIds } from "@lib/data/compare"
 import CompareProducts from "@modules/products/components/compare-products"
+import { Heading } from "@medusajs/ui"
+import InteractiveLink from "@modules/common/components/interactive-link"
+import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 
 type Props = {
   params: Promise<{ countryCode: string }>
@@ -25,14 +28,26 @@ export default async function ComparePage(props: Props) {
   if (!productIds || productIds.length === 0) {
     return (
       <div className="content-container py-16">
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <h1 className="text-3xl font-bold mb-4">Compare Products</h1>
-          <p className="text-ui-fg-subtle text-lg">
-            No products selected for comparison.
-          </p>
-          <p className="text-ui-fg-muted mt-2">
-            Click the compare button on products to add them here.
-          </p>
+        <div className="py-48 px-2 flex flex-col justify-center items-center min-h-[500px]">
+          <div className="flex flex-col items-center gap-y-6 max-w-[500px] text-center">
+            <div className="bg-gray-100 rounded-full p-6 mb-2">
+              <WoodMartIcon iconContent="f128" size={48} className="text-gray-400" />
+            </div>
+            <Heading
+              level="h1"
+              className="text-3xl-regular font-bold"
+            >
+              Compare Products
+            </Heading>
+            <p className="text-base-regular text-ui-fg-subtle mt-2">
+              No products selected for comparison yet. Start comparing products by clicking the compare button on any product card.
+            </p>
+            <div className="mt-6">
+              <InteractiveLink href="/store">
+                Browse products
+              </InteractiveLink>
+            </div>
+          </div>
         </div>
       </div>
     )

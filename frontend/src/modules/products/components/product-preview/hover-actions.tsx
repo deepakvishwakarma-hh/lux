@@ -9,6 +9,17 @@ import {
   addToCompare,
   removeFromCompare,
 } from "@lib/util/compare-cookies"
+import {
+  isLiked as isLikedCookie,
+  addToLiked as addToLikedCookie,
+  removeFromLiked as removeFromLikedCookie,
+} from "@lib/util/liked-cookies"
+import {
+  isLoggedIn,
+  addToLikedAPI,
+  removeFromLikedAPI,
+  getLikedProductIdsFromAPI,
+} from "@lib/util/liked-api"
 
 type HoverActionsProps = {
   product: HttpTypes.StoreProduct
@@ -18,14 +29,35 @@ export default function HoverActions({ product }: HoverActionsProps) {
   const router = useRouter()
   const [isLiked, setIsLiked] = useState(false)
   const [isInCompareState, setIsInCompareState] = useState(false)
+  const [isCheckingLiked, setIsCheckingLiked] = useState(true)
 
   // Check if product is liked or in compare on mount
   useEffect(() => {
-    // Check liked products (would need API call)
-    // For now, we'll skip this check
-
     // Check compare products from cookies
     setIsInCompareState(isInCompare(product.id))
+
+    // Check liked products
+    const checkLikedStatus = async () => {
+      setIsCheckingLiked(true)
+      try {
+        if (isLoggedIn()) {
+          // User is logged in, check API
+          const likedIds = await getLikedProductIdsFromAPI()
+          setIsLiked(likedIds.includes(product.id))
+        } else {
+          // User is not logged in, check cookies
+          setIsLiked(isLikedCookie(product.id))
+        }
+      } catch (error) {
+        console.error("Error checking liked status:", error)
+        // Fallback to cookies if API fails
+        setIsLiked(isLikedCookie(product.id))
+      } finally {
+        setIsCheckingLiked(false)
+      }
+    }
+
+    checkLikedStatus()
   }, [product.id])
 
   const handleLike = async (e: React.MouseEvent) => {
@@ -33,15 +65,31 @@ export default function HoverActions({ product }: HoverActionsProps) {
     e.stopPropagation()
 
     try {
-      // TODO: Implement like API call
-      // const response = await fetch("/store/liked-products", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ product_id: product.id }),
-      // })
-      setIsLiked(!isLiked)
+      if (isLoggedIn()) {
+        // User is logged in, use API
+        if (isLiked) {
+          const success = await removeFromLikedAPI(product.id)
+          if (success) {
+            setIsLiked(false)
+          }
+        } else {
+          const success = await addToLikedAPI(product.id)
+          if (success) {
+            setIsLiked(true)
+          }
+        }
+      } else {
+        // User is not logged in, use cookies
+        if (isLiked) {
+          removeFromLikedCookie(product.id)
+          setIsLiked(false)
+        } else {
+          addToLikedCookie(product.id)
+          setIsLiked(true)
+        }
+      }
     } catch (error) {
-      console.error("Failed to like product:", error)
+      console.error("Failed to like/unlike product:", error)
     }
   }
 
@@ -87,9 +135,10 @@ export default function HoverActions({ product }: HoverActionsProps) {
       </button>
       <button
         onClick={handleLike}
-        className="bg-white rounded-full p-2"
+        className={isLiked ? "bg-black text-white rounded-full p-2" : "bg-white rounded-full p-2"}
         aria-label="Like product"
         data-testid="like-button"
+        disabled={isCheckingLiked}
       >
         <WoodMartIcon iconContent="f106" size={16} />
       </button>
