@@ -5,6 +5,7 @@ import { getRegion } from "@lib/data/regions"
 import HeroCarouselTemplate from "@modules/layout/templates/hero-carousel"
 import DiscountBar from "@modules/home/components/discount-bar"
 import TopCatalog from "@modules/home/components/top-catalog"
+import PaginatedProducts from "@modules/store/templates/paginated-products"
 export const metadata: Metadata = {
   title: "Medusa Next.js Starter Template",
   description:
@@ -32,6 +33,14 @@ export default async function Home(props: {
     <>
       <HeroCarouselTemplate />
       <DiscountBar />
+      <TopCatalog />
+      <div className="content-container py-12 small:py-24">
+        <PaginatedProducts
+          sortBy="created_at"
+          page={1}
+          countryCode={countryCode}
+        />
+      </div>
       <TopCatalog />
     </>
   )
