@@ -114,13 +114,13 @@ export default function HomeCarousel({ carousels }: CarouselProps) {
           if (!imageUrl) return null
 
           const slideContent = (
-            <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px]">
+            <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] group overflow-hidden">
               <Image
                 src={imageUrl}
                 alt="Carousel slide"
                 fill
                 priority
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="100vw"
               />
             </div>

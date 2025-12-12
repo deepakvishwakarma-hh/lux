@@ -4,6 +4,7 @@ import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import HeroCarouselTemplate from "@modules/layout/templates/hero-carousel"
 import DiscountBar from "@modules/home/components/discount-bar"
+import TopCatalog from "@modules/home/components/top-catalog"
 export const metadata: Metadata = {
   title: "Medusa Next.js Starter Template",
   description:
@@ -31,6 +32,7 @@ export default async function Home(props: {
     <>
       <HeroCarouselTemplate />
       <DiscountBar />
+      <TopCatalog />
     </>
   )
 }
