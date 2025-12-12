@@ -1,0 +1,1 @@
+export const WEBSITE_DOMAIN = process.env.WEBSITE_DOMAIN || "none"
