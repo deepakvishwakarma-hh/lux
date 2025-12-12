@@ -6,6 +6,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import AddToCartButton from "./add-to-cart-button"
+import HoverActions from "./hover-actions"
 
 export default async function ProductPreview({
   product,
@@ -44,6 +45,7 @@ export default async function ProductPreview({
               -{cheapestPrice.percentage_diff}%
             </div>
           )}
+        <HoverActions product={product} />
         <Thumbnail
           thumbnail={product.thumbnail}
           images={product.images}
