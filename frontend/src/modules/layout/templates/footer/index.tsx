@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa"
+import { FaPhone, FaEnvelope } from "react-icons/fa"
 import { IoArrowUp } from "react-icons/io5"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { WEBSITE_DOMAIN, WEBSITE_NAME } from "@lib/brand"
@@ -42,41 +42,34 @@ const Footer = () => {
       <footer className="w-full bg-gray-800 text-gray-300">
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6">
-            {/* About Luxuriousmart Column */}
-            <div className="lg:col-span-2">
-              <h3 className="text-white font-semibold text-lg mb-4">
-                About {WEBSITE_NAME}
-              </h3>
+            {/* About Column */}
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-4">About</h3>
               <div className="space-y-3 text-sm leading-relaxed">
                 <p>
-                  {WEBSITE_NAME} curates a collection of high-end eyewear that
-                  combines style, quality, and authenticity. Our mission is to
-                  provide premium-quality designer eyeglasses and sunglasses to
-                  our customers.
+                  Explore Designer Luxury Eyewear at luxuryeyewear.in Our
+                  exclusive collection of premium Sunglasses, Eyeglasses,
+                  Glasses & Frames offers unmatched quality and style. Join the
+                  elite who appreciate the finer things. Elevate your look with
+                  our timeless elegance. Order today and embrace sophistication.
                 </p>
-                <p>
-                  We partner with top eyewear brands to bring you the latest
-                  trends and timeless classics. Every product in our collection
-                  is carefully selected to ensure authenticity and customer
-                  satisfaction.
-                </p>
-                <div className="pt-2">
-                  <p className="mb-1">
-                    <span className="font-medium">Phone:</span>{" "}
+                <div className="pt-2 space-y-2">
+                  <p className="flex items-center gap-2">
+                    <FaPhone className="text-gray-300" size={14} />
                     <a
-                      href="tel:+16613346334"
+                      href="tel:+919871981806"
                       className="hover:text-white transition-colors"
                     >
-                      +1 661-334-6334
+                      +91 9871981806
                     </a>
                   </p>
-                  <p>
-                    <span className="font-medium">Email:</span>{" "}
+                  <p className="flex items-center gap-2">
+                    <FaEnvelope className="text-gray-300" size={14} />
                     <a
-                      href="mailto:support@luxuriousmart.com"
+                      href="mailto:support@luxuryeyewear.in"
                       className="hover:text-white transition-colors"
                     >
-                      support@luxuriousmart.com
+                      support@luxuryeyewear.in
                     </a>
                   </p>
                 </div>
@@ -99,14 +92,6 @@ const Footer = () => {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    href="/faqs"
-                    className="hover:text-white transition-colors"
-                  >
-                    Faqs
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
                     href="/contact-us"
                     className="hover:text-white transition-colors"
                   >
@@ -119,14 +104,6 @@ const Footer = () => {
                     className="hover:text-white transition-colors"
                   >
                     Return & Refund Policy
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/returns-exchanges-policy"
-                    className="hover:text-white transition-colors"
-                  >
-                    Returns and Exchanges Policy
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -188,10 +165,10 @@ const Footer = () => {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    href="/brands/le-north"
+                    href="/brands/ic-berlin"
                     className="hover:text-white transition-colors"
                   >
-                    Le North Glasses
+                    Ic Berlin Glasses
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -208,14 +185,6 @@ const Footer = () => {
                     className="hover:text-white transition-colors"
                   >
                     Versace Sunglasses
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/brands/prada"
-                    className="hover:text-white transition-colors"
-                  >
-                    Prada Glasses
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -237,18 +206,18 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Quick Shop & Newsletter Column */}
+            {/* Quick Shop Column */}
             <div>
               <h3 className="text-white font-semibold text-lg mb-4">
                 Quick Shop
               </h3>
-              <ul className="space-y-2 text-sm mb-8">
+              <ul className="space-y-2 text-sm">
                 <li>
                   <LocalizedClientLink
                     href="/sunglasses"
                     className="hover:text-white transition-colors"
                   >
-                    Shop Sunglasses
+                    Shop sunglasses
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -256,7 +225,7 @@ const Footer = () => {
                     href="/sunglasses/men"
                     className="hover:text-white transition-colors"
                   >
-                    Sunglasses for Men
+                    Sunglasses for Man
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -265,6 +234,14 @@ const Footer = () => {
                     className="hover:text-white transition-colors"
                   >
                     Sunglasses for Women
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/sunglasses/kids"
+                    className="hover:text-white transition-colors"
+                  >
+                    Kids Sunglasses
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -280,7 +257,7 @@ const Footer = () => {
                     href="/glasses/men"
                     className="hover:text-white transition-colors"
                   >
-                    Glasses for Men
+                    Glasses for men
                   </LocalizedClientLink>
                 </li>
                 <li>
@@ -288,66 +265,38 @@ const Footer = () => {
                     href="/glasses/women"
                     className="hover:text-white transition-colors"
                   >
-                    Glasses for Women
+                    Glasses for women
                   </LocalizedClientLink>
                 </li>
               </ul>
+            </div>
 
+            {/* Newsletter & Quick Links Column */}
+            <div>
               {/* Newsletter Sign Up */}
-              <div className="mb-6">
+              <div className="mb-8">
                 <h3 className="text-white font-semibold text-lg mb-4">
                   Newsletter Sign Up
                 </h3>
                 <p className="text-sm mb-4">
                   Sign up for new arrivals, offers, and more!
                 </p>
-                <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                <form onSubmit={handleNewsletterSubmit} className="flex gap-0">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
                     required
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                    className="flex-1 px-4 py-2 bg-white border border-white rounded-l text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
                   />
                   <button
                     type="submit"
-                    className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors uppercase text-sm"
+                    className="bg-white hover:bg-gray-100 text-gray-900 font-semibold py-2 px-6 rounded-r transition-colors uppercase text-sm whitespace-nowrap"
                   >
                     SEND
                   </button>
                 </form>
-              </div>
-
-              {/* Social Media Icons */}
-              <div className="flex gap-4 mb-6">
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors"
-                  aria-label="Facebook"
-                >
-                  <FaFacebookF className="text-white" size={16} />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors"
-                  aria-label="Instagram"
-                >
-                  <FaInstagram className="text-white" size={16} />
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors"
-                  aria-label="Twitter"
-                >
-                  <FaTwitter className="text-white" size={16} />
-                </a>
               </div>
 
               {/* Quick Links */}
@@ -377,7 +326,7 @@ const Footer = () => {
                       href="/track-order"
                       className="hover:text-white transition-colors"
                     >
-                      Track your order
+                      Track Your Order
                     </LocalizedClientLink>
                   </li>
                 </ul>
@@ -388,17 +337,16 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="bg-black w-full">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <p className="text-white text-xs md:text-sm">
-              Copyright © 2025
-              {WEBSITE_DOMAIN} All Rights Reserved.
+          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-center items-center relative">
+            <p className="text-white text-xs md:text-sm text-center">
+              Copyright © 2025 Luxuryeyewear.In All Rights Reserved.
             </p>
             <button
               onClick={scrollToTop}
-              className="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors"
+              className="absolute right-4 w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-colors"
               aria-label="Scroll to top"
             >
-              <IoArrowUp className="text-gray-300" size={18} />
+              <IoArrowUp className="text-gray-900" size={18} />
             </button>
           </div>
         </div>
