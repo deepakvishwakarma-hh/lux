@@ -13,6 +13,7 @@ import { GetStoreCarouselsSchema } from "./store/carousels/route";
 import { CreateBrandSchema } from "./admin/brands/route";
 import { UpdateBrandSchema } from "./admin/brands/[id]/route";
 import { LinkBrandProductsSchema } from "./admin/brands/[id]/products/route";
+import { LinkProductBrandsSchema } from "./admin/products/[id]/brands/route";
 import { GetAdminCarouselsSchema, CreateCarouselSchema } from "./admin/carousels/route";
 import { UpdateCarouselSchema } from "./admin/carousels/[id]/route";
 import { CreateLikedProductSchema, GetAdminLikedProductsSchema } from "./admin/liked-products/route";
@@ -244,6 +245,22 @@ export default defineMiddlewares({
     },
     {
       matcher: "/store/liked-products",
+      method: ["DELETE"],
+    },
+    {
+      matcher: "/admin/products/:id/brands",
+      method: ["GET"],
+    },
+    {
+      matcher: "/admin/products/:id/brands",
+      method: ["POST"],
+      middlewares: [
+        // @ts-ignore
+        validateAndTransformBody(LinkProductBrandsSchema),
+      ],
+    },
+    {
+      matcher: "/admin/products/:id/brands",
       method: ["DELETE"],
     },
 
