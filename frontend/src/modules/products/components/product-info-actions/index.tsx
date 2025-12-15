@@ -48,109 +48,42 @@ const ProductInfoActions = () => {
         <Modal.Title>Size Guide</Modal.Title>
         <Modal.Body>
           <div className="w-full py-6">
-            <div className="space-y-4">
-              <p className="text-small-regular text-ui-fg-base">
-                Please refer to the size chart below to find your perfect fit.
-                Measurements are in inches.
-              </p>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-2 text-left">
-                        Size
-                      </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
-                        Chest
-                      </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
-                        Waist
-                      </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
-                        Length
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">XS</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        34-36
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        28-30
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">26</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">S</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        36-38
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        30-32
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">27</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">M</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        38-40
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        32-34
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">28</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">L</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        40-42
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        34-36
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">29</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">XL</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        42-44
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        36-38
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">30</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">XXL</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        44-46
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        38-40
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">31</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div className="flex flex-row gap-4 justify-center items-stretch">
+              <div className="flex-1 flex flex-col border border-gray-300 rounded p-4">
+                <div className="flex-1 flex items-center justify-center mb-3">
+                  <img
+                    src="/images/size-chart/lens-width.webp"
+                    alt="Lens Width Size Chart"
+                    className="w-full h-auto object-contain max-h-full"
+                  />
+                </div>
+                <h3 className="text-sm font-semibold text-center text-ui-fg-base">
+                  Lens Width: 52 mm
+                </h3>
               </div>
-              <div className="mt-4 text-small-regular text-ui-fg-subtle">
-                <p className="font-semibold mb-2">How to Measure:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    <strong>Chest:</strong> Measure around the fullest part of
-                    your chest
-                  </li>
-                  <li>
-                    <strong>Waist:</strong> Measure around your natural
-                    waistline
-                  </li>
-                  <li>
-                    <strong>Length:</strong> Measure from the top of the
-                    shoulder to the hem
-                  </li>
-                </ul>
+              <div className="flex-1 flex flex-col border border-gray-300 rounded p-4">
+                <div className="flex-1 flex items-center justify-center mb-3">
+                  <img
+                    src="/images/size-chart/lens-bridge.webp"
+                    alt="Lens Bridge Size Chart"
+                    className="w-full h-auto object-contain max-h-full"
+                  />
+                </div>
+                <h3 className="text-sm font-semibold text-center text-ui-fg-base">
+                  Lens bridge: 18 mm
+                </h3>
+              </div>
+              <div className="flex-1 flex flex-col border border-gray-300 rounded p-4">
+                <div className="flex-1 flex items-center justify-center mb-3">
+                  <img
+                    src="/images/size-chart/arm-len.webp"
+                    alt="Arm Length Size Chart"
+                    className="w-full h-auto object-contain max-h-full"
+                  />
+                </div>
+                <h3 className="text-sm font-semibold text-center text-ui-fg-base">
+                  Arm length: 145 mm
+                </h3>
               </div>
             </div>
           </div>
