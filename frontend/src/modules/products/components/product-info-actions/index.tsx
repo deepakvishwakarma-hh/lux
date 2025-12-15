@@ -100,46 +100,54 @@ const ProductInfoActions = () => {
         <Modal.Body>
           <div className="w-full py-6 space-y-6">
             <div>
-              <h3 className="font-semibold text-base mb-2">Delivery</h3>
-              <div className="text-small-regular text-ui-fg-base space-y-2">
+              <h3 className="font-semibold text-base mb-3">Delivery</h3>
+              <div className="text-small-regular text-ui-fg-base space-y-3">
                 <p>
-                  <strong>Standard Delivery:</strong> 3-5 business days
+                  <strong>100% authenticity guaranteed.</strong>
                 </p>
                 <p>
-                  <strong>Express Delivery:</strong> 1-2 business days
+                  Orders typically shipped within 2 Working Days of purchase.
+                  Items ordered on weekends or holidays will be shipped the next
+                  business day
                 </p>
                 <p>
-                  <strong>Free Shipping:</strong> Available on orders over $100
+                  All items are securely packaged and shipped from our US-based
+                  Distribution Center
                 </p>
+                <p>A tracking number is provided for all shipments</p>
                 <p>
-                  Your package will arrive at your pick up location or in the
-                  comfort of your home. You will receive a tracking number once
-                  your order ships.
+                  If you are shipping to a College or Apartment Building or any
+                  place where the mail is left outside for anyone to take it
+                  make sure to use a USPS Signature Required shipping option
                 </p>
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-base mb-2">Returns</h3>
-              <div className="text-small-regular text-ui-fg-base space-y-2">
+              <h3 className="font-semibold text-base mb-3">
+                Return & Exchanges Policy
+              </h3>
+              <div className="text-small-regular text-ui-fg-base space-y-3">
+                <ul className="list-disc list-inside space-y-2">
+                  <li>Place the original package into a shipping carton.</li>
+                  <li>
+                    Include the invoice and the reason for the return. If
+                    defective, please specify the defect.
+                  </li>
+                  <li>
+                    Please do not place stickers or shipping labels on the
+                    original manufacturer&apos;s package.
+                  </li>
+                  <li>
+                    The RMA number must be written clearly on the shipping
+                    carton to prevent refusal.
+                  </li>
+                </ul>
                 <p>
-                  <strong>Return Period:</strong> 30 days from delivery date
-                </p>
-                <p>
-                  <strong>Condition:</strong> Items must be unworn, unwashed,
-                  and with original tags attached
-                </p>
-                <p>
-                  <strong>Exchanges:</strong> Is the fit not quite right? No
-                  worries - we&apos;ll exchange your product for a new one.
-                </p>
-                <p>
-                  <strong>Easy Returns:</strong> Just return your product and
-                  we&apos;ll refund your money. No questions asked – we&apos;ll
-                  do our best to make sure your return is hassle-free.
-                </p>
-                <p>
-                  To initiate a return, please contact our customer service team
-                  or use the return portal in your account.
+                  If you are not satisfied with your purchase, you may exchange
+                  or return it for a refund within 15 days from shipping from
+                  our warehouse (excluding shipping and handling charges) Note:
+                  you may exchange or return it for a refund within 14 days from
+                  delivery for Pre-Owned items.
                 </p>
               </div>
             </div>
