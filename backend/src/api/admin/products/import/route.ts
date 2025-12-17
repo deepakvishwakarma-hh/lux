@@ -223,6 +223,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const handleIndex = normalizedHeaders.findIndex((h) => h === "handle")
     const skuIndex = normalizedHeaders.findIndex((h) => h === "sku")
     const imagesIndex = normalizedHeaders.findIndex((h) => h === "images" || h === "image")
+    const categoriesIndex = normalizedHeaders.findIndex((h) => h === "categories" || h === "category")
     const salesChannelIdIndex = normalizedHeaders.findIndex((h) => h === "sales_channel_id" || h === "sales channel id")
     const locationIdIndex = normalizedHeaders.findIndex((h) => h === "location_id" || h === "location id")
     const stockIndex = normalizedHeaders.findIndex((h) => h === "stock")
@@ -255,12 +256,26 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
+    // Query all categories for name-based lookup
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+    const { data: allCategories } = await query.graph({
+      entity: "product_category",
+      fields: ["id", "name"],
+    })
+    const categoryNameToIdMap = new Map<string, string>()
+    if (allCategories && allCategories.length > 0) {
+      for (const category of allCategories) {
+        if (category.name) {
+          categoryNameToIdMap.set(category.name.toLowerCase().trim(), category.id)
+        }
+      }
+    }
+
     // Process rows and separate into create/update based on SKU
     const BATCH_SIZE = 200
     const productsToCreate: any[] = []
     const productsToUpdate: any[] = []
     const productLocationStockMap: Array<{ locationId: string; stock: number; sku?: string }> = []
-    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
     // First pass: collect all SKUs and query existing products
     const skusToCheck: string[] = []
@@ -385,6 +400,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         }
       }
 
+      // Parse categories from CSV (comma-separated category names)
+      const categoryIds: string[] = []
+      if (categoriesIndex !== -1) {
+        const categoriesValue = row[categoriesIndex]?.trim()
+        if (categoriesValue) {
+          const categoryNames = categoriesValue.split(",").map((name) => name.trim()).filter(Boolean)
+          for (const categoryName of categoryNames) {
+            const categoryId = categoryNameToIdMap.get(categoryName.toLowerCase())
+            if (categoryId) {
+              categoryIds.push(categoryId)
+            }
+          }
+        }
+      }
+
       // Build product data
       const productData: any = {
         title,
@@ -394,6 +424,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         subtitle: row[normalizedHeaders.findIndex((h) => h === "subtitle")] || "",
         thumbnail: row[normalizedHeaders.findIndex((h) => h === "thumbnail")] || "",
         images: images.length > 0 ? images : undefined,
+        category_ids: categoryIds.length > 0 ? categoryIds : undefined,
         metadata,
         sales_channels: salesChannelId ? [{ id: salesChannelId }] : [],
         options: [

@@ -153,6 +153,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         "created_at",
         "updated_at",
         "images.*",
+        "categories.*",
         "variants.*",
         "variants.inventory_items.inventory_item.location_levels.location_id",
         "variants.inventory_items.inventory_item.location_levels.stocked_quantity",
@@ -228,6 +229,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         imagesValue = product.images.map((img: any) => img.url || "").filter(Boolean).join(",")
       }
 
+      // Extract categories (comma-separated names)
+      let categoriesValue = ""
+      if (product.categories && Array.isArray(product.categories) && product.categories.length > 0) {
+        categoriesValue = product.categories.map((cat: any) => cat.name || "").filter(Boolean).join(",")
+      }
+
       // Create one row per product (variants are handled automatically)
       const row = [
         product.id || "",
@@ -239,6 +246,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         product.subtitle || "",
         product.thumbnail || "",
         imagesValue,
+        categoriesValue,
         salesChannelId,
         locationId,
         stock,
