@@ -63,7 +63,7 @@ export default function FilterPage({
       <LoadingOverlay isLoading={isLoading} />
       <SearchQueryIndicator searchQuery={filters.search} />
       <div className="content-container py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           <FilterSidebar
             filters={{
               brand: filters.brand,

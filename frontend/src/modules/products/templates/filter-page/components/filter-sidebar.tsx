@@ -39,13 +39,15 @@ export default function FilterSidebar({
   onClearFilters,
 }: FilterSidebarProps) {
   return (
-    <aside className="w-full md:w-64 flex-shrink-0">
-      <div className="sticky top-4 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-md font-semibold uppercase">Filters</h2>
+    <aside className="w-full md:w-72 flex-shrink-0">
+      <div className="sticky top-4 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold uppercase tracking-wide text-gray-900">
+            Filters
+          </h2>
           <button
             onClick={onClearFilters}
-            className="text-sm text-ui-fg-subtle hover:text-ui-fg-base"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
           >
             Clear All
           </button>
@@ -126,4 +128,3 @@ export default function FilterSidebar({
     </aside>
   )
 }
-

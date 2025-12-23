@@ -10,9 +10,9 @@ export default function SearchQueryIndicator({
   if (!searchQuery) return null
 
   return (
-    <div className="bg-black text-white flex items-center justify-center p-5 font">
-      <p className="text-xl font-bold text-center">
-        Search Results for - "{searchQuery.toUpperCase()}"
+    <div className="bg-gray-900 text-white flex items-center justify-center py-6 px-4">
+      <p className="text-lg md:text-xl font-semibold text-center tracking-wide">
+        Search Results for: <span className="font-bold">"{searchQuery}"</span>
       </p>
     </div>
   )

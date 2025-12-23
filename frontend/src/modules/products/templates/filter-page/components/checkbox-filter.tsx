@@ -1,5 +1,7 @@
 "use client"
 
+import AccordionFilter from "./accordion-filter"
+
 type CheckboxFilterProps = {
   label: string
   options: Array<{ id?: string; name: string; slug?: string } | string>
@@ -19,31 +21,38 @@ export default function CheckboxFilter({
 }: CheckboxFilterProps) {
   if (!options || options.length === 0) return null
 
+  const hasSelectedValues = selectedValues.length > 0
+
   return (
-    <div className="pb-6 border-b border-gray-200">
-      <label className="block text-sm font-medium mb-2 text-gray-700">
-        {label}
-      </label>
-      <div className="space-y-2">
+    <AccordionFilter label={label} hasSelectedValues={hasSelectedValues}>
+      <div className="space-y-3 max-h-64 overflow-y-auto">
         {options.map((option) => {
           const value = getValue(option)
           const optionLabel = getLabel(option)
           const key = typeof option === "string" ? option : option.id || value
+          const isChecked = selectedValues.includes(value)
 
           return (
-            <label key={key} className="flex items-center">
+            <label
+              key={key}
+              className="flex items-center cursor-pointer group hover:bg-gray-50 px-2 py-1.5 rounded-md transition-colors"
+            >
               <input
                 type="checkbox"
-                checked={selectedValues.includes(value)}
+                checked={isChecked}
                 onChange={() => onChange(value)}
-                className="mr-2"
+                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-2 focus:ring-black focus:ring-offset-0 cursor-pointer"
               />
-              <span className="text-sm text-gray-400">{optionLabel}</span>
+              <span className={`ml-3 text-sm flex-1 ${
+                isChecked ? "text-gray-900 font-medium" : "text-gray-600"
+              }`}>
+                {optionLabel}
+              </span>
             </label>
           )
         })}
       </div>
-    </div>
+    </AccordionFilter>
   )
 }
 

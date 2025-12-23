@@ -1035,6 +1035,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
                     const existingLevel = existingLevels[0] as any
                     if (existingLevel.stocked_quantity !== stock) {
                       try {
+                        //@ts-ignore
                         await inventoryModuleService.updateInventoryLevels({
                           id: existingLevel.id,
                           stocked_quantity: stock,
