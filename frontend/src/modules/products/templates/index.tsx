@@ -58,16 +58,16 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <span>/</span>
           <span className="text-ui-fg-base">{product.title}</span>
         </nav>
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-10">
           {/* left side  */}
-          <div className="w-full md:w-1/2">
+          <div className="w-full md:w-1/2 ">
             <ProductImageCarousel
               images={(images ?? []).map((image) => image.url)}
               productTitle={product.title}
             />
           </div>
           {/* right side  */}
-          <div className="w-full md:w-1/2">
+          <div className="w-full md:w-1/2 ">
             <ProductInfo product={product} />
             <Suspense
               fallback={
@@ -86,7 +86,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </div>
       </div>
       <div
-        className="content-container my-16 small:my-32"
+        className="content-container "
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>

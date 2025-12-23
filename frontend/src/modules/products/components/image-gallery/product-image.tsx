@@ -33,7 +33,7 @@ const ProductImageCarousel = ({
   if (!images || images.length === 0) {
     return (
       <div className="w-full h-full">
-        <div className="relative aspect-square w-full rounded bg-white border">
+        <div className="relative aspect-square w-full rounded bg-white">
           <Image
             src="/placeholder.svg"
             alt={`${productTitle} - No image available`}
@@ -53,9 +53,54 @@ const ProductImageCarousel = ({
   }))
 
   return (
-    <div className="w-full">
+    <div className="grid grid-cols-[100px_calc(100%-100px)] gap-4">
+      <div className="">
+        {/* Thumbnail Carousel */}
+        {images.length > 1 && (
+          <div className="w-full mt-3">
+            <div
+              className="flex flex-col gap-2 overflow-y-auto"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {images.map((image, index) => (
+                <div
+                  key={index}
+                  className={`relative cursor-pointer flex-shrink-0 bg-neutral-100 rounded-lg overflow-hidden`}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    border:
+                      activeImage === index
+                        ? "2px solid #d4af37"
+                        : "2px solid transparent",
+                  }}
+                  onClick={() => {
+                    if (swiperRef.current) {
+                      swiperRef.current.slideTo(index)
+                      setActiveImage(index)
+                    }
+                  }}
+                >
+                  <Image
+                    src={image}
+                    alt={`${productTitle} - View ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                    sizes="80px"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Main Image Carousel */}
-      <div className="relative aspect-square w-full rounded bg-white border mb-3">
+      <div className="relative aspect-square w-full rounded bg-white mb-3">
         <Swiper
           spaceBetween={0}
           pagination={{
@@ -95,49 +140,6 @@ const ProductImageCarousel = ({
           <BsArrowsFullscreen />
         </button>
       </div>
-
-      {/* Thumbnail Carousel */}
-      {images.length > 1 && (
-        <div className="w-full mt-3">
-          <div
-            className="flex gap-2 overflow-x-auto"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
-          >
-            {images.map((image, index) => (
-              <div
-                key={index}
-                className={`relative cursor-pointer flex-shrink-0 bg-neutral-100 rounded-lg overflow-hidden`}
-                style={{
-                  width: "60px",
-                  height: "60px",
-                  border:
-                    activeImage === index
-                      ? "2px solid #d4af37"
-                      : "2px solid transparent",
-                }}
-                onClick={() => {
-                  if (swiperRef.current) {
-                    swiperRef.current.slideTo(index)
-                    setActiveImage(index)
-                  }
-                }}
-              >
-                <Image
-                  src={image}
-                  alt={`${productTitle} - View ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                  sizes="80px"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <Lightbox
         open={lightboxOpen}

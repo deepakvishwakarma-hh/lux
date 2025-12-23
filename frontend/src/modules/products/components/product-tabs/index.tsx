@@ -68,12 +68,12 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
   const allFields = [...metadataEntries]
 
   return (
-    <div className="text-small-regular py-8">
-      <div className="flex flex-col gap-y-3">
+    <div className="text-small-regular border-x border-t">
+      <div className="flex flex-col">
         {allFields.map((field, index) => (
-          <div key={index} className="flex flex-row gap-4">
-            <span className="font-semibold min-w-[180px]">{field.key}</span>
-            <span className="text-ui-fg-base">{field.value}</span>
+          <div key={index} className="flex flex-row gap-4 even:border-y">
+            <span className="font-semibold min-w-[50%] p-2">{field.key}</span>
+            <span className="text-ui-fg-base border-l p-2">{field.value}</span>
           </div>
         ))}
       </div>
@@ -82,7 +82,7 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
 }
 const ProductDescriptionTab = ({ product }: ProductTabsProps) => {
   return (
-    <div className="text-small-regular py-8">
+    <div className="text-sm text-gray-700 py-8">
       <p>{product.description}</p>
     </div>
   )
