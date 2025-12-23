@@ -10,6 +10,7 @@ import {
   Label,
   Textarea,
   Tabs,
+  Select,
 } from "@medusajs/ui";
 import { sdk } from "../../lib/config";
 import { useState, useRef } from "react";
@@ -19,6 +20,7 @@ const ProductImportExportPage = () => {
   const [activeTab, setActiveTab] = useState<"upload" | "export">("upload");
   const [csvContent, setCsvContent] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [sampleProductCount, setSampleProductCount] = useState<number>(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Import mutation
@@ -289,8 +291,8 @@ const ProductImportExportPage = () => {
     importMutation.mutate(csvContent);
   };
 
-  // Generate sample CSV data with 12 products (each row creates a new product)
-  const generateSampleCSV = (): string => {
+  // Generate sample CSV data with specified number of products (each row creates a new product)
+  const generateSampleCSV = (count: number = 1): string => {
     // Headers matching required-from-admin.md structure
     const headers = [
       "id",
@@ -855,7 +857,62 @@ const ProductImportExportPage = () => {
     // Build CSV rows
     const csvRows = [headers.join(",")];
 
+    // Generate products up to requested count
+    // Group products by name to understand variant structure
+    const productGroups: { [key: string]: typeof sampleProducts } = {};
     sampleProducts.forEach((product) => {
+      const name = product.name;
+      if (!productGroups[name]) {
+        productGroups[name] = [];
+      }
+      productGroups[name].push(product);
+    });
+
+    const productsToInclude: typeof sampleProducts = [];
+    let groupCounter = 0;
+
+    // Generate unique products by creating new product groups
+    while (productsToInclude.length < count) {
+      const groupNames = Object.keys(productGroups);
+      const baseGroupName = groupNames[groupCounter % groupNames.length];
+      const baseGroup = productGroups[baseGroupName];
+
+      // Create a new product group with unique name
+      baseGroup.forEach((baseProduct) => {
+        if (productsToInclude.length >= count) return;
+
+        const product = { ...baseProduct };
+        const uniqueSuffix = groupCounter > 0 ? ` ${groupCounter + 1}` : "";
+
+        // Make product name unique to avoid option value conflicts
+        product.name = baseProduct.name + uniqueSuffix;
+        product.id = (productsToInclude.length + 1).toString();
+
+        // Update SKU to be unique
+        if (product.sku) {
+          const skuParts = product.sku.split("-");
+          if (skuParts.length > 0) {
+            skuParts[skuParts.length - 1] = String(
+              productsToInclude.length + 1
+            ).padStart(2, "0");
+            product.sku = skuParts.join("-");
+          }
+        }
+
+        // Update GTIN to be unique
+        if (product.gtin) {
+          product.gtin = (
+            parseInt(product.gtin) + productsToInclude.length
+          ).toString();
+        }
+
+        productsToInclude.push(product);
+      });
+
+      groupCounter++;
+    }
+
+    productsToInclude.forEach((product) => {
       const row = [
         product.id,
         product.product_id,
@@ -914,7 +971,7 @@ const ProductImportExportPage = () => {
   };
 
   const handleDownloadSample = () => {
-    const csvContent = generateSampleCSV();
+    const csvContent = generateSampleCSV(sampleProductCount);
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -970,14 +1027,32 @@ const ProductImportExportPage = () => {
                       into your store.
                     </Text>
                   </div>
-                  <Button
-                    onClick={handleDownloadSample}
-                    variant="secondary"
-                    size="small"
-                  >
-                    <ArrowDownTray className="w-4 h-4 mr-2" />
-                    Download Sample CSV
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={sampleProductCount.toString()}
+                      onValueChange={(value) =>
+                        setSampleProductCount(parseInt(value))
+                      }
+                    >
+                      <Select.Trigger className="w-20">
+                        <Select.Value />
+                      </Select.Trigger>
+                      <Select.Content>
+                        <Select.Item value="1">1</Select.Item>
+                        <Select.Item value="5">5</Select.Item>
+                        <Select.Item value="10">10</Select.Item>
+                        <Select.Item value="50">50</Select.Item>
+                      </Select.Content>
+                    </Select>
+                    <Button
+                      onClick={handleDownloadSample}
+                      variant="secondary"
+                      size="small"
+                    >
+                      <ArrowDownTray className="w-4 h-4 mr-2" />
+                      Download Sample CSV
+                    </Button>
+                  </div>
                 </div>
 
                 {/* File Upload */}

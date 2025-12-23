@@ -70,6 +70,7 @@ module.exports = {
           "Ubuntu",
           "sans-serif",
         ],
+        urbanist: ["var(--font-urbanist)", "Urbanist", "sans-serif"],
         woodmart: ["woodmart-font", "sans-serif"],
       },
       keyframes: {

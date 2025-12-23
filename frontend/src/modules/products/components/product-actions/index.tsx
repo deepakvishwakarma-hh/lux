@@ -57,13 +57,19 @@ export default function ProductActions({
 
   // Automatically select the first variant optimistically
   useEffect(() => {
-    if (product.variants && product.variants.length > 0 && !hasInitializedVariant.current) {
+    if (
+      product.variants &&
+      product.variants.length > 0 &&
+      !hasInitializedVariant.current
+    ) {
       // Check if there's a variant ID in URL params
       const variantIdFromUrl = searchParams.get("v_id")
-      
+
       // If URL has a variant ID, find and select that variant
       if (variantIdFromUrl) {
-        const variantFromUrl = product.variants.find(v => v.id === variantIdFromUrl)
+        const variantFromUrl = product.variants.find(
+          (v) => v.id === variantIdFromUrl
+        )
         if (variantFromUrl) {
           const variantOptions = optionsAsKeymap(variantFromUrl.options)
           setOptions(variantOptions ?? {})
@@ -71,7 +77,7 @@ export default function ProductActions({
           return
         }
       }
-      
+
       // Auto-select the first variant optimistically
       const firstVariant = product.variants[0]
       const variantOptions = optionsAsKeymap(firstVariant.options)
@@ -248,7 +254,9 @@ export default function ProductActions({
 
   return (
     <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
+      <div className="flex flex-col gap-y-2 mt-2" ref={actionsRef}>
+        <ProductPrice product={product} variant={selectedVariant} />
+
         <div>
           {(product.variants?.length ?? 0) > 1 && (
             <div className="flex flex-col gap-y-4">
@@ -270,8 +278,6 @@ export default function ProductActions({
             </div>
           )}
         </div>
-
-        <ProductPrice product={product} variant={selectedVariant} />
 
         <div className="flex items-center gap-3">
           {/* Quantity Selector */}

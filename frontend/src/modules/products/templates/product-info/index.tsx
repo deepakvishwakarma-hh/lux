@@ -51,12 +51,12 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
             {product.collection.title}
           </LocalizedClientLink>
         )}
-        <p className="text-sm font-medium text-ui-fg-muted uppercase tracking-wide">
+        {/* <p className="text-sm font-medium text-ui-fg-muted uppercase tracking-wide">
           <b>Brand: </b> {productBrandName}
-        </p>
+        </p> */}
         <Heading
           level="h2"
-          className="text-2xl font-semibold leading-8 text-ui-fg-base pr-5"
+          className="text-2xl font-bold leading-8 text-ui-fg-base pr-5 font-urbanist"
           data-testid="product-title"
         >
           {product.title}

@@ -1,9 +1,10 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
-import { Navigation, Thumbs } from "swiper/modules"
+import type { Swiper as SwiperType } from "swiper"
+import { Thumbs } from "swiper/modules"
 import Lightbox from "yet-another-react-lightbox"
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen"
 import Slideshow from "yet-another-react-lightbox/plugins/slideshow"
@@ -14,7 +15,6 @@ import "yet-another-react-lightbox/styles.css"
 
 import "swiper/css"
 import "swiper/css/thumbs"
-import "swiper/css/navigation"
 import { BsArrowsFullscreen } from "react-icons/bs"
 
 interface ProductImageCarouselProps {
@@ -27,8 +27,8 @@ const ProductImageCarousel = ({
   productTitle,
 }: ProductImageCarouselProps) => {
   const [activeImage, setActiveImage] = useState(0)
-  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const swiperRef = useRef<SwiperType | null>(null)
 
   if (!images || images.length === 0) {
     return (
@@ -58,15 +58,16 @@ const ProductImageCarousel = ({
       <div className="relative aspect-square w-full rounded bg-white border mb-3">
         <Swiper
           spaceBetween={0}
-          navigation={true}
           pagination={{
             clickable: true,
             type: "bullets",
           }}
-          thumbs={{ swiper: thumbsSwiper }}
-          modules={[Navigation, Thumbs]}
+          modules={[Thumbs]}
           className="h-full product-image-carousel"
           onSlideChange={(swiper) => setActiveImage(swiper.activeIndex)}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper
+          }}
         >
           {images.map((image, index) => (
             <SwiperSlide key={index}>
@@ -118,8 +119,9 @@ const ProductImageCarousel = ({
                       : "2px solid transparent",
                 }}
                 onClick={() => {
-                  if (thumbsSwiper) {
-                    thumbsSwiper.slideTo(index)
+                  if (swiperRef.current) {
+                    swiperRef.current.slideTo(index)
+                    setActiveImage(index)
                   }
                 }}
               >

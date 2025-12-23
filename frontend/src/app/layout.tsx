@@ -1,11 +1,17 @@
-import { getBaseURL } from "@lib/util/env"
-import { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "styles/globals.css"
+import { Metadata } from "next"
+import { getBaseURL } from "@lib/util/env"
+import { Inter, Urbanist } from "next/font/google"
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+})
+
+const urbanist = Urbanist({
+  subsets: ["latin"],
+  variable: "--font-urbanist",
   display: "swap",
 })
 
@@ -19,7 +25,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-mode="light" className={inter.variable}>
+    <html
+      lang="en"
+      data-mode="light"
+      className={`${inter.variable} ${urbanist.variable}`}
+    >
       <head>
         <link
           href="https://db.onlinewebfonts.com/c/f890eea2e91e1270ce7109e36a42260a?family=woodmart-font"
