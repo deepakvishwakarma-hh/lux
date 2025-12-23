@@ -7,7 +7,7 @@
  * 
  * Query Parameters:
  * - brand_id: Filter by brand ID (string)
- * - brand_slug: Filter by brand slug (string)
+ * - brand_slug: Filter by brand slug(s) - comma-separated or array (string | string[])
  * - category_id: Filter by category ID(s) - comma-separated or array (string | string[])
  * - category_name: Filter by category name(s) - comma-separated or array (string | string[])
  * - search: Search text in product title (string) - also supports 'q' parameter
@@ -72,7 +72,10 @@ function formatPrice(amount: number | null, currencyCode: string): string | null
 const ProductFilterSchema = z.object({
   // Brand filters
   brand_id: z.string().optional(),
-  brand_slug: z.string().optional(),
+  brand_slug: z.union([
+    z.string().transform((val) => parseCommaSeparated(val)),
+    z.array(z.string()),
+  ]).optional(),
 
   // Category filters - supports comma-separated values
   category_id: z.union([
@@ -206,21 +209,25 @@ export async function GET(
     }
 
     // Apply brand filter
-    let brandIdToFilter: string | undefined
+    let brandIdsToFilter: string[] | undefined
     if (parsedQuery.brand_id) {
-      brandIdToFilter = parsedQuery.brand_id
+      brandIdsToFilter = [parsedQuery.brand_id]
     } else if (parsedQuery.brand_slug) {
-      // First, get brand ID from slug
+      const brandSlugs = Array.isArray(parsedQuery.brand_slug)
+        ? parsedQuery.brand_slug
+        : [parsedQuery.brand_slug]
+
+      // First, get brand IDs from slugs
       const { data: brands } = await query.graph({
         entity: "brand",
         fields: ["id", "slug"],
         filters: {
-          slug: parsedQuery.brand_slug,
+          slug: brandSlugs.length === 1 ? brandSlugs[0] : brandSlugs,
         },
       })
 
       if (brands && brands.length > 0) {
-        brandIdToFilter = brands[0].id
+        brandIdsToFilter = brands.map((b: any) => b.id)
       } else {
         // Brand not found, return empty result
         return res.json({
@@ -281,7 +288,7 @@ export async function GET(
       parsedQuery.min_price !== undefined ||
       parsedQuery.max_price !== undefined ||
       categoryIdsToFilter !== undefined ||
-      brandIdToFilter !== undefined ||
+      brandIdsToFilter !== undefined ||
       searchTerm !== undefined ||
       rimStyleFilters !== undefined ||
       genderFilters !== undefined ||
@@ -318,9 +325,9 @@ export async function GET(
     }
 
     // Filter by brand if provided (post-filtering for better flexibility)
-    if (brandIdToFilter) {
+    if (brandIdsToFilter && brandIdsToFilter.length > 0) {
       filteredProducts = filteredProducts.filter((product: any) => {
-        return product.brand && product.brand.id === brandIdToFilter
+        return product.brand && brandIdsToFilter.includes(product.brand.id)
       })
     }
 

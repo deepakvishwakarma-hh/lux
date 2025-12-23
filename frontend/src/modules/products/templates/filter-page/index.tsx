@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import useSWR from "swr"
+import { Range, getTrackBackground } from "react-range"
 import { FilterProductsResponse } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -140,8 +141,8 @@ export default function FilterPage({
 
     return {
       search: searchParams.get("search") || "",
-      brand: searchParams.get("brand") || "",
-      category: searchParams.get("category") || "",
+      brand: searchParams.getAll("brand"),
+      category: searchParams.getAll("category"),
       rimStyle: searchParams.getAll("rim_style"),
       gender: searchParams.getAll("gender"),
       shapes: searchParams.getAll("shapes"),
@@ -158,8 +159,8 @@ export default function FilterPage({
   const apiUrl = useMemo(() => {
     const queryParams = new URLSearchParams()
     if (filters.search) queryParams.set("search", filters.search)
-    if (filters.brand) queryParams.set("brand_slug", filters.brand)
-    if (filters.category) queryParams.set("category_name", filters.category)
+    filters.brand.forEach((v) => queryParams.append("brand_slug", v))
+    filters.category.forEach((v) => queryParams.append("category_name", v))
     filters.rimStyle.forEach((v) => queryParams.append("rim_style", v))
     filters.gender.forEach((v) => queryParams.append("gender", v))
     filters.shapes.forEach((v) => queryParams.append("shapes", v))
@@ -198,6 +199,58 @@ export default function FilterPage({
   const count = data?.count || 0
   const filterOptions = data?.filter_options
   const loading = isLoading
+
+  // Calculate price range from products (prices are in cents, convert to dollars)
+  const priceRange = useMemo(() => {
+    const prices = products
+      .map((p: any) => p.price)
+      .filter((p: number | null | undefined) => p != null && p !== undefined)
+      .map((p: number) => p / 100) // Convert from cents to dollars
+
+    if (prices.length === 0) {
+      return { min: 0, max: 1000 } // Default range if no products
+    }
+
+    const min = Math.floor(Math.min(...prices))
+    const max = Math.ceil(Math.max(...prices))
+
+    // Ensure we have a reasonable range
+    const rangeMin = Math.max(0, min)
+    const rangeMax = Math.max(rangeMin + 10, max)
+
+    return { min: rangeMin, max: rangeMax }
+  }, [products])
+
+  // Initialize price range state
+  const [priceValues, setPriceValues] = useState<number[]>(() => {
+    const min = filters.minPrice ? parseFloat(filters.minPrice) : priceRange.min
+    const max = filters.maxPrice ? parseFloat(filters.maxPrice) : priceRange.max
+    return [min, max]
+  })
+
+  // Update price values when filters or price range changes
+  useEffect(() => {
+    let min = filters.minPrice ? parseFloat(filters.minPrice) : priceRange.min
+    let max = filters.maxPrice ? parseFloat(filters.maxPrice) : priceRange.max
+
+    // Clamp values to valid range
+    min = Math.max(priceRange.min, Math.min(priceRange.max, min))
+    max = Math.max(priceRange.min, Math.min(priceRange.max, max))
+
+    // Ensure min <= max
+    if (min > max) {
+      min = priceRange.min
+      max = priceRange.max
+    }
+
+    setPriceValues((prevValues) => {
+      // Only update if values have actually changed to avoid unnecessary re-renders
+      if (prevValues[0] !== min || prevValues[1] !== max) {
+        return [min, max]
+      }
+      return prevValues
+    })
+  }, [filters.minPrice, filters.maxPrice, priceRange.min, priceRange.max])
 
   // Update URL with filters
   const updateFilters = (updates: Record<string, string | string[] | null>) => {
@@ -272,83 +325,134 @@ export default function FilterPage({
               </div>
 
               {/* Price Range */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Price Range
+              <div className="pb-6 border-b border-gray-200">
+                <label className="block text-sm font-medium mb-4 text-gray-700">
+                  Price
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={filters.minPrice || ""}
-                    onChange={(e) =>
-                      updateFilters({ min_price: e.target.value || null })
-                    }
-                    placeholder="Min"
-                    className="w-full px-3 py-2 border border-ui-border-base rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive"
+                <div className="px-2">
+                  <Range
+                    values={priceValues}
+                    step={1}
+                    min={priceRange.min}
+                    max={priceRange.max}
+                    onChange={(values) => {
+                      // Ensure min is always <= max
+                      const [min, max] =
+                        values[0] <= values[1]
+                          ? [values[0], values[1]]
+                          : [values[1], values[0]]
+
+                      setPriceValues([min, max])
+                      // Always update both min and max prices together
+                      updateFilters({
+                        min_price: String(min),
+                        max_price: String(max),
+                      })
+                    }}
+                    renderTrack={({ props, children }) => (
+                      <div
+                        {...props}
+                        style={{
+                          ...props.style,
+                          height: "8px",
+                          width: "100%",
+                          background: getTrackBackground({
+                            values: priceValues,
+                            colors: ["#e5e7eb", "#000", "#e5e7eb"],
+                            min: priceRange.min,
+                            max: priceRange.max,
+                          }),
+                          borderRadius: "0px",
+                        }}
+                      >
+                        {children}
+                      </div>
+                    )}
+                    renderThumb={({ props, index }) => (
+                      <div
+                        {...props}
+                        style={{
+                          ...props.style,
+                          height: "24px",
+                          width: "4px",
+                          borderRadius: "0px",
+                          backgroundColor: "#000",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          outline: "none",
+                        }}
+                      />
+                    )}
                   />
-                  <input
-                    type="number"
-                    value={filters.maxPrice || ""}
-                    onChange={(e) =>
-                      updateFilters({ max_price: e.target.value || null })
-                    }
-                    placeholder="Max"
-                    className="w-full px-3 py-2 border border-ui-border-base rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive"
-                  />
+                  <div className="mt-4 text-sm text-gray-400">
+                    Price: ${priceValues[0].toFixed(0)} — $
+                    {priceValues[1].toFixed(0)}
+                  </div>
                 </div>
               </div>
 
               {/* Brand Filter */}
               {filterOptions?.brands && filterOptions.brands.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="pb-6 border-b border-gray-200">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
                     Brand
                   </label>
-                  <select
-                    value={filters.brand}
-                    onChange={(e) =>
-                      updateFilters({ brand: e.target.value || null })
-                    }
-                    className="w-full px-3 py-2 border border-ui-border-base rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive"
-                  >
-                    <option value="">All Brands</option>
+                  <div className="space-y-2">
                     {filterOptions.brands.map((brand) => (
-                      <option key={brand.id} value={brand.slug}>
-                        {brand.name}
-                      </option>
+                      <label key={brand.id} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={filters.brand.includes(brand.slug)}
+                          onChange={() =>
+                            handleFilterChange("brand", brand.slug, true)
+                          }
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-400">
+                          {brand.name}
+                        </span>
+                      </label>
                     ))}
-                  </select>
+                  </div>
                 </div>
               )}
 
               {/* Category Filter */}
               {filterOptions?.categories &&
                 filterOptions.categories.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
+                  <div className="pb-6 border-b border-gray-200">
+                    <label className="block text-sm font-medium mb-2 text-gray-700">
                       Category
                     </label>
-                    <select
-                      value={filters.category}
-                      onChange={(e) =>
-                        updateFilters({ category: e.target.value || null })
-                      }
-                      className="w-full px-3 py-2 border border-ui-border-base rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive"
-                    >
-                      <option value="">All Categories</option>
+                    <div className="space-y-2">
                       {filterOptions.categories.map((category) => (
-                        <option key={category.id} value={category.name}>
-                          {category.name}
-                        </option>
+                        <label key={category.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={filters.category.includes(category.name)}
+                            onChange={() =>
+                              handleFilterChange(
+                                "category",
+                                category.name,
+                                true
+                              )
+                            }
+                            className="mr-2"
+                          />
+                          <span className="text-sm text-gray-400">
+                            {category.name}
+                          </span>
+                        </label>
                       ))}
-                    </select>
+                    </div>
                   </div>
                 )}
 
               {/* Gender Filter */}
               {filterOptions?.genders && filterOptions.genders.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="pb-6 border-b border-gray-200">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
                     Gender
                   </label>
                   <div className="space-y-2">
@@ -362,7 +466,7 @@ export default function FilterPage({
                           }
                           className="mr-2"
                         />
-                        <span className="text-sm">{gender}</span>
+                        <span className="text-sm text-gray-400">{gender}</span>
                       </label>
                     ))}
                   </div>
@@ -372,8 +476,8 @@ export default function FilterPage({
               {/* Rim Style Filter */}
               {filterOptions?.rim_styles &&
                 filterOptions.rim_styles.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
+                  <div className="pb-6 border-b border-gray-200">
+                    <label className="block text-sm font-medium mb-2 text-gray-700">
                       Rim Style
                     </label>
                     <div className="space-y-2">
@@ -387,7 +491,7 @@ export default function FilterPage({
                             }
                             className="mr-2"
                           />
-                          <span className="text-sm">{style}</span>
+                          <span className="text-sm text-gray-400">{style}</span>
                         </label>
                       ))}
                     </div>
@@ -396,8 +500,8 @@ export default function FilterPage({
 
               {/* Shapes Filter */}
               {filterOptions?.shapes && filterOptions.shapes.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="pb-6 border-b border-gray-200">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
                     Shapes
                   </label>
                   <div className="space-y-2">
@@ -411,7 +515,7 @@ export default function FilterPage({
                           }
                           className="mr-2"
                         />
-                        <span className="text-sm">{shape}</span>
+                        <span className="text-sm text-gray-400">{shape}</span>
                       </label>
                     ))}
                   </div>
@@ -420,8 +524,10 @@ export default function FilterPage({
 
               {/* Size Filter */}
               {filterOptions?.sizes && filterOptions.sizes.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">Size</label>
+                <div className="pb-6 border-b border-gray-200">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
+                    Size
+                  </label>
                   <div className="space-y-2">
                     {filterOptions.sizes.map((size) => (
                       <label key={size} className="flex items-center">
@@ -433,7 +539,7 @@ export default function FilterPage({
                           }
                           className="mr-2"
                         />
-                        <span className="text-sm">{size}</span>
+                        <span className="text-sm text-gray-400">{size}</span>
                       </label>
                     ))}
                   </div>

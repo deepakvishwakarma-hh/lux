@@ -12,8 +12,8 @@ type Props = {
   params: Promise<{ countryCode: string }>
   searchParams: Promise<{
     search?: string
-    brand?: string
-    category?: string
+    brand?: string | string[]
+    category?: string | string[]
     rim_style?: string | string[]
     gender?: string | string[]
     shapes?: string | string[]
@@ -39,7 +39,15 @@ export default async function FilterProductsPage(props: Props) {
   // Get filters from search params
   const search = searchParams.search
   const brand = searchParams.brand
+    ? Array.isArray(searchParams.brand)
+      ? searchParams.brand
+      : [searchParams.brand]
+    : undefined
   const category = searchParams.category
+    ? Array.isArray(searchParams.category)
+      ? searchParams.category
+      : [searchParams.category]
+    : undefined
   const rimStyle = searchParams.rim_style
     ? Array.isArray(searchParams.rim_style)
       ? searchParams.rim_style
@@ -60,8 +68,12 @@ export default async function FilterProductsPage(props: Props) {
       ? searchParams.size
       : [searchParams.size]
     : undefined
-  const minPrice = searchParams.min_price ? parseFloat(searchParams.min_price) : undefined
-  const maxPrice = searchParams.max_price ? parseFloat(searchParams.max_price) : undefined
+  const minPrice = searchParams.min_price
+    ? parseFloat(searchParams.min_price)
+    : undefined
+  const maxPrice = searchParams.max_price
+    ? parseFloat(searchParams.max_price)
+    : undefined
   const order = (searchParams.order as any) || "created_at"
   const orderDirection = (searchParams.order_direction as any) || "desc"
   const page = parseInt(searchParams.page || "1")
@@ -95,4 +107,3 @@ export default async function FilterProductsPage(props: Props) {
     />
   )
 }
-

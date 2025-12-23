@@ -251,7 +251,9 @@ export const filterProducts = async ({
       query.brand_id = filterParams.brand_id
     }
     if (filterParams.brand_slug) {
-      query.brand_slug = filterParams.brand_slug
+      query.brand_slug = Array.isArray(filterParams.brand_slug)
+        ? filterParams.brand_slug.join(",")
+        : filterParams.brand_slug
     }
     if (filterParams.category_id) {
       query.category_id = Array.isArray(filterParams.category_id)
