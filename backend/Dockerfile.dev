@@ -1,0 +1,19 @@
+# Development Dockerfile for Medusa.js
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# Install dependencies
+RUN npm ci || yarn install
+
+# Copy application files
+COPY . .
+
+EXPOSE 9000
+
+CMD ["npm", "run", "dev"]
+

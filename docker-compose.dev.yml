@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: luxuriousonly-postgres-dev
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa_password
+      POSTGRES_DB: medusa_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medusa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - luxuriousonly-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: luxuriousonly-backend-dev
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://medusa:medusa_password@postgres:5432/medusa_db
+      STORE_CORS: http://localhost:8000,http://frontend:8000
+      ADMIN_CORS: http://localhost:7001,http://localhost:9000
+      AUTH_CORS: http://localhost:8000,http://frontend:8000
+      JWT_SECRET: ${JWT_SECRET:-supersecret}
+      COOKIE_SECRET: ${COOKIE_SECRET:-supersecret}
+      BACKEND_URL: http://localhost:9000
+    ports:
+      - "9000:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend_uploads_dev:/app/static
+    networks:
+      - luxuriousonly-network
+    command: npm run dev
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: luxuriousonly-frontend-dev
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
+      NEXT_PUBLIC_BASE_URL: http://localhost:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - luxuriousonly-network
+    command: npm run dev
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:
+  backend_uploads_dev:
+
+networks:
+  luxuriousonly-network:
+    driver: bridge
+

@@ -1,0 +1,22 @@
+# Development Dockerfile for Next.js
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# Install dependencies
+RUN npm ci || yarn install
+
+# Copy application files
+COPY . .
+
+EXPOSE 8000
+
+ENV PORT=8000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["npm", "run", "dev"]
+
