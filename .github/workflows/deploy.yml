@@ -16,15 +16,22 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p $HOME/.ssh
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> $HOME/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H 31.97.226.111 >> $HOME/.ssh/known_hosts 2>/dev/null || true
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.VPS_PORT }}
+          host: 31.97.226.111
+          username: root
+          key: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+            QyNTUxOQAAACBXB4iplWwisVppwA1bSHR9yOK1usTxigvEUeafmaxKrQAAAJiy/ptAsv6b
+            QAAAAAtzc2gtZWQyNTUxOQAAACBXB4iplWwisVppwA1bSHR9yOK1usTxigvEUeafmaxKrQ
+            AAAEC3SqwwYZ9j0oE6oG8ef5XeyNcoPHvweISG2qwQCcrNa1cHiKmVbCKxWmnADVtIdH3I
+            4rW6xPGKC8RR5p+ZrEqtAAAADmdpdGh1Yi1hY3Rpb25zAQIDBAUGBw==
+            -----END OPENSSH PRIVATE KEY-----
+          port: 22
           debug: true
           script: |
 
