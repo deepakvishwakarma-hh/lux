@@ -12,6 +12,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import ProductActionsWrapper from "./product-actions-wrapper"
 import ProductImageCarousel from "@modules/products/components/image-gallery/product-image"
 import ProductInfoActions from "@modules/products/components/product-info-actions"
+import TrackProductView from "@modules/products/components/track-product-view"
 import { Brand } from "@lib/data/brands"
 
 type ProductTemplateProps = {
@@ -35,6 +36,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <TrackProductView productId={product.id} />
       <div className="content-container">
         {/* Breadcrumb */}
         <nav
@@ -84,7 +86,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
               <ProductActionsWrapper id={product.id} region={region} />
             </Suspense>
 
-            <ProductTabs product={product} />
+            <ProductTabs
+              product={product}
+              countryCode={countryCode}
+              region={region}
+            />
             <ProductInfoActions />
           </div>
         </div>
