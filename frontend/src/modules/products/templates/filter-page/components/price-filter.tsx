@@ -24,33 +24,33 @@ export default function PriceFilter({
   }
 
   return (
-    <div className="pb-6 border-b border-gray-200">
-      <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wide">
+    <div className="pb-4 sm:pb-6 border-b border-gray-200">
+      <h3 className="text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-gray-900 uppercase tracking-wide">
         Filter by price
       </h3>
       <div className="space-y-4">
         {/* Min/Max Input Fields */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <label className="block text-xs text-gray-600 mb-1">Min price</label>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <div className="flex-1 min-w-0">
+            <label className="block text-xs text-gray-600 mb-1.5">Min price</label>
             <input
               type="number"
               min={priceRange.min}
               max={priceRange.max}
               value={Math.round(priceValues[0])}
               onChange={handleMinChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
             />
           </div>
-          <div className="flex-1">
-            <label className="block text-xs text-gray-600 mb-1">Max price</label>
+          <div className="flex-1 min-w-0">
+            <label className="block text-xs text-gray-600 mb-1.5">Max price</label>
             <input
               type="number"
               min={priceRange.min}
               max={priceRange.max}
               value={Math.round(priceValues[1])}
               onChange={handleMaxChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
             />
           </div>
         </div>

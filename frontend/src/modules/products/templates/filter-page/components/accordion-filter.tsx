@@ -17,7 +17,6 @@ export default function AccordionFilter({
 }: AccordionFilterProps) {
   const [isOpen, setIsOpen] = useState(isOpenByDefault || hasSelectedValues)
 
-  // Auto-open if values are selected
   useEffect(() => {
     if (hasSelectedValues) {
       setIsOpen(true)
@@ -26,17 +25,43 @@ export default function AccordionFilter({
 
   return (
     <div className="border-b border-gray-200">
+      {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-4 text-left hover:bg-gray-50 transition-colors rounded-md px-1 -mx-1"
+        aria-expanded={isOpen}
+        className="
+          w-full flex items-center justify-between
+          py-3 sm:py-4
+          px-2 sm:px-3
+          text-left
+          hover:bg-gray-50
+          active:bg-gray-100
+          transition-colors
+          rounded-md
+        "
       >
-        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+        <h3
+          className="
+            text-sm sm:text-base
+            font-semibold
+            text-gray-900
+            uppercase
+            tracking-wide
+            truncate
+          "
+        >
           {label}
         </h3>
+
+        {/* Chevron */}
         <svg
-          className={`w-5 h-5 text-gray-600 transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? "transform rotate-180" : ""
-          }`}
+          className={`
+            w-5 h-5 sm:w-5 sm:h-5
+            text-gray-600
+            transition-transform duration-200
+            flex-shrink-0
+            ${isOpen ? "rotate-180" : ""}
+          `}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -49,14 +74,19 @@ export default function AccordionFilter({
           />
         </svg>
       </button>
+
+      {/* Content */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`
+          overflow-hidden
+          transition-all duration-300 ease-in-out
+          ${isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}
+        `}
       >
-        <div className="pb-4 pt-2">{children}</div>
+        <div className="pt-2 pb-4 px-1 sm:px-2">
+          {children}
+        </div>
       </div>
     </div>
   )
 }
-

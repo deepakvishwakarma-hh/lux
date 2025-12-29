@@ -10,8 +10,8 @@ export default function SearchQueryIndicator({
   if (!searchQuery) return null
 
   return (
-    <div className="bg-gray-900 text-white flex items-center justify-center py-6 px-4">
-      <p className="text-lg md:text-xl font-semibold text-center tracking-wide">
+    <div className="bg-gray-900 text-white flex items-center justify-center py-4 sm:py-6 px-3 sm:px-4">
+      <p className="text-sm sm:text-base md:text-lg font-semibold text-center tracking-wide break-words">
         Search Results for: <span className="font-bold">"{searchQuery}"</span>
       </p>
     </div>

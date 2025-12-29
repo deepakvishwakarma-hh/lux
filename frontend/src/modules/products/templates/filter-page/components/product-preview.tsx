@@ -52,15 +52,15 @@ export default function ProductPreview({
   }
 
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
+    <LocalizedClientLink href={`/products/${product.handle}`} className="group h-full">
       <div
         data-testid="product-wrapper"
-        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative"
+        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative h-full flex flex-col"
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
           cheapestPrice.percentage_diff && (
-            <div className="absolute top-2 left-2 z-10 bg-black text-white px-2 py-1 rounded-full text-[11px] font-semibold">
+            <div className="absolute top-1 sm:top-2 left-1 sm:left-2 z-10 bg-black text-white px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold">
               -{cheapestPrice.percentage_diff}%
             </div>
           )}
@@ -70,15 +70,15 @@ export default function ProductPreview({
           images={product.images}
           size="full"
         />
-        <div className="flex flex-col txt-compact-medium mt-4 justify-between px-4 pb-4">
+        <div className="flex flex-col txt-compact-medium mt-2 sm:mt-4 justify-between px-3 sm:px-4 pb-3 sm:pb-4 flex-grow">
           <p
-            className="text-ui-fg-subtle text-center"
+            className="text-ui-fg-subtle text-center text-xs sm:text-sm"
             data-testid="product-title"
           >
             {product.title}
           </p>
           {product.brand && (
-            <p className="text-ui-fg-subtle text-center font-bold">
+            <p className="text-ui-fg-subtle text-center font-bold text-xs sm:text-sm">
               {product.brand.name}
             </p>
           )}
