@@ -17,11 +17,11 @@ type ProductReviewsProps = {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5 sm:gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
         <svg
           key={star}
-          className={`w-5 h-5 ${
+          className={`w-4 h-4 sm:w-5 sm:h-5 ${
             star <= rating
               ? "text-yellow-400 fill-current"
               : "text-gray-300 fill-current"
@@ -44,27 +44,27 @@ function ReviewItem({ review }: { review: Review }) {
   })
 
   return (
-    <div className="h-full p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div className="h-full p-3 sm:p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col h-full">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Text className="font-semibold text-gray-900 text-sm">
+        <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+              <Text className="font-semibold text-gray-900 text-xs sm:text-sm truncate">
                 {review.first_name} {review.last_name}
               </Text>
             </div>
             <StarRating rating={review.rating} />
           </div>
-          <Text className="text-xs text-gray-500 ml-2 flex-shrink-0">
+          <Text className="text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">
             {formattedDate}
           </Text>
         </div>
         {review.title && (
-          <Text className="text-base font-medium text-gray-800 mb-2">
+          <Text className="text-sm sm:text-base font-medium text-gray-800 mb-1 sm:mb-2 line-clamp-2">
             {review.title}
           </Text>
         )}
-        <Text className="text-sm text-gray-700 leading-relaxed flex-1 line-clamp-4">
+        <Text className="text-xs sm:text-sm text-gray-700 leading-relaxed flex-1 line-clamp-4">
           {review.content}
         </Text>
       </div>
@@ -158,15 +158,15 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   if (isLoading) {
     return (
       <div className="product-page-constraint pb-10">
-        <div className="flex flex-col mt-5 mb-5">
-          <span className="text-2xl font-urbanist font-semibold text-gray-700">
+        <div className="flex flex-col mt-3 sm:mt-5 mb-3 sm:mb-5">
+          <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
             Reviews
           </span>
         </div>
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
+          <div className="h-6 sm:h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-24 sm:h-32 bg-gray-200 rounded"></div>
+          <div className="h-24 sm:h-32 bg-gray-200 rounded"></div>
         </div>
       </div>
     )
@@ -175,20 +175,20 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   if (error) {
     return (
       <div className="product-page-constraint pb-10">
-        <div className="flex flex-col mt-5 mb-5">
-          <span className="text-2xl font-urbanist font-semibold text-gray-700">
+        <div className="flex flex-col mt-3 sm:mt-5 mb-3 sm:mb-5">
+          <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
             Reviews
           </span>
         </div>
-        <div className="text-red-600">{error}</div>
+        <div className="text-sm sm:text-base text-red-600">{error}</div>
       </div>
     )
   }
 
   return (
     <div className="product-page-constraint pb-10">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-5 mb-5 gap-4">
-        <span className="text-2xl font-urbanist font-semibold text-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 sm:mt-5 mb-3 sm:mb-5 gap-3 sm:gap-4">
+        <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
           Reviews
         </span>
 
@@ -203,14 +203,14 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
       {/* Average Rating Summary */}
       {count > 0 && (
-        <div className="mb-6 pb-6 border-b border-gray-200">
-          <div className="flex items-center gap-4">
-            <div className="text-4xl font-bold text-gray-900">
+        <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-200">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="text-3xl sm:text-4xl font-bold text-gray-900">
               {averageRating.toFixed(1)}
             </div>
             <div>
               <StarRating rating={Math.round(averageRating)} />
-              <Text className="text-sm text-gray-600 mt-1">
+              <Text className="text-xs sm:text-sm text-gray-600 mt-1">
                 Based on {count} {count === 1 ? "review" : "reviews"}
               </Text>
             </div>
@@ -220,7 +220,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
       {/* Reviews Carousel */}
       {reviews.length > 0 ? (
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={20}
@@ -251,8 +251,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
           </Swiper>
         </div>
       ) : (
-        <div className="mb-6 py-8 text-center">
-          <Text className="text-gray-600 mb-4">
+        <div className="mb-4 sm:mb-6 py-6 sm:py-8 text-center">
+          <Text className="text-sm sm:text-base text-gray-600 mb-4">
             No reviews yet. Be the first to review this product!
           </Text>
           {!sessionLoading && customer && !hasReviewed && (
@@ -266,8 +266,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
       {/* Message for users who are not logged in */}
       {!sessionLoading && !customer && (
-        <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-          <Text className="text-gray-600">
+        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 text-center">
+          <Text className="text-sm sm:text-base text-gray-600">
             Please log in to write a review.
           </Text>
         </div>
