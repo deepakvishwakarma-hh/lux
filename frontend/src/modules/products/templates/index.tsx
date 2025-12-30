@@ -13,6 +13,7 @@ import ProductActionsWrapper from "./product-actions-wrapper"
 import ProductImageCarousel from "@modules/products/components/image-gallery/product-image"
 import ProductInfoActions from "@modules/products/components/product-info-actions"
 import TrackProductView from "@modules/products/components/track-product-view"
+import ProductReviews from "@modules/products/components/product-reviews"
 import { Brand } from "@lib/data/brands"
 
 type ProductTemplateProps = {
@@ -94,6 +95,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <ProductInfoActions />
           </div>
         </div>
+      </div>
+      <div
+        className="content-container"
+        data-testid="product-reviews-container"
+      >
+        <ProductReviews productId={product.id} />
       </div>
       <div
         className="content-container "
