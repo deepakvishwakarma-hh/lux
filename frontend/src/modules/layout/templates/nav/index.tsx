@@ -53,15 +53,13 @@ export default function Nav() {
             {/* Login / Account ALWAYS visible */}
             <AccountDropdown customer={customer} isLoading={isLoading} />
 
-            <div className="hidden sm:block">
-              <CompareButton />
-            </div>
+            <div className="hidden sm:block">{/* <CompareButton /> */}</div>
 
-            <LikedButton />
+            {/* <LikedButton /> */}
 
-            <Suspense fallback={<span className="text-sm">Cart (0)</span>}>
+            {/* <Suspense fallback={<span className="text-sm">Cart (0)</span>}>
               <CartButton />
-            </Suspense>
+            </Suspense> */}
           </div>
         </nav>
       </header>
