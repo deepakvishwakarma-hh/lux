@@ -60,12 +60,10 @@ export default function NavSearch() {
   const searchApiUrl =
     query.trim().length >= 2
       ? (() => {
-          const backendUrl =
-            typeof window !== "undefined"
-              ? window.location.origin.includes("localhost")
-                ? "http://localhost:9000"
-                : window.location.origin.replace(/:\d+$/, ":9000")
-              : process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+          const backendUrl = process.env.PUBLIC_MEDUSA_BACKEND_URL
+          if (!backendUrl) {
+            return null
+          }
           const params = new URLSearchParams()
           params.set("search", query.trim())
           params.set("limit", "4")
