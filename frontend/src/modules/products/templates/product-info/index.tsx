@@ -3,10 +3,13 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Brand } from "@lib/data/brands"
 import Image from "next/image"
+import ProductReviewSummary from "@modules/products/components/product-review-summary"
+import { ReviewsResponse } from "@lib/data/reviews"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
   brand: Brand | null
+  reviewSummary: ReviewsResponse | null
 }
 
 // Helper function to check if a variant is in stock
@@ -30,7 +33,7 @@ const isVariantInStock = (variant: HttpTypes.StoreProductVariant): boolean => {
   return false
 }
 
-const ProductInfo = ({ product, brand }: ProductInfoProps) => {
+const ProductInfo = ({ product, brand, reviewSummary }: ProductInfoProps) => {
   // Check if product has any variant in stock
   const isInStock = (() => {
     if (!product.variants || product.variants.length === 0) {
@@ -67,6 +70,8 @@ const ProductInfo = ({ product, brand }: ProductInfoProps) => {
         >
           {product.title}
         </Heading>
+        {/* Review Summary */}
+        <ProductReviewSummary reviewSummary={reviewSummary} />
         {/* Stock Status Indicator */}
         <div className="flex items-center gap-2">
           <div

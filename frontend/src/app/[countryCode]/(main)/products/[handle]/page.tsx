@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getBrandsByProductId } from "@lib/data/brands"
+import { getProductReviews } from "@lib/data/reviews"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 import { getBaseURL } from "@lib/util/env"
@@ -209,8 +210,11 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
-  // Fetch brands optimistically (in parallel with product)
-  const brand = await getBrandsByProductId(pricedProduct.id)
+  // Fetch brands and reviews optimistically (in parallel with product)
+  const [brand, reviewSummary] = await Promise.all([
+    getBrandsByProductId(pricedProduct.id),
+    getProductReviews(pricedProduct.id, { limit: 1, offset: 0 }).catch(() => null),
+  ])
 
   // Get product price for structured data
   const { cheapestPrice } = getProductPrice({ product: pricedProduct })
@@ -317,6 +321,7 @@ export default async function ProductPage(props: Props) {
         countryCode={params.countryCode}
         images={images ?? []}
         brand={brand}
+        reviewSummary={reviewSummary}
       />
     </>
   )

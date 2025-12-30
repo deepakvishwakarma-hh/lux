@@ -15,6 +15,7 @@ import ProductInfoActions from "@modules/products/components/product-info-action
 import TrackProductView from "@modules/products/components/track-product-view"
 import ProductReviews from "@modules/products/components/product-reviews"
 import { Brand } from "@lib/data/brands"
+import { ReviewsResponse } from "@lib/data/reviews"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -22,6 +23,7 @@ type ProductTemplateProps = {
   countryCode: string
   images: HttpTypes.StoreProductImage[]
   brand: Brand | null
+  reviewSummary: ReviewsResponse | null
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
@@ -30,6 +32,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   countryCode,
   images,
   brand,
+  reviewSummary,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -74,7 +77,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           </div>
           {/* right side  */}
           <div className="w-full md:w-1/2 ">
-            <ProductInfo product={product} brand={brand} />
+            <ProductInfo product={product} brand={brand} reviewSummary={reviewSummary} />
             <Suspense
               fallback={
                 <ProductActions
