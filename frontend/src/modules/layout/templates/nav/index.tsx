@@ -57,11 +57,11 @@ export default function Nav() {
               <CompareButton />
             </div>
 
-            {/* <LikedButton /> */}
+            <LikedButton />
 
-            {/* <Suspense fallback={<span className="text-sm">Cart (0)</span>}>
+            <Suspense fallback={<span className="text-sm">Cart (0)</span>}>
               <CartButton />
-            </Suspense> */}
+            </Suspense>
           </div>
         </nav>
       </header>
