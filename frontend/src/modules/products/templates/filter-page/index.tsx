@@ -75,7 +75,7 @@ export default function FilterPage({
   }, [showMobileFilters])
 
   return (
-    <div className="relative">
+    <div className="relative" style={{ zIndex: 0 }}>
       <LoadingOverlay isLoading={isLoading} />
       <SearchQueryIndicator searchQuery={filters.search} />
       <div className="content-container py-4 sm:py-6 md:py-8">
@@ -87,14 +87,16 @@ export default function FilterPage({
             id="mobile-filter-drawer"
             role="dialog"
             aria-modal="true"
-            className="fixed inset-0 z-60 lg:hidden"
+            className="fixed inset-0 lg:hidden"
+            style={{ zIndex: 9998 }}
           >
             <div
               className="fixed inset-0 bg-black bg-opacity-40"
               onClick={() => setShowMobileFilters(false)}
+              style={{ zIndex: 9998 }}
             />
 
-            <div className={`fixed top-0 left-0 h-full w-80 max-w-[85%] z-70 bg-white shadow-xl transform transition-transform`}>
+            <div className={`fixed top-0 left-0 h-full w-80 max-w-[85%] bg-white shadow-xl transform transition-transform`} style={{ zIndex: 9999 }}>
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <h2 className="text-base font-bold">Filters</h2>
                 <button
@@ -137,7 +139,7 @@ export default function FilterPage({
 
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 lg:gap-10">
           {/* Sidebar - Hidden on mobile by default */}
-          <div className="hidden lg:block lg:w-72 flex-shrink-0 self-start lg:sticky lg:top-20 lg:z-10">
+          <div className="hidden lg:block lg:w-72 flex-shrink-0 self-start lg:sticky lg:top-20" style={{ zIndex: 20 }}>
             <FilterSidebar
               filters={{
                 brand: filters.brand,

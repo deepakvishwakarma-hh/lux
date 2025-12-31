@@ -7,7 +7,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react"
-import { useParams, usePathname } from "next/navigation"
+import { useParams, usePathname, useRouter } from "next/navigation"
 import { ArrowRightOnRectangle } from "@medusajs/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ChevronDown from "@modules/common/icons/chevron-down"
@@ -26,6 +26,7 @@ type AccountDropdownProps = {
 export default function AccountDropdown({ customer, isLoading = false }: AccountDropdownProps) {
   const { countryCode } = useParams() as { countryCode: string }
   const pathname = usePathname()
+  const router = useRouter()
 
   const handleLogout = async () => {
     await signout(countryCode)
@@ -54,93 +55,15 @@ export default function AccountDropdown({ customer, isLoading = false }: Account
     )
   }
 
+  // When logged in, show account icon that redirects to /account
   return (
-    <Popover className="relative">
-      {({ open, close }) => (
-        <>
-          <PopoverButton className="flex items-center gap-2 hover:text-ui-fg-base text-small-regular">
-            <span>My Account</span>
-            <ChevronDown
-              className={`transform transition-transform ${
-                open ? "rotate-180" : ""
-              }`}
-            />
-          </PopoverButton>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-200"
-            enterFrom="opacity-0 translate-y-1"
-            enterTo="opacity-100 translate-y-0"
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100 translate-y-0"
-            leaveTo="opacity-0 translate-y-1"
-          >
-            <PopoverPanel className="absolute right-0 top-full mt-2 w-56 bg-white border border-ui-border-base rounded-md shadow-lg z-50">
-              <div className="py-2">
-                <LocalizedClientLink
-                  href="/account"
-                  onClick={close}
-                  className={`flex items-center gap-2 px-4 py-2 hover:bg-ui-bg-subtle ${
-                    pathname?.includes("/account") &&
-                    !pathname?.includes("/account/profile") &&
-                    !pathname?.includes("/account/addresses") &&
-                    !pathname?.includes("/account/orders")
-                      ? "bg-ui-bg-subtle font-semibold"
-                      : ""
-                  }`}
-                >
-                  <User size={16} />
-                  <span>Overview</span>
-                </LocalizedClientLink>
-                <LocalizedClientLink
-                  href="/account/profile"
-                  onClick={close}
-                  className={`flex items-center gap-2 px-4 py-2 hover:bg-ui-bg-subtle ${
-                    pathname?.includes("/account/profile")
-                      ? "bg-ui-bg-subtle font-semibold"
-                      : ""
-                  }`}
-                >
-                  <User size={16} />
-                  <span>Profile</span>
-                </LocalizedClientLink>
-                <LocalizedClientLink
-                  href="/account/addresses"
-                  onClick={close}
-                  className={`flex items-center gap-2 px-4 py-2 hover:bg-ui-bg-subtle ${
-                    pathname?.includes("/account/addresses")
-                      ? "bg-ui-bg-subtle font-semibold"
-                      : ""
-                  }`}
-                >
-                  <MapPin size={16} />
-                  <span>Addresses</span>
-                </LocalizedClientLink>
-                <LocalizedClientLink
-                  href="/account/orders"
-                  onClick={close}
-                  className={`flex items-center gap-2 px-4 py-2 hover:bg-ui-bg-subtle ${
-                    pathname?.includes("/account/orders")
-                      ? "bg-ui-bg-subtle font-semibold"
-                      : ""
-                  }`}
-                >
-                  <Package size={16} />
-                  <span>Orders</span>
-                </LocalizedClientLink>
-                <div className="border-t border-ui-border-base my-1" />
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-ui-bg-subtle w-full text-left text-small-regular"
-                >
-                  <ArrowRightOnRectangle />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </PopoverPanel>
-          </Transition>
-        </>
-      )}
-    </Popover>
+    <button
+      onClick={() => router.push(`/${countryCode}/account`)}
+      className="flex items-center justify-center p-2 hover:bg-ui-bg-subtle rounded-md transition-colors"
+      aria-label="Go to account"
+      title="Account"
+    >
+      <User size={20} />
+    </button>
   )
 }

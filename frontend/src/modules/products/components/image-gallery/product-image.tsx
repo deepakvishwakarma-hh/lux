@@ -1,115 +1,123 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
-import type { Swiper as SwiperType } from "swiper"
-import { Navigation, Pagination } from "swiper/modules"
+import { Pagination } from "swiper/modules"
 import Lightbox from "yet-another-react-lightbox"
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen"
-import Slideshow from "yet-another-react-lightbox/plugins/slideshow"
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"
-import Captions from "yet-another-react-lightbox/plugins/captions"
 import Zoom from "yet-another-react-lightbox/plugins/zoom"
-import "yet-another-react-lightbox/styles.css"
 
 import "swiper/css"
-import "swiper/css/navigation"
 import "swiper/css/pagination"
+import "yet-another-react-lightbox/styles.css"
+
 import { BsArrowsFullscreen } from "react-icons/bs"
-import styles from "./product-image.module.css"
 
 interface ProductImageCarouselProps {
   images: string[]
   productTitle: string
 }
 
-const ProductImageCarousel = ({
+export default function ProductImageCarousel({
   images,
   productTitle,
-}: ProductImageCarouselProps) => {
+}: ProductImageCarouselProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
-  const swiperRef = useRef<SwiperType | null>(null)
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full h-full">
-        <div className="relative aspect-square w-full rounded bg-white">
-          <Image
-            src="/placeholder.svg"
-            alt={`${productTitle} - No image available`}
-            fill
-            className="object-contain w-full h-full"
-            priority
-          />
-        </div>
-      </div>
+      <div className="aspect-square w-full bg-white rounded" />
     )
   }
 
-  // Prepare slides for Lightbox
-  const lightboxSlides = images.map((img, idx) => ({
-    src: img,
-    alt: `${productTitle} - View ${idx + 1}`,
-  }))
+  const lightboxSlides = images.map((img) => ({ src: img }))
 
   return (
     <div className="w-full">
-      {/* Main Image (carousel) */}
-      <div className="relative aspect-square w-full rounded bg-white">
+      {/* ================= MOBILE SLIDER ================= */}
+      <div className="block md:hidden relative aspect-square bg-white rounded">
         <Swiper
-          spaceBetween={0}
-          modules={[Navigation, Pagination]}
-          navigation
+          modules={[Pagination]}
           pagination={{ clickable: true }}
-          className={`h-full ${styles.productImageCarousel}`}
-          onSlideChange={(swiper) => setActiveImage(swiper.activeIndex)}
-          onSwiper={(swiper) => (swiperRef.current = swiper)}
+          onSlideChange={(s) => setActiveImage(s.activeIndex)}
         >
-          {images.map((image, index) => (
-            <SwiperSlide key={index}>
-              <div className="relative w-full h-full">
+          {images.map((img, i) => (
+            <SwiperSlide key={i}>
+              <div className="relative aspect-square">
                 <Image
-                  src={image}
-                  alt={`${productTitle} - View ${index + 1}`}
+                  src={img}
+                  alt={`${productTitle} ${i}`}
                   fill
                   className="object-contain"
-                  priority={index === 0}
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority={i === 0}
                 />
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* Enlarge Button */}
         <button
-          className="
-          absolute top-2 left-2 z-30
-          w-9 h-9 md:w-10 md:h-10
-          flex items-center justify-center
-          rounded-full border-2 border-black
-          bg-white/80 backdrop-blur
-        "
+          className="absolute top-2 left-2 z-20 w-9 h-9 rounded-full border-2 border-black bg-white flex items-center justify-center"
           onClick={() => setLightboxOpen(true)}
-          aria-label="Enlarge image"
         >
           <BsArrowsFullscreen />
         </button>
       </div>
 
-      {/* Lightbox */}
+      {/* ================= DESKTOP VIEW ================= */}
+      <div className="hidden md:grid grid-cols-[80px_1fr] gap-6">
+        {/* Thumbnails */}
+        <div className="flex flex-col gap-4">
+          {images.map((img, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveImage(index)}
+              className={`relative aspect-square border rounded-md overflow-hidden ${
+                activeImage === index
+                  ? "border-black"
+                  : "border-gray-200"
+              }`}
+            >
+              <Image
+                src={img}
+                alt={`Thumbnail ${index}`}
+                fill
+                className="object-contain"
+              />
+            </button>
+          ))}
+        </div>
+
+        {/* Main Image */}
+        <div className="relative aspect-square bg-white rounded">
+          <Image
+            src={images[activeImage]}
+            alt={productTitle}
+            fill
+            className="object-contain"
+            priority
+          />
+
+          <button
+            className="absolute top-3 left-3 z-20 w-10 h-10 rounded-full border-2 border-black bg-white flex items-center justify-center"
+            onClick={() => setLightboxOpen(true)}
+          >
+            <BsArrowsFullscreen />
+          </button>
+        </div>
+      </div>
+
+      {/* ================= LIGHTBOX ================= */}
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
         slides={lightboxSlides}
         index={activeImage}
-        plugins={[Fullscreen, Slideshow, Thumbnails, Zoom, Captions]}
+        plugins={[Fullscreen, Zoom]}
         on={{ view: ({ index }) => setActiveImage(index) }}
       />
     </div>
   )
 }
-
-export default ProductImageCarousel
