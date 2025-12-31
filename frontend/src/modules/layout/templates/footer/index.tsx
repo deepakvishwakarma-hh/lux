@@ -146,7 +146,7 @@ const Footer = () => {
 
             {/* NEWSLETTER + QUICK LINKS */}
             <div>
-              <h3 className="text-white font-bold text-sm mb-3 uppercase">
+              {/* <h3 className="text-white font-bold text-sm mb-3 uppercase">
                 Newsletter
               </h3>
               <p className="text-sm mb-4">
@@ -171,7 +171,7 @@ const Footer = () => {
                 >
                   Subscribe
                 </button>
-              </form>
+              </form> */}
 
               <h3 className="text-white font-bold text-sm mb-3 uppercase">
                 Quick Links

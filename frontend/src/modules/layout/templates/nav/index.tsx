@@ -72,14 +72,14 @@ export default function Nav() {
               <AccountDropdown customer={customer} isLoading={isLoading} />
             </div>
 
-            <div className="hidden sm:block">
+            {/* <div className="hidden sm:block">
               <CompareButton />
             </div>
 
-            <LikedButton />
+            <LikedButton /> */}
 
             <Suspense fallback={<span className="text-sm">Cart (0)</span>}>
-              <CartButton />
+              {/* <CartButton /> */}
             </Suspense>
           </div>
         </nav>

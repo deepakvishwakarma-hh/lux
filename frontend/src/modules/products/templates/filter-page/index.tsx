@@ -26,6 +26,7 @@ export default function FilterPage({
 }: FilterPageProps) {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const filters = useFilterParams()
+  const [viewMode, setViewMode] = useState<'list' | 'grid-2' | 'grid-3' | 'grid-4'>('grid-3')
 
   const {
     data,
@@ -136,7 +137,7 @@ export default function FilterPage({
 
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 lg:gap-10">
           {/* Sidebar - Hidden on mobile by default */}
-          <div className="hidden lg:block lg:w-72 flex-shrink-0">
+          <div className="hidden lg:block lg:w-72 flex-shrink-0 self-start lg:sticky lg:top-20 lg:z-10">
             <FilterSidebar
               filters={{
                 brand: filters.brand,
@@ -164,7 +165,9 @@ export default function FilterPage({
               isLoading={isLoading}
               order={filters.order}
               orderDirection={filters.orderDirection}
+              viewMode={viewMode}
               onSortChange={handleSortChange}
+              onViewModeChange={setViewMode}
               onOpenFilters={() => setShowMobileFilters(true)}
             />
             <ProductGrid
@@ -173,6 +176,7 @@ export default function FilterPage({
               countryCode={countryCode}
               isLoading={isLoading}
               error={error}
+              viewMode={viewMode}
               onRetry={() => mutate()}
             />
             <Pagination

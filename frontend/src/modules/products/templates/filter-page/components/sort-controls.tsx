@@ -5,7 +5,9 @@ type SortControlsProps = {
   isLoading: boolean
   order: string
   orderDirection: string
+  viewMode?: 'list' | 'grid-2' | 'grid-3' | 'grid-4'
   onSortChange: (order: string, direction: string) => void
+  onViewModeChange?: (mode: 'list' | 'grid-2' | 'grid-3' | 'grid-4') => void
   onOpenFilters?: () => void
 }
 
@@ -14,7 +16,9 @@ export default function SortControls({
   isLoading,
   order,
   orderDirection,
+  viewMode = 'grid-3',
   onSortChange,
+  onViewModeChange,
   onOpenFilters,
 }: SortControlsProps) {
   return (
@@ -44,22 +48,39 @@ export default function SortControls({
           </button>
         )}
 
-        <label className="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Sort by:</label>
+        <div className="ml-auto flex items-center gap-2">
+          <label className="flex items-center gap-2">
+            <span className="text-xs sm:hidden font-semibold text-gray-900">Sort</span>
+            <span className="hidden sm:inline text-xs sm:text-sm font-semibold text-gray-900">Sort by:</span>
+          </label>
+          <select
+            value={`${order}_${orderDirection}`}
+            onChange={(e) => {
+              const [newOrder, newDirection] = e.target.value.split("_")
+              onSortChange(newOrder, newDirection)
+            }}
+            className="w-28 sm:w-44 px-2 sm:px-4 py-2 text-xs sm:py-2.5 sm:text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
+          >
+            <option value="created_at_desc">Newest First</option>
+            <option value="title_asc">Name A-Z</option>
+            <option value="title_desc">Name Z-A</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
 
-        <select
-          value={`${order}_${orderDirection}`}
-          onChange={(e) => {
-            const [newOrder, newDirection] = e.target.value.split("_")
-            onSortChange(newOrder, newDirection)
-          }}
-          className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
-        >
-          <option value="created_at_desc">Newest First</option>
-          <option value="title_asc">Name A-Z</option>
-          <option value="title_desc">Name Z-A</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-        </select>
+          {/* View Mode Dropdown */}
+          <select
+            value={viewMode}
+            onChange={(e) => onViewModeChange?.(e.target.value as 'list' | 'grid-2' | 'grid-3' | 'grid-4')}
+            className="w-32 sm:w-40 px-2 sm:px-4 py-2 text-xs sm:py-2.5 sm:text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
+            aria-label="View mode"
+          >
+            <option value="list">View - List</option>
+            <option value="grid-2">View - Grid 2</option>
+            <option value="grid-3">View - Grid 3</option>
+            <option value="grid-4">View - Grid 4</option>
+          </select>
+        </div>
       </div>
     </div>
   )

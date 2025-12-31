@@ -441,6 +441,13 @@ export default function BrandPage({
           </div>
         </aside>
 
+
+
+
+
+
+
+
         {/* Main Content */}
         <div className="flex-1">
           {/* Sort and Results Count */}

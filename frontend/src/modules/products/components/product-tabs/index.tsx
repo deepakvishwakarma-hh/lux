@@ -8,21 +8,24 @@ type ProductTabsProps = {
   product: HttpTypes.StoreProduct
   countryCode: string
   region: HttpTypes.StoreRegion
+  visibleFields?: string[]
 }
 
 type ProductTabProps = {
   product: HttpTypes.StoreProduct
+  visibleFields?: string[]
 }
 
 const ProductTabs = ({
   product,
   countryCode,
   region,
+  visibleFields,
 }: ProductTabsProps) => {
   const tabs = [
     {
       label: "Product Details",
-      component: <ProductInfoTab product={product} />,
+      component: <ProductInfoTab product={product} visibleFields={visibleFields} />,
     },
 
     {
@@ -59,16 +62,16 @@ const ProductTabs = ({
   )
 }
 
-const ProductInfoTab = ({ product }: ProductTabProps) => {
-  // Helper function to format metadata keys (snake_case to Title Case)
+const ProductInfoTab = ({ product, visibleFields }: ProductTabProps) => {
   const formatKey = (key: string): string => {
-    return key
-      .split("_")
+    const raw = key.includes(".") ? key.split('.').slice(-1)[0] : key
+    return raw
+      .replace(/_/g, " ")
+      .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ")
   }
 
-  // Helper function to format metadata values
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return "-"
     if (typeof value === "boolean") return value ? "Yes" : "No"
@@ -77,21 +80,33 @@ const ProductInfoTab = ({ product }: ProductTabProps) => {
     return String(value)
   }
 
-  // Get all metadata entries
-  const metadataEntries = product.metadata
-    ? Object.entries(product.metadata).map(([key, value]) => ({
-        key: formatKey(key),
-        value: formatValue(value),
-      }))
-    : []
+  const resolveKey = (obj: any, key: string) => {
+    // support nested keys with dot notation
+    if (key.includes('.')) {
+      return key.split('.').reduce((acc: any, part: string) => {
+        if (acc === undefined || acc === null) return undefined
+        return acc[part]
+      }, obj)
+    }
 
-  // Combine standard fields and metadata
-  const allFields = [...metadataEntries]
+    // direct property on product
+    if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key]
+
+    // fallback to metadata
+    if (obj.metadata && Object.prototype.hasOwnProperty.call(obj.metadata, key)) return obj.metadata[key]
+
+    return undefined
+  }
+
+  // If visibleFields provided, render only those. Otherwise fall back to showing all metadata entries.
+  const fieldsToRender = visibleFields && visibleFields.length > 0
+    ? visibleFields.map((k) => ({ key: formatKey(k), value: formatValue(resolveKey(product, k)) }))
+    : (product.metadata ? Object.entries(product.metadata).map(([key, value]) => ({ key: formatKey(key), value: formatValue(value) })) : [])
 
   return (
     <div className="text-small-regular border-x border-t">
       <div className="flex flex-col">
-        {allFields.map((field, index) => (
+        {fieldsToRender.map((field, index) => (
           <div key={index} className="flex flex-row gap-4 even:border-y">
             <span className="font-semibold min-w-[50%] p-2">{field.key}</span>
             <span className="text-ui-fg-base border-l p-2">{field.value}</span>

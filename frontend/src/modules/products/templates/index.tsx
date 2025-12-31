@@ -98,6 +98,21 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
               product={product}
               countryCode={countryCode}
               region={region}
+              visibleFields={[
+                'brand',
+                'model',
+                'color_code',
+                'ean',
+                'gender',
+                'rim_style',
+                'shapes',
+                'frame_material',
+                'size',
+                'lens_width',
+                'lens_bridge',
+                'arm_length',
+                'department',
+              ]}
             />
             <ProductInfoActions />
           </div>
