@@ -32,7 +32,7 @@ module.exports = defineConfig({
       resolve: "@medusajs/file-local",
       options: {
         upload_dir: "uploads/images",
-        backend_url: process.env.BACKEND_URL || "http://localhost:9000",
+        backend_url: process.env.BACKEND_URL
       },
     },
   ],
