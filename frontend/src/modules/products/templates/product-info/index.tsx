@@ -5,11 +5,13 @@ import { Brand } from "@lib/data/brands"
 import Image from "next/image"
 import ProductReviewSummary from "@modules/products/components/product-review-summary"
 import { ReviewsResponse } from "@lib/data/reviews"
+import { ProductAvailabilityResponse } from "@lib/data/products"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
   brand: Brand | null
   reviewSummary: ReviewsResponse | null
+  availability: ProductAvailabilityResponse | null
 }
 
 // Helper function to check if a variant is in stock
@@ -33,16 +35,63 @@ const isVariantInStock = (variant: HttpTypes.StoreProductVariant): boolean => {
   return false
 }
 
-const ProductInfo = ({ product, brand, reviewSummary }: ProductInfoProps) => {
-  // Check if product has any variant in stock
+// Helper function to get ETA from product metadata based on stock status
+const getETA = (product: HttpTypes.StoreProduct, inStock: boolean, hasBackorder: boolean): string | null => {
+  const metadata = product.metadata || {}
+  
+  if (inStock) {
+    // Use regular delivery days if in stock
+    const days = metadata.days_of_deliery || metadata.days_of_delivery
+    const maxDays = metadata.max_days_of_delivery
+    
+    if (days && maxDays) {
+      return `${days}-${maxDays} days`
+    } else if (days) {
+      return `${days} days`
+    } else if (maxDays) {
+      return `Up to ${maxDays} days`
+    }
+  } else if (hasBackorder) {
+    // Use backorder delivery days
+    const days = metadata.days_of_delivery_backorders
+    if (days) {
+      return `${days} days`
+    }
+  } else {
+    // Use out of stock delivery days
+    const days = metadata.days_of_delivery_out_of_stock
+    const maxDays = metadata.max_days_of_delivery_out_of_stock
+    
+    if (days && maxDays) {
+      return `${days}-${maxDays} days`
+    } else if (days) {
+      return `${days} days`
+    } else if (maxDays) {
+      return `Up to ${maxDays} days`
+    }
+  }
+  
+  return null
+}
+
+const ProductInfo = ({ product, brand, reviewSummary, availability }: ProductInfoProps) => {
+  // Check stock availability from product data
   const isInStock = (() => {
     if (!product.variants || product.variants.length === 0) {
       return false
     }
-
-    // If at least one variant is in stock, the product is in stock
     return product.variants.some((variant) => isVariantInStock(variant))
   })()
+
+  // Check if any variant allows backorder
+  const hasBackorder = product.variants?.some((variant) => variant.allow_backorder) ?? false
+
+  // Product is available if region is available AND (in stock OR has backorder)
+  const regionAvailable = availability?.region_available ?? true
+  const isAvailable = regionAvailable && (isInStock || hasBackorder)
+  
+  // Use ETA from region metadata if available, otherwise calculate from product metadata based on stock status
+  const eta = availability?.eta ?? getETA(product, isInStock, hasBackorder)
 
   return (
     <div id="product-info">
@@ -72,21 +121,27 @@ const ProductInfo = ({ product, brand, reviewSummary }: ProductInfoProps) => {
         </Heading>
         {/* Review Summary */}
         <ProductReviewSummary reviewSummary={reviewSummary} />
-        {/* Stock Status Indicator */}
+        {/* Availability Status */}
         <div className="flex items-center gap-2">
           <div
             className={`w-3 h-3 rounded-full ${
-              isInStock ? "bg-green-500" : "bg-red-500"
+              isAvailable ? "bg-green-500" : "bg-red-500"
             }`}
             aria-hidden="true"
           />
           <p
             className={`text-sm font-medium ${
-              isInStock ? "text-green-700" : "text-red-700"
+              isAvailable ? "text-green-700" : "text-red-700"
             }`}
-            data-testid="product-stock-status"
+            data-testid="product-availability-status"
           >
-            {isInStock ? "In Stock" : "Out of Stock"}
+            {isAvailable ? (
+              <>
+                Available{eta && ` - ETA: ${eta}`}
+              </>
+            ) : (
+              "This item is not available"
+            )}
           </p>
         </div>
 

@@ -333,3 +333,74 @@ export const filterProducts = async ({
     }
   }
 }
+
+export type ProductAvailabilityResponse = {
+  region_available: boolean
+  eta: string | null
+  product_id: string
+  product_title: string
+  handle: string
+  region: string
+  error?: string
+  message?: string
+}
+
+/**
+ * Check product availability in a specific region
+ */
+export const getProductAvailability = async ({
+  handle,
+  countryCode,
+}: {
+  handle: string
+  countryCode: string
+}): Promise<ProductAvailabilityResponse | null> => {
+  try {
+    // Convert country code to region code
+    // GB -> uk, others -> lowercase
+    let regionCode = countryCode.toLowerCase()
+    if (countryCode.toUpperCase() === "GB") {
+      regionCode = "uk"
+    }
+
+    const authHeaders = await getAuthHeaders()
+    const headers: Record<string, string> = {
+      ...authHeaders,
+    }
+
+    // Ensure publishable API key is included
+    if (process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY && !headers['x-publishable-api-key']) {
+      headers['x-publishable-api-key'] = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+    }
+
+    const next = {
+      ...(await getCacheOptions("product-availability")),
+    }
+
+    const response = await sdk.client.fetch<ProductAvailabilityResponse>(
+      `/store/products/availability`,
+      {
+        method: "GET",
+        query: {
+          handle,
+          region: regionCode,
+        },
+        headers,
+        next,
+        cache: "force-cache",
+      }
+    )
+
+    return response
+  } catch (error: any) {
+    console.error("[getProductAvailability] API Error:", {
+      message: error?.message,
+      status: error?.status,
+      handle,
+      countryCode,
+      error: error,
+    })
+
+    return null
+  }
+}

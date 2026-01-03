@@ -16,6 +16,7 @@ import TrackProductView from "@modules/products/components/track-product-view"
 import ProductReviews from "@modules/products/components/product-reviews"
 import { Brand } from "@lib/data/brands"
 import { ReviewsResponse } from "@lib/data/reviews"
+import { ProductAvailabilityResponse } from "@lib/data/products"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -24,6 +25,7 @@ type ProductTemplateProps = {
   images: HttpTypes.StoreProductImage[]
   brand: Brand | null
   reviewSummary: ReviewsResponse | null
+  availability: ProductAvailabilityResponse | null
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
@@ -33,6 +35,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   images,
   brand,
   reviewSummary,
+  availability,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -81,6 +84,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
               product={product}
               brand={brand}
               reviewSummary={reviewSummary}
+              availability={availability}
             />
             <Suspense
               fallback={

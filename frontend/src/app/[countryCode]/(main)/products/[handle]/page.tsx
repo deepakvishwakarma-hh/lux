@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
+import { listProducts, getProductAvailability } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getBrandsByProductId } from "@lib/data/brands"
 import { getProductReviews } from "@lib/data/reviews"
@@ -210,10 +210,16 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
-  // Fetch brands and reviews optimistically (in parallel with product)
-  const [brand, reviewSummary] = await Promise.all([
+  // Fetch brands, reviews, and availability optimistically (in parallel with product)
+  const [brand, reviewSummary, availability] = await Promise.all([
     getBrandsByProductId(pricedProduct.id),
-    getProductReviews(pricedProduct.id, { limit: 1, offset: 0 }).catch(() => null),
+    getProductReviews(pricedProduct.id, { limit: 1, offset: 0 }).catch(
+      () => null
+    ),
+    getProductAvailability({
+      handle: params.handle,
+      countryCode: params.countryCode,
+    }).catch(() => null),
   ])
 
   // Get product price for structured data
@@ -315,6 +321,7 @@ export default async function ProductPage(props: Props) {
           __html: JSON.stringify(breadcrumbStructuredData),
         }}
       />
+      {JSON.stringify(availability)}
       <ProductTemplate
         product={pricedProduct}
         region={region}
@@ -322,6 +329,7 @@ export default async function ProductPage(props: Props) {
         images={images ?? []}
         brand={brand}
         reviewSummary={reviewSummary}
+        availability={availability}
       />
     </>
   )
