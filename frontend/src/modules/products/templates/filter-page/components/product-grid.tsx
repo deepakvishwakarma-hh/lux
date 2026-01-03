@@ -52,11 +52,15 @@ export default function ProductGrid({
     )
   }
 
+  // Responsive grid columns per view mode to ensure good layout across screen sizes
   const gridColsClass = {
     list: "grid-cols-1",
+    // 2-col always
     "grid-2": "grid-cols-2",
-    "grid-3": "grid-cols-3",
-    "grid-4": "grid-cols-4",
+    // on small screens show 2-col, on md show 3
+    "grid-3": "grid-cols-2 md:grid-cols-3",
+    // 2 on small, 3 on md, 4 on lg
+    "grid-4": "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
   }[viewMode] || "grid-cols-3"
 
   return (

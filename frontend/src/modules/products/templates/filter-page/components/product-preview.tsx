@@ -53,13 +53,24 @@ export default function ProductPreview({
     }
   }
 
+  // Determine list view and stock state so we can render a compact badge on list
   const isList = viewMode === "list"
+
+  // Basic stock detection (matches logic used in AddToCartButton)
+  const firstVariant = product.variants?.[0]
+  const inStock = (() => {
+    if (!firstVariant) return false
+    if (!firstVariant.manage_inventory) return true
+    if (firstVariant.allow_backorder) return true
+    if ((firstVariant.inventory_quantity || 0) > 0) return true
+    return false
+  })()
 
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className={`group ${isList ? 'w-full' : 'h-full'}`}>
       <div
         data-testid="product-wrapper"
-        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${isList ? 'relative flex flex-row gap-4 items-start' : 'overflow-hidden relative h-full flex flex-col'}`}
+        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${isList ? 'relative flex flex-row gap-4 items-start p-4 sm:p-5 border border-gray-100 rounded-lg bg-white' : 'overflow-hidden relative h-full flex flex-col'}`}
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
@@ -69,37 +80,58 @@ export default function ProductPreview({
             </div>
           )}
         <HoverActions product={formattedProduct} />
-        <div className={isList ? 'w-36 sm:w-44 flex-shrink-0' : ''}>
+
+
+        <div className={isList ? 'w-40 sm:w-48 flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center' : ''}>
           <Thumbnail
             thumbnail={product.thumbnail}
             images={product.images}
             size={isList ? 'medium' : 'full'}
+            className={isList ? 'p-0 bg-transparent shadow-none' : ''}
+            // use object-contain in list view so full image is visible and not cropped
+            imageClassName={isList ? 'object-contain' : ''}
           />
         </div>
-        <div className={`flex flex-col txt-compact-medium ${isList ? 'justify-start px-4 py-3 flex-1' : 'mt-2 sm:mt-4 justify-between px-3 sm:px-4 pb-3 sm:pb-4 flex-grow'}`}>
-          <p
-            className={`${isList ? 'text-ui-fg-subtle text-left text-sm font-semibold' : 'text-ui-fg-subtle text-center text-xs sm:text-sm'}`}
-            data-testid="product-title"
-          >
-            {product.title}
-          </p>
-          {product.brand && (
-            <p className={`${isList ? 'text-ui-fg-subtle text-left font-bold text-sm' : 'text-ui-fg-subtle text-center font-bold text-xs sm:text-sm'}`}>
-              {product.brand.name}
+        <div className={`flex flex-col txt-compact-medium ${isList ? 'flex-1 justify-start px-4 py-0 sm:py-0' : 'mt-2 sm:mt-4 justify-between px-3 sm:px-4 pb-3 sm:pb-4 flex-grow'}`}>
+          <div className="py-3 sm:py-2">
+            <p
+              className={`${isList ? 'text-left text-base sm:text-base font-semibold text-gray-900 truncate' : 'text-ui-fg-subtle text-center text-xs sm:text-sm'}`}
+              data-testid="product-title"
+            >
+              {product.title}
             </p>
-          )}
+            {product.brand && (
+              <p className={`${isList ? 'text-left text-sm text-gray-500 mt-1' : 'text-ui-fg-subtle text-center font-bold text-xs sm:text-sm'}`}>
+                {product.brand.name}
+              </p>
+            )}
+            {isList && product.description && (
+              <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
+            )}
+          </div>
+
           {isList ? (
-            <div className="mt-2 flex items-center gap-4">
-              {cheapestPrice ? (
-                <span className="text-lg font-bold text-gray-900">{cheapestPrice.calculated_price}</span>
-              ) : (
-                <span className="text-sm text-gray-500">&nbsp;</span>
-              )}
-              <div className="ml-auto">
-                <AddToCartButton
-                  product={formattedProduct}
-                  countryCode={countryCode}
-                />
+            <div className="flex items-center gap-4 w-full mt-2">
+              <div>
+                {cheapestPrice ? (
+                  <div className="text-2xl font-bold text-gray-900">{cheapestPrice.calculated_price}</div>
+                ) : (
+                  <span className="text-sm text-gray-500">&nbsp;</span>
+                )}
+                {product.location && (
+                  <div className="text-sm text-gray-500">{product.location}</div>
+                )}
+              </div>
+
+              <div className="ml-auto flex items-center gap-2">
+                {inStock ? (
+                  <AddToCartButton
+                    product={formattedProduct}
+                    countryCode={countryCode}
+                  />
+                ) : (
+                  <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-md">Out of stock</span>
+                )}
               </div>
             </div>
           ) : (

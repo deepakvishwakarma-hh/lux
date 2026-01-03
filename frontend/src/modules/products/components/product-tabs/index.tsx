@@ -104,7 +104,7 @@ const ProductInfoTab = ({ product, visibleFields }: ProductTabProps) => {
     : (product.metadata ? Object.entries(product.metadata).map(([key, value]) => ({ key: formatKey(key), value: formatValue(value) })) : [])
 
   return (
-    <div className="text-small-regular border-x border-t">
+    <div className="text-small-regular border border-gray-200">
       <div className="flex flex-col">
         {fieldsToRender.map((field, index) => (
           <div key={index} className="flex flex-row gap-4 even:border-y">

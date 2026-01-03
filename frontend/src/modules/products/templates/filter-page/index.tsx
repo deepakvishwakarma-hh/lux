@@ -27,6 +27,22 @@ export default function FilterPage({
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const filters = useFilterParams()
   const [viewMode, setViewMode] = useState<'list' | 'grid-2' | 'grid-3' | 'grid-4'>('grid-3')
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
+
+  // Detect small screens (mobile). On small screens we force 2-column grid and hide grid options
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const onResize = () => setIsSmallScreen(window.innerWidth < 640)
+    onResize()
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
+  useEffect(() => {
+    if (isSmallScreen && viewMode !== 'grid-2') {
+      setViewMode('grid-2')
+    }
+  }, [isSmallScreen])
 
   const {
     data,
@@ -171,6 +187,7 @@ export default function FilterPage({
               onSortChange={handleSortChange}
               onViewModeChange={setViewMode}
               onOpenFilters={() => setShowMobileFilters(true)}
+              showViewSelector={!isSmallScreen}
             />
             <ProductGrid
               products={products}

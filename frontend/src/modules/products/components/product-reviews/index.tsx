@@ -1,14 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Text, Button } from "@medusajs/ui"
+import { Text } from "@medusajs/ui"
 import type { Review } from "@lib/data/reviews"
 import CreateReviewForm from "../create-review-form"
 import { useSession } from "@lib/hooks/use-session"
 import { Swiper, SwiperSlide } from "swiper/react"
-import { Navigation, Pagination } from "swiper/modules"
+import { Pagination } from "swiper/modules"
 import "swiper/css"
-import "swiper/css/navigation"
 import "swiper/css/pagination"
 
 type ProductReviewsProps = {
@@ -157,7 +156,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
   if (isLoading) {
     return (
-      <div className="product-page-constraint pb-10">
+      <div className="product-page-constraint pb-4">
         <div className="flex flex-col mt-3 sm:mt-5 mb-3 sm:mb-5">
           <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
             Reviews
@@ -174,8 +173,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
   if (error) {
     return (
-      <div className="product-page-constraint pb-10">
-        <div className="flex flex-col mt-3 sm:mt-5 mb-3 sm:mb-5">
+      <div className="product-page-constraint pb-5">
+        <div className="flex flex-col mt-3 sm:mt-5 mb-1 sm:mb-3">
           <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
             Reviews
           </span>
@@ -220,14 +219,14 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
       {/* Reviews Carousel */}
       {reviews.length > 0 ? (
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-2 sm:mb-4">
           <Swiper
-            modules={[Navigation, Pagination]}
-            spaceBetween={20}
+            modules={[Pagination]}
+            spaceBetween={12}
             slidesPerView={1}
             slidesPerGroup={1}
-            navigation={reviews.length > 3}
             pagination={{
+              el: ".reviews-pagination",
               clickable: true,
               dynamicBullets: true,
             }}
@@ -241,6 +240,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
                 slidesPerGroup: 3,
               },
             }}
+
             className="reviews-carousel"
           >
             {reviews.map((review) => (
@@ -249,6 +249,15 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               </SwiperSlide>
             ))}
           </Swiper>
+
+          {/* Centered pagination placed after the cards */}
+          <div className="flex items-center justify-center mt-2">
+            <div className="reviews-pagination"></div>
+          </div>
+
+
+
+          
         </div>
       ) : (
         <div className="mb-4 sm:mb-6 py-6 sm:py-8 text-center">

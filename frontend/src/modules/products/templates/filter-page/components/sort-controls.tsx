@@ -9,6 +9,7 @@ type SortControlsProps = {
   onSortChange: (order: string, direction: string) => void
   onViewModeChange?: (mode: 'list' | 'grid-2' | 'grid-3' | 'grid-4') => void
   onOpenFilters?: () => void
+  showViewSelector?: boolean
 }
 
 export default function SortControls({
@@ -20,6 +21,7 @@ export default function SortControls({
   onSortChange,
   onViewModeChange,
   onOpenFilters,
+  showViewSelector = true,
 }: SortControlsProps) {
   return (
     <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8 pb-4 border-b border-gray-200">
@@ -68,18 +70,20 @@ export default function SortControls({
             <option value="price_desc">Price: High to Low</option>
           </select>
 
-          {/* View Mode Dropdown */}
-          <select
-            value={viewMode}
-            onChange={(e) => onViewModeChange?.(e.target.value as 'list' | 'grid-2' | 'grid-3' | 'grid-4')}
-            className="w-32 sm:w-40 px-2 sm:px-4 py-2 text-xs sm:py-2.5 sm:text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
-            aria-label="View mode"
-          >
-            <option value="list">View - List</option>
-            <option value="grid-2">View - Grid 2</option>
-            <option value="grid-3">View - Grid 3</option>
-            <option value="grid-4">View - Grid 4</option>
-          </select>
+          {/* View Mode Dropdown - hidden on small screens when showViewSelector is false */}
+          {showViewSelector !== false && (
+            <select
+              value={viewMode}
+              onChange={(e) => onViewModeChange?.(e.target.value as 'list' | 'grid-2' | 'grid-3' | 'grid-4')}
+              className="w-32 sm:w-40 px-2 sm:px-4 py-2 text-xs sm:py-2.5 sm:text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent cursor-pointer"
+              aria-label="View mode"
+            >
+              <option value="list">View - List</option>
+              <option value="grid-2">View - Grid 2</option>
+              <option value="grid-3">View - Grid 3</option>
+              <option value="grid-4">View - Grid 4</option>
+            </select>
+          )}
         </div>
       </div>
     </div>

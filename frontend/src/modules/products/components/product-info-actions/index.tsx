@@ -17,7 +17,7 @@ const ProductInfoActions = () => {
       <Button
         variant="transparent"
         onClick={sizeGuideState.open}
-        className="text-sm flex items-center gap-2"
+        className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
       >
         <WoodMartIcon iconContent="f13f" size={16} />
         Size Guide
@@ -25,7 +25,7 @@ const ProductInfoActions = () => {
       <Button
         variant="transparent"
         onClick={deliveryReturnState.open}
-        className="text-sm flex items-center gap-2"
+        className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
       >
         <WoodMartIcon iconContent="f123" size={16} />
         Delivery & Return
@@ -33,7 +33,7 @@ const ProductInfoActions = () => {
       <Button
         variant="transparent"
         onClick={askQuestionState.open}
-        className="text-sm flex items-center gap-2"
+        className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
       >
         <WoodMartIcon iconContent="f128" size={16} />
         Ask a Question
