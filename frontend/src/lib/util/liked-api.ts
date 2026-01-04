@@ -4,7 +4,11 @@
  * Client-side utility for managing liked products via API
  */
 
+import { mutate } from "swr"
 import { sdk } from "@lib/config"
+
+// SWR key for liked products - shared across components
+export const LIKED_PRODUCTS_SWR_KEY = "/liked-products"
 
 const GUEST_CUSTOMER_ID_COOKIE = "_medusa_guest_customer_id"
 
@@ -127,14 +131,8 @@ export async function addToLikedAPI(productId: string): Promise<boolean> {
       }
     )
 
-    // Dispatch custom event for other components to listen
-    if (typeof window !== "undefined") {
-      // Fetch updated count to dispatch with event
-      const updatedIds = await getLikedProductIdsFromAPI()
-      window.dispatchEvent(
-        new CustomEvent("likedUpdated", { detail: { count: updatedIds.length } })
-      )
-    }
+    // Revalidate SWR cache directly - no need for events
+    await mutate(LIKED_PRODUCTS_SWR_KEY)
 
     return true
   } catch (error: any) {
@@ -174,14 +172,8 @@ export async function removeFromLikedAPI(productId: string): Promise<boolean> {
       return false
     }
 
-    // Dispatch custom event for other components to listen
-    if (typeof window !== "undefined") {
-      // Fetch updated count to dispatch with event
-      const updatedIds = await getLikedProductIdsFromAPI()
-      window.dispatchEvent(
-        new CustomEvent("likedUpdated", { detail: { count: updatedIds.length } })
-      )
-    }
+    // Revalidate SWR cache directly - no need for events
+    await mutate(LIKED_PRODUCTS_SWR_KEY)
 
     return true
   } catch (error: any) {
