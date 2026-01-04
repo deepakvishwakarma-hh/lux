@@ -1,12 +1,65 @@
 import { Metadata } from "next"
 import { websiteConfig } from "@lib/website.config"
+import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: `Terms & Conditions | ${websiteConfig.name}`,
-  description: `Read our terms and conditions to understand the rules and regulations for using ${websiteConfig.name} and making purchases.`,
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function TermsConditionsPage() {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const termsUrl = `${baseURL}/${countryCode}/terms-conditions`
+
+  const title = `Terms & Conditions | ${companyName}`
+  const description = `Read our terms and conditions to understand the rules and regulations for using ${companyName} and making purchases.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "terms and conditions",
+      "terms of service",
+      "user agreement",
+      companyName,
+      "legal",
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: termsUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: termsUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default function TermsConditionsPage(props: Props) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="prose prose-lg max-w-none">

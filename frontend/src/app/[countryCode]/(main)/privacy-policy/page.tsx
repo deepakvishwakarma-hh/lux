@@ -1,12 +1,65 @@
 import { Metadata } from "next"
 import { websiteConfig } from "@lib/website.config"
+import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: `Privacy Policy | ${websiteConfig.name}`,
-  description: `Read our privacy policy to understand how ${websiteConfig.name} collects, uses, and protects your personal information.`,
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function PrivacyPolicyPage() {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const privacyUrl = `${baseURL}/${countryCode}/privacy-policy`
+
+  const title = `Privacy Policy | ${companyName}`
+  const description = `Read our privacy policy to understand how ${companyName} collects, uses, and protects your personal information.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "privacy policy",
+      "data protection",
+      "privacy",
+      companyName,
+      "legal",
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: privacyUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: privacyUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default function PrivacyPolicyPage(props: Props) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="prose prose-lg max-w-none">

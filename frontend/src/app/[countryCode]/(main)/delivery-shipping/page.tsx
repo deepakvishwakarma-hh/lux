@@ -1,12 +1,66 @@
 import { Metadata } from "next"
 import { websiteConfig } from "@lib/website.config"
+import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: `Delivery & Shipping | ${websiteConfig.name}`,
-  description: `Learn about our delivery and shipping policies at ${websiteConfig.name}. Find information about shipping times, costs, and tracking.`,
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function DeliveryShippingPage() {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const shippingUrl = `${baseURL}/${countryCode}/delivery-shipping`
+
+  const title = `Delivery & Shipping | ${companyName}`
+  const description = `Learn about our delivery and shipping policies at ${companyName}. Find information about shipping times, costs, and tracking.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "delivery",
+      "shipping",
+      "shipping policy",
+      "delivery policy",
+      companyName,
+      "legal",
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: shippingUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: shippingUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default function DeliveryShippingPage(props: Props) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="prose prose-lg max-w-none">

@@ -1,7 +1,10 @@
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getRegion } from "@lib/data/regions"
 import { listProducts } from "@lib/data/products"
 import { getCompareProductIds } from "@lib/data/compare"
+import { getBaseURL } from "@lib/util/env"
+import { websiteConfig } from "@lib/website.config"
 import CompareProducts from "@modules/products/components/compare-products"
 import { Heading } from "@medusajs/ui"
 import InteractiveLink from "@modules/common/components/interactive-link"
@@ -9,6 +12,42 @@ import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 
 type Props = {
   params: Promise<{ countryCode: string }>
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const compareUrl = `${baseURL}/${countryCode}/compare`
+
+  const title = `Compare Products | ${companyName}`
+  const description = `Compare products side-by-side at ${companyName}. Evaluate features, prices, and specifications to make the best choice.`
+
+  return {
+    title,
+    description,
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: compareUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: compareUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+  }
 }
 
 export default async function ComparePage(props: Props) {
@@ -43,7 +82,7 @@ export default async function ComparePage(props: Props) {
               No products selected for comparison yet. Start comparing products by clicking the compare button on any product card.
             </p>
             <div className="mt-6">
-              <InteractiveLink href="/store">
+              <InteractiveLink href={`/${countryCode}`}>
                 Browse products
               </InteractiveLink>
             </div>

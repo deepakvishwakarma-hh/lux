@@ -1,7 +1,10 @@
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getRegion } from "@lib/data/regions"
 import { listProducts } from "@lib/data/products"
 import { getAllLikedProductIds } from "@lib/data/liked"
+import { getBaseURL } from "@lib/util/env"
+import { websiteConfig } from "@lib/website.config"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import { Heading } from "@medusajs/ui"
 import InteractiveLink from "@modules/common/components/interactive-link"
@@ -9,6 +12,42 @@ import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 
 type Props = {
   params: Promise<{ countryCode: string }>
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const likedUrl = `${baseURL}/${countryCode}/liked`
+
+  const title = `Liked Products | ${companyName}`
+  const description = `View your liked products and wishlist at ${companyName}. Save your favorite items for later.`
+
+  return {
+    title,
+    description,
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: likedUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: likedUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+  }
 }
 
 export default async function LikedPage(props: Props) {
@@ -45,7 +84,7 @@ export default async function LikedPage(props: Props) {
               wishlist by clicking the heart icon on any product you love.
             </p>
             <div className="mt-6">
-              <InteractiveLink href="/store">Explore products</InteractiveLink>
+              <InteractiveLink href={`/${countryCode}`}>Explore products</InteractiveLink>
             </div>
           </div>
         </div>

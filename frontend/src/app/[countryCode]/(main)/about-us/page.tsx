@@ -1,12 +1,66 @@
 import { Metadata } from "next"
 import { websiteConfig } from "@lib/website.config"
+import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: `About Us | ${websiteConfig.name}`,
-  description: `Learn about ${websiteConfig.name} - ${websiteConfig.seo.defaultDescription}`,
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function AboutUsPage() {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const aboutUrl = `${baseURL}/${countryCode}/about-us`
+
+  const title = `About Us | ${companyName}`
+  const description = `Learn about ${companyName} - ${websiteConfig.seo.defaultDescription}. Discover our mission, values, and commitment to providing premium luxury eyewear.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "about us",
+      companyName,
+      "luxury eyewear",
+      "designer eyewear",
+      "premium sunglasses",
+      "eyeglasses",
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: aboutUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: aboutUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default function AboutUsPage(props: Props) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="prose prose-lg max-w-none">

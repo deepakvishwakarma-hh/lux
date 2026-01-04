@@ -1,12 +1,66 @@
 import { Metadata } from "next"
 import { websiteConfig } from "@lib/website.config"
+import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: `Return & Refund Policy | ${websiteConfig.name}`,
-  description: `Learn about our return and refund policy at ${websiteConfig.name}. Understand our terms for returns, exchanges, and refunds.`,
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function ReturnRefundPolicyPage() {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const returnUrl = `${baseURL}/${countryCode}/return-refund-policy`
+
+  const title = `Return & Refund Policy | ${companyName}`
+  const description = `Learn about our return and refund policy at ${companyName}. Understand our terms for returns, exchanges, and refunds.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "return policy",
+      "refund policy",
+      "returns",
+      "refunds",
+      companyName,
+      "legal",
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: returnUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: returnUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default function ReturnRefundPolicyPage(props: Props) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="prose prose-lg max-w-none">

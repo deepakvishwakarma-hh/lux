@@ -1,13 +1,67 @@
 import { Metadata } from "next"
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa"
 import { websiteConfig } from "@lib/website.config"
+import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: `Contact Us | ${websiteConfig.name}`,
-  description: `Get in touch with ${websiteConfig.name}. Contact us for inquiries, support, or assistance with your luxury eyewear needs.`,
+type Props = {
+  params: Promise<{ countryCode: string }>
 }
 
-export default function ContactUsPage() {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const contactUrl = `${baseURL}/${countryCode}/contact-us`
+
+  const title = `Contact Us | ${companyName}`
+  const description = `Get in touch with ${companyName}. Contact us for inquiries, support, or assistance with your luxury eyewear needs. Phone: ${websiteConfig.contact.phoneFormatted}, Email: ${websiteConfig.contact.email}`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "contact us",
+      "customer service",
+      companyName,
+      "luxury eyewear support",
+      websiteConfig.contact.phone,
+      websiteConfig.contact.email,
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: contactUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: contactUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default function ContactUsPage(props: Props) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="prose prose-lg max-w-none">

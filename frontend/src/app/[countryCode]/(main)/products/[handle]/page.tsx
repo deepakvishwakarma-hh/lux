@@ -142,9 +142,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       : []
 
   const siteName = websiteConfig.shortName
+  const companyName = websiteConfig.name || websiteConfig.displayName
   const title = `${product.title}${
     product.subtitle ? ` - ${product.subtitle}` : ""
-  } | ${siteName}`
+  } | ${companyName}`
 
   return {
     title,

@@ -24,7 +24,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const regionName = region?.name || "Store"
   const siteName = websiteConfig.shortName
-  const title = `${siteName} - Premium Luxury Products | ${countryName}`
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const title = `${companyName} - Premium Luxury Products | ${countryName}`
   const description = `Discover premium luxury products at ${siteName}. Shop the finest collection of high-end items delivered to ${countryName}. Free shipping on orders over $100.`
 
   const baseURL = getBaseURL()
@@ -41,9 +42,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       countryName,
       regionName,
     ],
-    authors: [{ name: siteName }],
-    creator: siteName,
-    publisher: siteName,
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
     alternates: {
       canonical,
     },
@@ -51,7 +52,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       type: "website",
       locale: "en_US",
       url: canonical,
-      siteName,
+      siteName: companyName,
       title,
       description,
       images: [
@@ -104,14 +105,15 @@ export default async function Home(props: Props) {
 
   const baseURL = getBaseURL()
   const canonical = `${baseURL}/${countryCode}`
+  const companyName = websiteConfig.name || websiteConfig.displayName
 
   // Structured data for SEO
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: websiteConfig.shortName,
+    name: companyName,
     url: canonical,
-    description: `Discover premium luxury products at ${websiteConfig.shortName}. Shop the finest collection of high-end items delivered to ${countryName}.`,
+    description: `Discover premium luxury products at ${companyName}. Shop the finest collection of high-end items delivered to ${countryName}.`,
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -125,7 +127,7 @@ export default async function Home(props: Props) {
   const organizationData = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: websiteConfig.shortName,
+    name: companyName,
     url: baseURL,
     logo: `${baseURL}${websiteConfig.logo.path}`,
     description: "Premium luxury products and high-end items",

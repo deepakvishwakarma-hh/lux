@@ -1,12 +1,9 @@
 import { Metadata } from "next"
 import { getRegion } from "@lib/data/regions"
+import { getBaseURL } from "@lib/util/env"
+import { websiteConfig } from "@lib/website.config"
 import FilterPage from "@modules/products/templates/filter-page"
 import { filterProducts } from "@lib/data/products"
-
-export const metadata: Metadata = {
-  title: "Filter Products",
-  description: "Filter and search products by various attributes.",
-}
 
 type Props = {
   params: Promise<{ countryCode: string }>
@@ -27,6 +24,64 @@ type Props = {
     order_direction?: string
     page?: string
   }>
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const { countryCode } = params
+  const region = await getRegion(countryCode)
+  const companyName = websiteConfig.name || websiteConfig.displayName
+  const baseURL = getBaseURL()
+  const filterUrl = `${baseURL}/${countryCode}/filter`
+
+  const countryName =
+    region?.countries?.find((c) => c.iso_2 === countryCode)?.display_name ||
+    countryCode.toUpperCase()
+
+  const title = `Filter Products | ${companyName}`
+  const description = `Filter and search premium luxury products at ${companyName}. Find the perfect items by brand, category, price, and more. Shop in ${countryName}.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      "filter products",
+      "search products",
+      "luxury products",
+      "premium goods",
+      countryName,
+    ],
+    authors: [{ name: companyName }],
+    creator: companyName,
+    publisher: companyName,
+    alternates: {
+      canonical: filterUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: filterUrl,
+      siteName: companyName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
 }
 
 export default async function FilterProductsPage(props: Props) {
