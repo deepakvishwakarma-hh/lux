@@ -18,6 +18,9 @@ import { GetAdminCarouselsSchema, CreateCarouselSchema } from "./admin/carousels
 import { UpdateCarouselSchema } from "./admin/carousels/[id]/route";
 import { CreateLikedProductSchema, GetAdminLikedProductsSchema } from "./admin/liked-products/route";
 import { CreateLikedProductSchema as StoreCreateLikedProductSchema } from "./store/liked-products/route";
+import { PostStoreProductQuerySchema } from "./store/product-queries/route";
+import { GetAdminProductQueriesSchema } from "./admin/product-queries/route";
+import { UpdateProductQueryStatusSchema } from "./admin/product-queries/[id]/route";
 // import { GetAdminBrandsSchema } from "./admin/brands/route";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators"
 
@@ -266,6 +269,45 @@ export default defineMiddlewares({
     {
       matcher: "/store/products/:id/brands",
       method: ["GET"],
+    },
+    {
+      matcher: "/store/product-queries",
+      method: ["POST"],
+      middlewares: [
+        // @ts-ignore
+        validateAndTransformBody(PostStoreProductQuerySchema),
+      ],
+    },
+    {
+      matcher: "/admin/product-queries",
+      method: ["GET"],
+      middlewares: [
+        validateAndTransformQuery(GetAdminProductQueriesSchema, {
+          isList: true,
+          defaults: [
+            "id",
+            "type",
+            "product_id",
+            "customer_name",
+            "customer_email",
+            "customer_mobile",
+            "subject",
+            "message",
+            "address",
+            "status",
+            "created_at",
+            "updated_at",
+          ],
+        }),
+      ],
+    },
+    {
+      matcher: "/admin/product-queries/:id",
+      method: ["PATCH"],
+      middlewares: [
+        // @ts-ignore
+        validateAndTransformBody(UpdateProductQueryStatusSchema),
+      ],
     },
 
 

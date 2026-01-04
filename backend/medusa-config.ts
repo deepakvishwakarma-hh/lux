@@ -26,6 +26,9 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/liked_product",
     },
+    {
+      resolve: "./src/modules/product_query",
+    },
   ],
   plugins: [
     {

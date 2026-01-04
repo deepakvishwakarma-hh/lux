@@ -6,8 +6,13 @@ import Modal from "@modules/common/components/modal"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import Input from "@modules/common/components/input"
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
+import { sdk } from "@lib/config"
 
-const ProductInfoActions = () => {
+type ProductInfoActionsProps = {
+  productId: string
+}
+
+const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
   const sizeGuideState = useToggleState(false)
   const deliveryReturnState = useToggleState(false)
   const askQuestionState = useToggleState(false)
@@ -159,6 +164,7 @@ const ProductInfoActions = () => {
       <AskQuestionModal
         isOpen={askQuestionState.state}
         close={askQuestionState.close}
+        productId={productId}
       />
     </div>
   )
@@ -167,20 +173,31 @@ const ProductInfoActions = () => {
 type AskQuestionModalProps = {
   isOpen: boolean
   close: () => void
+  productId: string
 }
 
-const AskQuestionModal = ({ isOpen, close }: AskQuestionModalProps) => {
+const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) => {
   const [formData, setFormData] = useState({
+    type: "question" as "question" | "custom_delivery" | "customize_product",
     name: "",
     email: "",
-    phone: "",
+    mobile: "",
+    subject: "",
     message: "",
+    address_1: "",
+    address_2: "",
+    city: "",
+    state: "",
+    postal_code: "",
+    country: "",
+    country_code: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -192,98 +209,251 @@ const AskQuestionModal = ({ isOpen, close }: AskQuestionModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError(null)
 
-    // Simulate API call - replace with actual API endpoint
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      console.log("Form submitted:", formData)
+      const response = await sdk.client.fetch<{ product_query: any }>(
+        `/store/product-queries`,
+        {
+          method: "POST",
+          body: {
+            type: formData.type,
+            product_id: productId,
+            customer_name: formData.name,
+            customer_email: formData.email,
+            customer_mobile: formData.mobile,
+            subject: formData.subject,
+            message: formData.message,
+            address: {
+              address_1: formData.address_1,
+              address_2: formData.address_2 || null,
+              city: formData.city,
+              state: formData.state || null,
+              postal_code: formData.postal_code,
+              country: formData.country,
+              country_code: formData.country_code || null,
+            },
+          },
+        }
+      )
+
       setSubmitSuccess(true)
       setTimeout(() => {
         setSubmitSuccess(false)
-        setFormData({ name: "", email: "", phone: "", message: "" })
+        setFormData({
+          type: "question",
+          name: "",
+          email: "",
+          mobile: "",
+          subject: "",
+          message: "",
+          address_1: "",
+          address_2: "",
+          city: "",
+          state: "",
+          postal_code: "",
+          country: "",
+          country_code: "",
+        })
         close()
       }, 2000)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error)
+      const errorMessage = error?.message || error?.response?.data?.message || "An error occurred. Please try again."
+      setError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <Modal isOpen={isOpen} close={close} size="medium">
-      <Modal.Title>Ask a Question</Modal.Title>
+    <Modal isOpen={isOpen} close={close} size="large">
+      <Modal.Title>Ask a Question / Request</Modal.Title>
       <Modal.Body>
-        <div className="w-full py-6">
+        <div className="w-full max-w-full overflow-hidden">
           {submitSuccess ? (
             <div className="text-center py-8">
               <p className="text-green-600 font-semibold mb-2">
-                Thank you for your question!
+                Thank you for your query!
               </p>
               <p className="text-small-regular text-ui-fg-base">
                 We&apos;ll get back to you as soon as possible.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                name="name"
-                type="text"
-                label="Your Name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                name="email"
-                type="email"
-                label="Email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                name="phone"
-                type="tel"
-                label="Phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium mb-1 text-ui-fg-base"
-                >
-                  Message <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent"
-                  placeholder="Enter your question or message"
-                />
-              </div>
-              <Modal.Footer>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={close}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
-              </Modal.Footer>
-            </form>
+            <div className="max-h-[60vh] overflow-y-auto pr-2">
+              <form id="product-query-form" onSubmit={handleSubmit} className="space-y-3 py-2">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+                    {error}
+                  </div>
+                )}
+                
+                <div>
+                  <label
+                    htmlFor="type"
+                    className="block text-sm font-medium mb-1 text-ui-fg-base"
+                  >
+                    Query Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="type"
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                  >
+                    <option value="question">Question</option>
+                    <option value="custom_delivery">Custom Delivery Request</option>
+                    <option value="customize_product">Product Customization Request</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    name="name"
+                    type="text"
+                    label="Your Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                  <Input
+                    name="email"
+                    type="email"
+                    label="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    name="mobile"
+                    type="tel"
+                    label="Mobile Number"
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    required
+                  />
+                  <Input
+                    name="subject"
+                    type="text"
+                    label="Subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-medium mb-1 text-ui-fg-base"
+                  >
+                    Message <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                    placeholder="Enter your question or message"
+                  />
+                </div>
+
+                <div className="border-t pt-3 mt-3">
+                  <h3 className="text-sm font-semibold mb-3 text-ui-fg-base">Address</h3>
+                  <div className="space-y-3">
+                    <Input
+                      name="address_1"
+                      type="text"
+                      label="Address Line 1"
+                      value={formData.address_1}
+                      onChange={handleChange}
+                      required
+                    />
+                    <Input
+                      name="address_2"
+                      type="text"
+                      label="Address Line 2 (Optional)"
+                      value={formData.address_2}
+                      onChange={handleChange}
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        name="city"
+                        type="text"
+                        label="City"
+                        value={formData.city}
+                        onChange={handleChange}
+                        required
+                      />
+                      <Input
+                        name="state"
+                        type="text"
+                        label="State/Province"
+                        value={formData.state}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        name="postal_code"
+                        type="text"
+                        label="Postal Code"
+                        value={formData.postal_code}
+                        onChange={handleChange}
+                        required
+                      />
+                      <Input
+                        name="country"
+                        type="text"
+                        label="Country"
+                        value={formData.country}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <Input
+                      name="country_code"
+                      type="text"
+                      label="Country Code (Optional)"
+                      value={formData.country_code}
+                      onChange={handleChange}
+                      placeholder="e.g., US, UK"
+                    />
+                  </div>
+                </div>
+              </form>
+            </div>
           )}
         </div>
       </Modal.Body>
+      {!submitSuccess && (
+        <Modal.Footer>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={close}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            form="product-query-form"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
+        </Modal.Footer>
+      )}
     </Modal>
   )
 }
