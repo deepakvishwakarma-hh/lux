@@ -62,6 +62,8 @@ export default function Nav() {
       <div className="px-4 pb-3 md:hidden">
         <NavSearch />
       </div>
+
+
     </div>
   )
 }

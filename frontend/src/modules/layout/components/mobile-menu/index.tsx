@@ -5,6 +5,9 @@ import { HiOutlineMenu, HiX } from "react-icons/hi"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import AccountDropdown from "@modules/layout/components/account-dropdown"
 import { useCustomer } from "@lib/hooks/use-customer"
+import NavSearch from "@modules/layout/components/nav-search"
+import CompareButton from "@modules/layout/components/compare-button"
+import LikedButton from "@modules/layout/components/liked-button"
 
 export default function MobileMenu() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -31,8 +34,16 @@ export default function MobileMenu() {
             </button>
 
             {/* LOGIN / REGISTER INSIDE MENU */}
-            <div className="mb-6">
+            <div className="mb-4">
               <AccountDropdown customer={customer} isLoading={isLoading} />
+            </div>
+
+
+
+            {/* Quick actions (Compare / Liked) */}
+            <div className="flex flex-col gap-3 mb-4">
+              <CompareButton labelOnly />
+              <LikedButton labelOnly label="Wishlist" />
             </div>
 
             {/* NAV LINKS */}

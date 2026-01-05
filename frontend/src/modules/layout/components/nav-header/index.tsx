@@ -27,11 +27,14 @@ export default function NavHeader({ cartButton }: NavHeaderProps) {
           <AccountDropdown customer={customer} isLoading={isLoading} />
         </div>
 
-        <div className="hidden sm:block">
+        {/* Compare and Liked only on md+ (hidden on small screens) */}
+        <div className="hidden md:block">
           <CompareButton />
         </div>
 
-        <LikedButton />
+        <div className="hidden md:block">
+          <LikedButton />
+        </div>
 
         {cartButton}
       </div>

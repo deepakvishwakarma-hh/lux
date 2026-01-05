@@ -17,12 +17,15 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
+import { useCustomer } from "@lib/hooks/use-customer"
 
 const CartDropdown = ({
   cart: cartState,
 }: {
   cart?: HttpTypes.StoreCart | null
 }) => {
+  const { customer } = useCustomer()
+
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
   )
@@ -87,12 +90,12 @@ const CartDropdown = ({
           <div className="flex items-center gap-4">
             <LocalizedClientLink
               className="hover:text-ui-fg-base flex items-center relative"
-              href="/cart"
+              href={customer ? "/cart" : "/account"}
               data-testid="nav-cart-link"
             >
               <WoodMartIcon iconContent="f126" size={20} badge={totalItems} />
             </LocalizedClientLink>
-            <span className="text-sm font-bold text-ui-fg-base text-[13px]">
+            <span className="hidden md:inline text-sm font-bold text-ui-fg-base text-[13px]">
               {convertToLocale({
                 amount: total || 0,
                 currency_code: currencyCode,
@@ -204,13 +207,13 @@ const CartDropdown = ({
                       })}
                     </span>
                   </div>
-                  <LocalizedClientLink href="/cart" passHref>
+                  <LocalizedClientLink href={customer ? "/cart" : "/account"} passHref>
                     <Button
                       className="w-full"
                       size="large"
                       data-testid="go-to-cart-button"
                     >
-                      Go to cart
+                      {customer ? "Go to cart" : "Sign in to view cart"}
                     </Button>
                   </LocalizedClientLink>
                 </div>

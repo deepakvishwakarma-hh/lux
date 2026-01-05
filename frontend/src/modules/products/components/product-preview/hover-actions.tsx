@@ -123,14 +123,14 @@ export default function HoverActions({ product }: HoverActionsProps) {
       >
         <WoodMartIcon iconContent="f128" size={16} />
       </button>
-      <button
+      {/* <button
         onClick={handleSearch}
         className="bg-white rounded-full p-2"
         aria-label="View product"
         data-testid="search-button"
       >
         <WoodMartIcon iconContent="f130" size={16} />
-      </button>
+      </button> */}
       <button
         onClick={handleLike}
         className={isLiked ? "bg-black text-white rounded-full p-2" : "bg-white rounded-full p-2"}

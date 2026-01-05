@@ -243,6 +243,12 @@ export default function ProductActions({
       } else {
         const likedIds = await getLikedProductIdsFromAPI()
         setIsLiked(likedIds.includes(product.id))
+        // Notify other components (header count, buttons) that liked products changed
+        try {
+          window.dispatchEvent(new Event("likedUpdated"))
+        } catch (e) {
+          // ignore if window is not available for any reason
+        }
       }
     } catch (error) {
       console.error("Failed to toggle wishlist:", error)

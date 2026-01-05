@@ -5,7 +5,12 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 import { getCompareCount } from "@lib/util/compare-cookies"
 
-export default function CompareButton() {
+type CompareButtonProps = {
+  labelOnly?: boolean
+  label?: string
+}
+
+export default function CompareButton({ labelOnly = false, label = "Compare" }: CompareButtonProps) {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
@@ -36,9 +41,27 @@ export default function CompareButton() {
     }
   }, [])
 
+  if (labelOnly) {
+    return (
+      <LocalizedClientLink
+        href="/compare"
+        className="hover:text-ui-fg-base flex items-center gap-2"
+        data-testid="nav-compare-link"
+      >
+        <span className="text-sm">{label}</span>
+        {count > 0 && (
+          <span className="ml-2 inline-flex items-center justify-center bg-black text-white text-xs rounded-full px-2 py-0.5">
+            {count}
+          </span>
+        )}
+      </LocalizedClientLink>
+    )
+  }
+
   return (
     <LocalizedClientLink
       href="/compare"
+
       className="hover:text-ui-fg-base flex items-center relative"
       data-testid="nav-compare-link"
     >

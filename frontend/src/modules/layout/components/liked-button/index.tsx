@@ -19,7 +19,12 @@ const likedProductsFetcher = async (): Promise<string[]> => {
   }
 }
 
-export default function LikedButton() {
+type LikedButtonProps = {
+  labelOnly?: boolean
+  label?: string
+}
+
+export default function LikedButton({ labelOnly = false, label = "Wishlist" }: LikedButtonProps) {
   // Use SWR to fetch and cache liked products
   const { data: likedIds } = useSWR<string[]>(
     LIKED_PRODUCTS_SWR_KEY,
@@ -34,6 +39,23 @@ export default function LikedButton() {
   )
 
   const count = useMemo(() => likedIds?.length || 0, [likedIds])
+
+  if (labelOnly) {
+    return (
+      <LocalizedClientLink
+        href="/liked"
+        className="hover:text-ui-fg-base flex items-center gap-2"
+        data-testid="nav-liked-link"
+      >
+        <span className="text-sm">{label}</span>
+        {count > 0 && (
+          <span className="ml-2 inline-flex items-center justify-center bg-black text-white text-xs rounded-full px-2 py-0.5">
+            {count}
+          </span>
+        )}
+      </LocalizedClientLink>
+    )
+  }
 
   return (
     <LocalizedClientLink

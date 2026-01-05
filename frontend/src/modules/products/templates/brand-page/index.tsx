@@ -11,6 +11,8 @@ import PreviewPrice from "@modules/products/components/product-preview/price"
 import AddToCartButton from "@modules/products/components/product-preview/add-to-cart-button"
 import HoverActions from "@modules/products/components/product-preview/hover-actions"
 import { getProductPrice } from "@lib/util/get-product-price"
+import FilterSidebar from "../filter-page/components/filter-sidebar"
+import { usePriceRange } from "../filter-page/hooks/use-price-range"
 
 // Client-side product preview component
 function ProductPreviewClient({
@@ -208,6 +210,15 @@ export default function BrandPage({
   const count = data?.count || 0
   const filterOptions = data?.filter_options
   const loading = isLoading
+
+  const { priceRange, priceValues, handlePriceChange } = usePriceRange({
+    products,
+    minPriceFilter: filters.minPrice,
+    maxPriceFilter: filters.maxPrice,
+    onPriceChange: (minCents, maxCents) => {
+      updateFilters({ min_price: String(minCents), max_price: String(maxCents) })
+    },
+  })
 
   useEffect(() => {
     if (typeof document === "undefined") return
@@ -533,7 +544,27 @@ export default function BrandPage({
               </div>
 
               <div className="h-full overflow-auto p-4">
-                <BrandFilterSidebar />
+                <FilterSidebar
+                  filters={{
+                    brand: [],
+                    category: filters.category ? [filters.category] : [],
+                    rimStyle: filters.rimStyle,
+                    gender: filters.gender,
+                    shapes: filters.shapes,
+                    size: filters.size,
+                    frameMaterial: filters.frameMaterial,
+                    shapeFilter: filters.shapeFilter,
+                    shape: filters.shape,
+                    minPrice: filters.minPrice || undefined,
+                    maxPrice: filters.maxPrice || undefined,
+                  }}
+                  filterOptions={filterOptions}
+                  priceRange={priceRange}
+                  priceValues={priceValues}
+                  onPriceChange={handlePriceChange}
+                  onFilterChange={handleFilterChange}
+                  onClearFilters={() => { clearFilters(); setShowMobileFilters(false) }}
+                />
               </div>
             </div>
           </div>
@@ -541,7 +572,27 @@ export default function BrandPage({
 
         {/* Sidebar Filters - visible on lg and up */}
         <aside className="hidden lg:block lg:w-72 flex-shrink-0 self-start lg:sticky lg:top-20" style={{ zIndex: 20 }}>
-          <BrandFilterSidebar />
+          <FilterSidebar
+            filters={{
+              brand: [],
+              category: filters.category ? [filters.category] : [],
+              rimStyle: filters.rimStyle,
+              gender: filters.gender,
+              shapes: filters.shapes,
+              size: filters.size,
+              frameMaterial: filters.frameMaterial,
+              shapeFilter: filters.shapeFilter,
+              shape: filters.shape,
+              minPrice: filters.minPrice || undefined,
+              maxPrice: filters.maxPrice || undefined,
+            }}
+            filterOptions={filterOptions}
+            priceRange={priceRange}
+            priceValues={priceValues}
+            onPriceChange={handlePriceChange}
+            onFilterChange={handleFilterChange}
+            onClearFilters={clearFilters}
+          />
         </aside>
 
         {/* Main Content */}
