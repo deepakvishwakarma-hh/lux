@@ -53,5 +53,5 @@ USER medusa
 
 EXPOSE 9000
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
 
