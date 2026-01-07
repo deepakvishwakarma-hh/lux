@@ -49,7 +49,9 @@ services:
       postgres:
         condition: service_healthy
     volumes:
+      - ./backend:/app
       - backend_uploads:/app/static
+      - /app/node_modules
     networks:
       - luxuriousonly-network
     healthcheck:
@@ -74,7 +76,7 @@ services:
         NEXT_PUBLIC_BASE_URL: https://luxuriousonly.com
     container_name: luxuriousonly-frontend
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       # Server-side backend URL (for internal Docker network)
       MEDUSA_BACKEND_URL: https://admin.luxuriousonly.com
       # Client-side backend URL (for browser access)
@@ -86,6 +88,10 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     networks:
       - luxuriousonly-network
     restart: unless-stopped
