@@ -189,10 +189,16 @@ function extractMetadata(headers: string[], row: string[]): Record<string, any> 
     const isExtraField = ALL_EXTRA_FIELDS.some((field) => normalizedHeader === field.toLowerCase())
     const isRequiredField = REQUIRED_FIELDS.some((field) => normalizedHeader === field.toLowerCase())
 
-    // Skip fields that are handled directly (name, sku, brand, model, etc.)
-    // Note: purchase_cost will be stored in metadata
-    const skipFields = ["name", "title", "sku", "brand", "model", "categories", "images", "description", "subtitle", "images_alt", "thumbnail_alt", "thumbnail"]
+    // Skip fields that are handled directly (name, sku, brand, etc.)
+    // Note: purchase_cost and model will be stored in metadata
+    const skipFields = ["name", "title", "sku", "brand", "categories", "images", "description", "subtitle", "images_alt", "thumbnail_alt", "thumbnail"]
     if (skipFields.includes(normalizedHeader)) return
+
+    // Handle model - store in metadata
+    if (normalizedHeader === "model") {
+      metadata[header.trim()] = value
+      return
+    }
 
     // Handle purchase_cost - store in metadata
     if (normalizedHeader === "purchase_cost") {
