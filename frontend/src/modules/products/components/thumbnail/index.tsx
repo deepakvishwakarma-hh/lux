@@ -30,17 +30,21 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
     <Container
       className={clx(
         "relative w-full overflow-hidden p-4 bg-ui-bg-subtle shadow-elevation-card-rest-- rounded-large-- group-hover:shadow-elevation-card-hover-- transition-shadow-- ease-in-out duration-150 aspect-[1/1]",
-        className,
-        {
-          "w-[180px]": size === "small",
-          "w-[290px]": size === "medium",
-          "w-[440px]": size === "large",
-          "w-full": size === "full",
-        }
+        className
+        // {
+        //   "w-[180px]": size === "small",
+        //   "w-[290px]": size === "medium",
+        //   "w-[440px]": size === "large",
+        //   "w-full": size === "full",
+        // }
       )}
       data-testid={dataTestid}
     >
-      <ImageOrPlaceholder image={initialImage} size={size} imageClassName={imageClassName} />
+      <ImageOrPlaceholder
+        image={initialImage}
+        size={size}
+        imageClassName={imageClassName}
+      />
     </Container>
   )
 }
@@ -54,7 +58,10 @@ const ImageOrPlaceholder = ({
     <Image
       src={image}
       alt="Thumbnail"
-      className={`absolute inset-0 object-cover object-center ${imageClassName || ""}`}
+      // we changed object-cover to object-contain to avoid cropping the image
+      className={`absolute inset-0 object-contain object-center ${
+        imageClassName || ""
+      }`}
       draggable={false}
       quality={100}
       sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
