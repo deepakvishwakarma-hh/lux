@@ -1,5 +1,3 @@
-import { Text } from "@medusajs/ui"
-import { listProducts } from "@lib/data/products"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -28,15 +26,21 @@ export default async function ProductPreview({
   //   return null
   // }
 
+  const brandName = product.title.split(" ")[0]
+
   const { cheapestPrice } = getProductPrice({
     product,
   })
 
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group" target="_blank">
+    <LocalizedClientLink
+      href={`/products/${product.handle}`}
+      className="group"
+      target="_blank"
+    >
       <div
         data-testid="product-wrapper"
-        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative"
+        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative bg-[#f7f7f7]"
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
@@ -54,12 +58,14 @@ export default async function ProductPreview({
         />
         <div className="flex flex-col txt-compact-medium mt-4 justify-between px-4 pb-4">
           <p
-            className="text-ui-fg-subtle text-center"
+            className="text-ui-fg-subtle text-center font-semibold"
             data-testid="product-title"
           >
             {product.title}
           </p>
-          <p className="text-ui-fg-subtle text-center font-bold">Gucci</p>
+          <p className="text-ui-fg-subtle text-center text-sm my-1">
+            {brandName}
+          </p>
           <div className="flex items-center justify-center gap-x-2">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>

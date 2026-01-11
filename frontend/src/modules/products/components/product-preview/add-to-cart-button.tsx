@@ -63,7 +63,7 @@ export default function AddToCartButton({
         disabled={!inStock || isAdding}
         variant="secondary"
         size="small"
-        className="bg-black text-white hover:bg-black/90 disabled:bg-gray-400 disabled:text-gray-200"
+        className="bg-black text-white hover:bg-black/90 disabled:bg-gray-400 disabled:text-gray-200 uppercase px-5 py-2"
         isLoading={isAdding}
         data-testid="add-to-cart-button"
       >
@@ -72,4 +72,3 @@ export default function AddToCartButton({
     </div>
   )
 }
-
