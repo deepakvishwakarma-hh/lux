@@ -6,18 +6,18 @@
 
 export const websiteConfig = {
     // Brand Identity
-    name: "Luxuryeyewear.in",
-    displayName: "Luxuryeyewear.in",
-    shortName: "Luxurious Only",
-    tagline: "Designer Luxury Eyewear",
+    name: "brand.luxuriousonly.com",
+    tagline: "Brand Luxurious Only",
+    shortName: "Brand Luxurious Only",
+    displayName: "brand.luxuriousonly.com",
 
     // Contact Information
     contact: {
         phone: "+91 9871981806",
         phoneFormatted: "+91 9871981806",
         phoneLink: "tel:+919871981806",
-        email: "support@luxuryeyewear.in",
-        emailLink: "mailto:support@luxuryeyewear.in",
+        email: "support@luxuriousonly.com",
+        emailLink: "mailto:support@luxuriousonly.com",
         businessHours: {
             weekdays: "Mon-Sat, 10:00 AM - 7:00 PM IST",
             sunday: "Closed",
@@ -27,7 +27,7 @@ export const websiteConfig = {
     // Logo Configuration
     logo: {
         path: "/logo.avif",
-        alt: "Luxuryeyewear.in",
+        alt: "brand.luxuriousonly.com",
         desktop: {
             width: 205,
             height: 66,
@@ -39,8 +39,8 @@ export const websiteConfig = {
     },
 
     // Domain & URLs
-    domain: "luxuryeyewear.in",
-    websiteUrl: "https://luxuryeyewear.in",
+    domain: "brand.luxuriousonly.com",
+    websiteUrl: "https://brand.luxuriousonly.com",
 
     // Social Media (add as needed)
     social: {
@@ -51,13 +51,13 @@ export const websiteConfig = {
 
     // Company Information
     company: {
-        description: "Explore Designer Luxury Eyewear at luxuryeyewear.in. Our exclusive collection of premium Sunglasses, Eyeglasses & Frames offers unmatched quality and style.",
-        copyright: `© ${new Date().getFullYear()} Luxuryeyewear.in — All Rights Reserved`,
+        description: "Explore Designer Luxury Eyewear at brand.luxuriousonly.com. Our exclusive collection of premium Sunglasses, Eyeglasses & Frames offers unmatched quality and style.",
+        copyright: `© ${new Date().getFullYear()} brand.luxuriousonly.com — All Rights Reserved`,
     },
 
     // SEO Defaults
     seo: {
-        defaultTitle: "Luxuryeyewear.in",
+        defaultTitle: "brand.luxuriousonly.com",
         defaultDescription: "Your destination for designer luxury eyewear including premium sunglasses, eyeglasses, and frames.",
     },
 } as const
