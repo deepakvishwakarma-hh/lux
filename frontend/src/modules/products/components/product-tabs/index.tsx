@@ -3,17 +3,20 @@
 import Accordion from "./accordion"
 import { HttpTypes } from "@medusajs/types"
 import RecentlyViewedProducts from "../recently-viewed-products"
+import { Brand } from "@lib/data/brands"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
   countryCode: string
   region: HttpTypes.StoreRegion
   visibleFields?: string[]
+  brand?: Brand | null
 }
 
 type ProductTabProps = {
   product: HttpTypes.StoreProduct
   visibleFields?: string[]
+  brand?: Brand | null
 }
 
 const ProductTabs = ({
@@ -21,11 +24,12 @@ const ProductTabs = ({
   countryCode,
   region,
   visibleFields,
+  brand,
 }: ProductTabsProps) => {
   const tabs = [
     {
       label: "Product Details",
-      component: <ProductInfoTab product={product} visibleFields={visibleFields} />,
+      component: <ProductInfoTab product={product} visibleFields={visibleFields} brand={brand} />,
     },
 
     {
@@ -62,7 +66,7 @@ const ProductTabs = ({
   )
 }
 
-const ProductInfoTab = ({ product, visibleFields }: ProductTabProps) => {
+const ProductInfoTab = ({ product, visibleFields, brand }: ProductTabProps) => {
   const formatKey = (key: string): string => {
     const raw = key.includes(".") ? key.split('.').slice(-1)[0] : key
     return raw
@@ -80,7 +84,17 @@ const ProductInfoTab = ({ product, visibleFields }: ProductTabProps) => {
     return String(value)
   }
 
-  const resolveKey = (obj: any, key: string) => {
+  const resolveKey = (obj: any, key: string, brand?: Brand | null) => {
+    // if brand field requested, prefer provided brand prop, then product.brand fallback
+    if (key === "brand") {
+      if (brand && brand.name) return brand.name
+      if (Object.prototype.hasOwnProperty.call(obj, 'brand')) {
+        const prodBrand = obj['brand']
+        if (prodBrand && typeof prodBrand === 'object') return prodBrand.name || prodBrand
+        return prodBrand
+      }
+    }
+
     // support nested keys with dot notation
     if (key.includes('.')) {
       return key.split('.').reduce((acc: any, part: string) => {
@@ -100,7 +114,7 @@ const ProductInfoTab = ({ product, visibleFields }: ProductTabProps) => {
 
   // If visibleFields provided, render only those. Otherwise fall back to showing all metadata entries.
   const fieldsToRender = visibleFields && visibleFields.length > 0
-    ? visibleFields.map((k) => ({ key: formatKey(k), value: formatValue(resolveKey(product, k)) }))
+    ? visibleFields.map((k) => ({ key: formatKey(k), value: formatValue(resolveKey(product, k, brand)) }))
     : (product.metadata ? Object.entries(product.metadata).map(([key, value]) => ({ key: formatKey(key), value: formatValue(value) })) : [])
 
   return (

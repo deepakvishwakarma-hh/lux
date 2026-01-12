@@ -72,7 +72,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </nav>
         <div className="flex flex-col md:flex-row gap-10">
           {/* left side  */}
-          <div className="w-full md:w-3/5 ">
+          <div className="w-full md:w-3/5 md:self-start md:sticky md:top-24 md:z-10">
             <ProductImageCarousel
               images={(images ?? []).map((image) => image.url)}
               productTitle={product.title}
@@ -102,14 +102,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
               product={product}
               countryCode={countryCode}
               region={region}
+              brand={brand}
               visibleFields={[
                 "brand",
                 "model",
                 "color_code",
-                "ean",
                 "gender",
                 "rim_style",
-                "shapes",
+                "shape",
                 "frame_material",
                 "size",
                 "lens_width",

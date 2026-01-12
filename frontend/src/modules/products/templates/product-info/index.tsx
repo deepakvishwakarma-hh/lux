@@ -93,32 +93,46 @@ const ProductInfo = ({ product, brand, reviewSummary, availability }: ProductInf
   // Use ETA from region metadata if available, otherwise calculate from product metadata based on stock status
   const eta = availability?.eta ?? getETA(product, isInStock, hasBackorder)
 
+  // Derive item number by taking the first 3 characters of each of the first three words
+  const itemNo = (() => {
+    if (!product?.title) return "N/A"
+    const words = product.title.split(/\s+/).filter(Boolean)
+    return words
+      .slice(0, 3)
+      .map((w) => w.slice(0, 3).toUpperCase())
+      .join(" ")
+  })()
+
   return (
     <div id="product-info">
-      {/* Brand Details JSON Display */}
-      {brand && brand.image_url && (
-        <LocalizedClientLink
-          href={`/brands/${brand.slug}`}
-          className="flex items-center justify-start gap-2"
-        >
-          <p className="text-sm font-bold ">Brand :</p>
-          <Image
-            src={brand.image_url ?? ""}
-            alt={brand.name}
-            width={30}
-            height={30}
-          />
-        </LocalizedClientLink>
-      )}
+      <header className="mb-3">
+        {brand && (
+          <LocalizedClientLink
+            href={`/brands/${brand.slug || brand.id}`}
+            className="inline-flex items-center px-3 py-1 rounded bg-ui-bg-subtle hover:bg-ui-bg-muted text-sm font-semibold mb-2"
+            target="_blank"
+            rel="noopener noreferrer"
+            role="button"
+            aria-label={`View brand ${brand.name} in a new tab`}
+          >
+            {brand.name}
+          </LocalizedClientLink>
+        )}
+
+        <div className="flex flex-col gap-y-2">
+          <Heading
+            level="h1"
+            className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight sm:leading-9 md:leading-10 text-ui-fg-base pr-2 sm:pr-5 font-urbanist break-words"
+            data-testid="product-title"
+          >
+            {product.title}
+          </Heading>
+
+          <p className="text-sm font-medium">Item No : {itemNo}</p>
+        </div>
+      </header>
 
       <div className="flex flex-col gap-y-3">
-        <Heading
-          level="h2"
-          className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight sm:leading-9 md:leading-10 text-ui-fg-base pr-2 sm:pr-5 font-urbanist break-words"
-          data-testid="product-title"
-        >
-          {product.title}
-        </Heading>
         {/* Review Summary */}
         <ProductReviewSummary reviewSummary={reviewSummary} />
         {/* Availability Status */}
@@ -145,9 +159,7 @@ const ProductInfo = ({ product, brand, reviewSummary, availability }: ProductInf
           </p>
         </div>
 
-        <p className="text-sm font-medium">
-          Item No : {(product?.metadata?.item_no as string) ?? "N/A"}
-        </p>
+    
       </div>
     </div>
   )

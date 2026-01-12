@@ -40,7 +40,7 @@ export default async function ProductPreview({
     >
       <div
         data-testid="product-wrapper"
-        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative bg-[#f7f7f7]"
+        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative bg-white"
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
