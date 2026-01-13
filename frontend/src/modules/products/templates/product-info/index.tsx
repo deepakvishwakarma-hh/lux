@@ -6,6 +6,7 @@ import Image from "next/image"
 import ProductReviewSummary from "@modules/products/components/product-review-summary"
 import { ReviewsResponse } from "@lib/data/reviews"
 import { ProductAvailabilityResponse } from "@lib/data/products"
+import AvailabilityDetails from "@modules/products/components/availability-details"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -36,14 +37,18 @@ const isVariantInStock = (variant: HttpTypes.StoreProductVariant): boolean => {
 }
 
 // Helper function to get ETA from product metadata based on stock status
-const getETA = (product: HttpTypes.StoreProduct, inStock: boolean, hasBackorder: boolean): string | null => {
+const getETA = (
+  product: HttpTypes.StoreProduct,
+  inStock: boolean,
+  hasBackorder: boolean
+): string | null => {
   const metadata = product.metadata || {}
-  
+
   if (inStock) {
     // Use regular delivery days if in stock
     const days = metadata.days_of_deliery || metadata.days_of_delivery
     const maxDays = metadata.max_days_of_delivery
-    
+
     if (days && maxDays) {
       return `${days}-${maxDays} days`
     } else if (days) {
@@ -61,7 +66,7 @@ const getETA = (product: HttpTypes.StoreProduct, inStock: boolean, hasBackorder:
     // Use out of stock delivery days
     const days = metadata.days_of_delivery_out_of_stock
     const maxDays = metadata.max_days_of_delivery_out_of_stock
-    
+
     if (days && maxDays) {
       return `${days}-${maxDays} days`
     } else if (days) {
@@ -70,11 +75,16 @@ const getETA = (product: HttpTypes.StoreProduct, inStock: boolean, hasBackorder:
       return `Up to ${maxDays} days`
     }
   }
-  
+
   return null
 }
 
-const ProductInfo = ({ product, brand, reviewSummary, availability }: ProductInfoProps) => {
+const ProductInfo = ({
+  product,
+  brand,
+  reviewSummary,
+  availability,
+}: ProductInfoProps) => {
   // Check stock availability from product data
   const isInStock = (() => {
     if (!product.variants || product.variants.length === 0) {
@@ -84,12 +94,13 @@ const ProductInfo = ({ product, brand, reviewSummary, availability }: ProductInf
   })()
 
   // Check if any variant allows backorder
-  const hasBackorder = product.variants?.some((variant) => variant.allow_backorder) ?? false
+  const hasBackorder =
+    product.variants?.some((variant) => variant.allow_backorder) ?? false
 
   // Product is available if region is available AND (in stock OR has backorder)
   const regionAvailable = availability?.region_available ?? true
   const isAvailable = regionAvailable && (isInStock || hasBackorder)
-  
+
   // Use ETA from region metadata if available, otherwise calculate from product metadata based on stock status
   const eta = availability?.eta ?? getETA(product, isInStock, hasBackorder)
 
@@ -150,16 +161,15 @@ const ProductInfo = ({ product, brand, reviewSummary, availability }: ProductInf
             data-testid="product-availability-status"
           >
             {isAvailable ? (
-              <>
-                Available{eta && ` - ETA: ${eta}`}
-              </>
+              <>Available{eta && ` - ETA: ${eta}`}</>
             ) : (
               "This item is not available"
             )}
           </p>
         </div>
 
-    
+        {/* Availability Details - Expected Delivery Date */}
+        {isAvailable && eta && <AvailabilityDetails eta={eta} />}
       </div>
     </div>
   )
