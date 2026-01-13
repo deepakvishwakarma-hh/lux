@@ -181,7 +181,6 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
     type: "question" as "question" | "custom_delivery" | "customize_product",
     name: "",
     email: "",
-    mobile: "",
     subject: "",
     message: "",
     address_1: "",
@@ -221,7 +220,6 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
             product_id: productId,
             customer_name: formData.name,
             customer_email: formData.email,
-            customer_mobile: formData.mobile,
             subject: formData.subject,
             message: formData.message,
             address: {
@@ -244,7 +242,6 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
           type: "question",
           name: "",
           email: "",
-          mobile: "",
           subject: "",
           message: "",
           address_1: "",
@@ -329,15 +326,7 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
                   />
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input
-                    name="mobile"
-                    type="tel"
-                    label="Mobile Number"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    required
-                  />
+                <div className="grid grid-cols-1 gap-3">
                   <Input
                     name="subject"
                     type="text"
