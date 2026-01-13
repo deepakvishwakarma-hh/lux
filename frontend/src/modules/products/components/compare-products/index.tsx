@@ -7,12 +7,14 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import { removeFromCompare } from "@lib/util/compare-cookies"
 import { useRouter } from "next/navigation"
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
+import AddToCartButton from "@modules/products/components/product-preview/add-to-cart-button"
 
 type CompareProductsProps = {
   products: HttpTypes.StoreProduct[]
+  countryCode: string
 }
 
-export default function CompareProducts({ products }: CompareProductsProps) {
+export default function CompareProducts({ products, countryCode }: CompareProductsProps) {
   const router = useRouter()
 
   const handleRemove = (productId: string) => {
@@ -59,42 +61,49 @@ export default function CompareProducts({ products }: CompareProductsProps) {
       {products.map((product) => {
         const priced = getPricedProduct(product)
         const { cheapestPrice } = getProductPrice({ product: priced })
+        const imageSrc = product.thumbnail || product.images?.[0]?.url || product.variants?.[0]?.images?.[0]?.url || null
         return (
-          <div key={product.id} className="border border-gray-200 rounded p-4 flex items-center gap-4">
-            <button
-              onClick={() => handleRemove(product.id)}
-              className="p-1 hover:bg-gray-200 rounded"
-              aria-label="Remove from compare"
-            >
-              <WoodMartIcon iconContent="f112" size={16} />
-            </button>
-            <LocalizedClientLink href={`/products/${product.handle}`} target="_blank" className="flex items-center gap-4 w-full">
-              {product.thumbnail ? (
-                <div className="relative w-24 h-24 flex-shrink-0">
-                  <Image src={product.thumbnail} alt={product.title || "Product image"} fill className="object-contain" />
+          <div key={product.id} className="border border-gray-200 rounded p-4">
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm text-gray-600">&nbsp;</div>
+              <button
+                onClick={() => handleRemove(product.id)}
+                className="text-sm text-gray-600 hover:underline"
+                aria-label="Remove from compare"
+              >
+                × Remove
+              </button>
+            </div>
+
+            <LocalizedClientLink href={`/products/${product.handle}`} target="_blank" className="flex flex-col items-center gap-3 w-full text-center">
+              {imageSrc ? (
+                <div className="relative w-40 h-40">
+                  <Image src={imageSrc} alt={product.title || "Product image"} fill className="object-contain" />
                 </div>
               ) : (
-                <div className="w-24 h-24 bg-gray-100 flex items-center justify-center">
+                <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
                   <span className="text-ui-fg-subtle">No image</span>
                 </div>
               )}
-              <div className="flex-1">
-                <div className="font-medium text-ui-fg-base">{product.title}</div>
-                <div className="mt-2">
-                  {cheapestPrice ? (
-                    <div className="flex items-baseline gap-2">
-                      <span className={cheapestPrice.price_type === "sale" ? "text-ui-fg-interactive font-semibold" : "text-ui-fg-base font-semibold"}>
-                        {cheapestPrice.calculated_price}
-                      </span>
-                      {cheapestPrice.price_type === "sale" && (
-                        <span className="text-ui-fg-subtle line-through text-sm">{cheapestPrice.original_price}</span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-ui-fg-subtle">N/A</span>
-                  )}
-                </div>
+
+              <div className="font-medium text-ui-fg-base">{product.title}</div>
+
+              <div>
+                {cheapestPrice ? (
+                  <div className="flex flex-col items-center">
+                    <span className={cheapestPrice.price_type === "sale" ? "text-ui-fg-interactive font-semibold text-lg" : "text-ui-fg-base font-semibold text-lg"}>
+                      {cheapestPrice.calculated_price}
+                    </span>
+                    {cheapestPrice.price_type === "sale" && (
+                      <span className="text-ui-fg-subtle line-through text-sm">{cheapestPrice.original_price}</span>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-ui-fg-subtle">N/A</span>
+                )}
               </div>
+
+              <AddToCartButton product={product} countryCode={countryCode} />
             </LocalizedClientLink>
           </div>
         )
@@ -105,81 +114,95 @@ export default function CompareProducts({ products }: CompareProductsProps) {
   // Desktop table view (md+)
   const desktopTable = (
     <div className="hidden md:block overflow-x-auto">
-      <table className="w-full border-collapse border border-gray-200">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="border border-gray-200 p-4 text-left font-semibold">Product</th>
-            {products.map((product) => (
-              <th key={product.id} className="border border-gray-200 p-4 min-w-[250px] relative align-top">
-                <button
-                  onClick={() => handleRemove(product.id)}
-                  className="absolute top-2 right-2 p-1 hover:bg-gray-200 rounded z-10"
-                  aria-label="Remove from compare"
-                >
-                  <WoodMartIcon iconContent="f112" size={16} />
-                </button>
-                <LocalizedClientLink href={`/products/${product.handle}`} className="block hover:opacity-80 transition-opacity" target="_blank">
-                  {product.thumbnail ? (
-                    <div className="relative w-full h-48 mb-4">
-                      <Image src={product.thumbnail} alt={product.title || "Product image"} fill className="object-contain" sizes="(max-width: 768px) 100vw, 250px" />
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 bg-gray-100 flex items-center justify-center mb-4">
-                      <span className="text-ui-fg-subtle">No image</span>
-                    </div>
-                  )}
-                </LocalizedClientLink>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {/* Title Row */}
-          <tr>
-            <td className="border border-gray-200 p-4 font-semibold bg-gray-50">Title</td>
-            {products.map((product) => (
-              <td key={product.id} className="border border-gray-200 p-4">
-                <LocalizedClientLink href={`/products/${product.handle}`} className="text-ui-fg-base hover:text-ui-fg-interactive font-medium" target="_blank">
-                  {product.title}
-                </LocalizedClientLink>
-              </td>
-            ))}
-          </tr>
+      <div className="max-w-[1100px] mx-auto">
+        <table className="w-full border-collapse border border-gray-200">
+          <thead>
+            <tr className="bg-white">
+              <th className="border border-gray-200 p-4 w-[220px]">&nbsp;</th>
+              {products.map((product) => (
+                <th key={product.id} className="border border-gray-200 p-4 min-w-[220px] relative align-top text-center">
+                  <div className="flex justify-between items-start">
+                    <div className="text-sm text-gray-600">&nbsp;</div>
+                    <button
+                      onClick={() => handleRemove(product.id)}
+                      className="text-sm text-gray-600 hover:underline"
+                      aria-label="Remove from compare"
+                    >
+                      × Remove
+                    </button>
+                  </div>
 
-          {/* Price Row */}
-          <tr>
-            <td className="border border-gray-200 p-4 font-semibold bg-gray-50">Price</td>
-            {products.map((product) => {
-              const priced = getPricedProduct(product)
-              const { cheapestPrice } = getProductPrice({ product: priced })
-              // if we still don't have a price, fall back to product.price if available
-              const fallbackPrice = !cheapestPrice && (product as any).price != null ? ((product as any).price_formatted || `$${((product as any).price / 100).toFixed(2)}`) : null
+                  <LocalizedClientLink href={`/products/${product.handle}`} className="block hover:opacity-80 transition-opacity" target="_blank">
+                    {(() => {
+                      const imageSrc = product.thumbnail || product.images?.[0]?.url || product.variants?.[0]?.images?.[0]?.url || null
+                      return imageSrc ? (
+                        <div className="relative w-full h-48 mb-3 flex items-center justify-center">
+                          <Image src={imageSrc} alt={product.title || "Product image"} fill className="object-contain" sizes="(max-width: 768px) 100vw, 250px" />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 bg-gray-100 flex items-center justify-center mb-3">
+                          <span className="text-ui-fg-subtle">No image</span>
+                        </div>
+                      )
+                    })()}
 
-              return (
-                <td key={product.id} className="border border-gray-200 p-4">
-                  {cheapestPrice ? (
-                    <div className="flex flex-col">
-                      <span className={cheapestPrice.price_type === "sale" ? "text-ui-fg-interactive font-semibold text-lg" : "text-ui-fg-base font-semibold text-lg"}>
-                        {cheapestPrice.calculated_price}
-                      </span>
-                      {cheapestPrice.price_type === "sale" && (
-                        <>
-                          <span className="text-ui-fg-subtle line-through text-sm">{cheapestPrice.original_price}</span>
-                          <span className="text-ui-fg-interactive text-sm">Save {cheapestPrice.percentage_diff}%</span>
-                        </>
-                      )}
+                    <div className="font-medium text-ui-fg-base mb-2">{product.title}</div>
+
+                    <div>
+                      {(() => {
+                        const priced = getPricedProduct(product)
+                        const { cheapestPrice } = getProductPrice({ product: priced })
+                        if (cheapestPrice) {
+                          return (
+                            <div className="flex flex-col items-center">
+                              <span className={cheapestPrice.price_type === "sale" ? "text-ui-fg-interactive font-semibold text-lg" : "text-ui-fg-base font-semibold text-lg"}>
+                                {cheapestPrice.calculated_price}
+                              </span>
+                              {cheapestPrice.price_type === "sale" && (
+                                <span className="text-ui-fg-subtle line-through text-sm">{cheapestPrice.original_price}</span>
+                              )}
+                            </div>
+                          )
+                        }
+                        const fallbackPrice = (product as any).price != null ? ((product as any).price_formatted || `$${((product as any).price / 100).toFixed(2)}`) : null
+                        return fallbackPrice ? <div className="text-ui-fg-base font-semibold text-lg">{fallbackPrice}</div> : <span className="text-ui-fg-subtle">N/A</span>
+                      })()}
                     </div>
-                  ) : fallbackPrice ? (
-                    <div className="text-ui-fg-base font-semibold text-lg">{fallbackPrice}</div>
-                  ) : (
-                    <span className="text-ui-fg-subtle">N/A</span>
-                  )}
-                </td>
-              )
-            })}
-          </tr>
-        </tbody>
-      </table>
+
+                    <AddToCartButton product={product} countryCode={countryCode} />
+                  </LocalizedClientLink>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {/* Availability Row */
+            }
+            <tr>
+              <td className="border border-gray-200 p-4 font-semibold bg-gray-50">AVAILABILITY</td>
+              {products.map((product) => {
+                const firstVariant = product.variants?.[0]
+                const inStock = (() => {
+                  if (!firstVariant) return false
+                  if (!firstVariant.manage_inventory) return true
+                  if (firstVariant.allow_backorder) return true
+                  if ((firstVariant.inventory_quantity || 0) > 0) return true
+                  return false
+                })()
+                return (
+                  <td key={product.id} className="border border-gray-200 p-4">
+                    {inStock ? (
+                      <div className="inline-flex items-center gap-2 bg-green-50 border border-green-100 text-green-700 px-3 py-1 text-sm rounded">✓ In stock</div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 bg-red-50 border border-red-100 text-red-700 px-3 py-1 text-sm rounded">Out of stock</div>
+                    )}
+                  </td>
+                )
+              })}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 

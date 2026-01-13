@@ -66,25 +66,28 @@ export default async function ComparePage(props: Props) {
   // If no products to compare, show empty state
   if (!productIds || productIds.length === 0) {
     return (
-      <div className="content-container py-16">
-        <div className="py-48 px-2 flex flex-col justify-center items-center min-h-[500px]">
-          <div className="flex flex-col items-center gap-y-6 max-w-[500px] text-center">
-            <div className="bg-gray-100 rounded-full p-6 mb-2">
-              <WoodMartIcon iconContent="f128" size={48} className="text-gray-400" />
-            </div>
-            <Heading
-              level="h1"
-              className="text-3xl-regular font-bold"
-            >
-              Compare Products
-            </Heading>
-            <p className="text-base-regular text-ui-fg-subtle mt-2">
-              No products selected for comparison yet. Start comparing products by clicking the compare button on any product card.
-            </p>
-            <div className="mt-6">
-              <InteractiveLink href={`/${countryCode}`}>
-                Browse products
-              </InteractiveLink>
+      <div>
+        <div className="w-full bg-black py-8 mb-8">
+          <div className="content-container text-center text-white">
+            <h1 className="text-3xl font-bold">Compare</h1>
+            <div className="text-sm text-gray-300 mt-1">Home / Compare</div>
+          </div>
+        </div>
+
+        <div className="content-container py-16">
+          <div className="py-48 px-2 flex flex-col justify-center items-center min-h-[500px]">
+            <div className="flex flex-col items-center gap-y-6 max-w-[500px] text-center">
+              <div className="bg-gray-100 rounded-full p-6 mb-2">
+                <WoodMartIcon iconContent="f128" size={48} className="text-gray-400" />
+              </div>
+              <p className="text-base-regular text-ui-fg-subtle mt-2">
+                No products selected for comparison yet. Start comparing products by clicking the compare button on any product card.
+              </p>
+              <div className="mt-6">
+                <InteractiveLink href={`/${countryCode}`}>
+                  Browse products
+                </InteractiveLink>
+              </div>
             </div>
           </div>
         </div>
@@ -99,7 +102,7 @@ export default async function ComparePage(props: Props) {
       id: productIds,
       limit: 100,
       fields:
-        "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,",
+        "thumbnail,*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags",
     },
   })
 
@@ -111,9 +114,17 @@ export default async function ComparePage(props: Props) {
   )
 
   return (
-    <div className="content-container py-16">
-      <h1 className="text-3xl font-bold mb-8">Compare Products</h1>
-      <CompareProducts products={validProducts} />
+    <div>
+      <div className="w-full bg-black py-8 mb-8">
+        <div className="content-container text-center text-white">
+          <h1 className="text-3xl font-bold">Compare</h1>
+          <div className="text-sm text-gray-300 mt-1">Home / Compare</div>
+        </div>
+      </div>
+
+      <div className="content-container py-16">
+        <CompareProducts products={validProducts} countryCode={countryCode} />
+      </div>
     </div>
   )
 }

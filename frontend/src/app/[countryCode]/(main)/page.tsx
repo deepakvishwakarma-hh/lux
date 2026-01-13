@@ -157,7 +157,7 @@ export default async function Home(props: Props) {
           countryCode={countryCode}
         />
       </div>
-      <TopCatalog />
+      {/* <TopCatalog /> */}
     </>
   )
 }
