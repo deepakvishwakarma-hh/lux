@@ -58,12 +58,7 @@ export default function MobileMenu() {
                 SHOP BY BRAND
               </LocalizedClientLink>
 
-              <LocalizedClientLink href="/cart" onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <WoodMartIcon iconContent="f126" size={20} />
-                  <span className="text-sm font-semibold">CART</span>
-                </div>
-              </LocalizedClientLink>
+
 
               <LikedButton asMenuItem label="WISHLIST" />
 

@@ -104,14 +104,11 @@ const ProductInfo = ({
   // Use ETA from region metadata if available, otherwise calculate from product metadata based on stock status
   const eta = availability?.eta ?? getETA(product, isInStock, hasBackorder)
 
-  // Derive item number by taking the first 3 characters of each of the first three words
+  // Derive item number by taking the first three words of the product title
   const itemNo = (() => {
     if (!product?.title) return "N/A"
     const words = product.title.split(/\s+/).filter(Boolean)
-    return words
-      .slice(0, 3)
-      .map((w) => w.slice(0, 3).toUpperCase())
-      .join(" ")
+    return words.slice(0, 3).join(" ")
   })()
 
   return (
@@ -133,7 +130,7 @@ const ProductInfo = ({
         <div className="flex flex-col gap-y-2">
           <Heading
             level="h1"
-            className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight sm:leading-9 md:leading-10 text-ui-fg-base pr-2 sm:pr-5 font-urbanist break-words"
+            className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight sm:leading-9 md:leading-10 text-ui-fg-base pr-2 sm:pr-5 font-urbanist break-words overflow-hidden line-clamp-1 sm:line-clamp-3"
             data-testid="product-title"
           >
             {product.title}

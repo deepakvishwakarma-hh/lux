@@ -7,6 +7,8 @@ import useToggleState from "@lib/hooks/use-toggle-state"
 import Input from "@modules/common/components/input"
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 import { sdk } from "@lib/config"
+import { FiShare2, FiCopy } from "react-icons/fi"
+import { FaFacebookF, FaTwitter, FaWhatsapp } from "react-icons/fa"
 
 type ProductInfoActionsProps = {
   productId: string
@@ -17,23 +19,9 @@ const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
   const deliveryReturnState = useToggleState(false)
   const askQuestionState = useToggleState(false)
 
-  const [shareOpen, setShareOpen] = React.useState(false)
-  const [copied, setCopied] = React.useState(false)
-  const shareRef = React.useRef<HTMLDivElement | null>(null)
-
-  React.useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (shareRef.current && !shareRef.current.contains(e.target as Node)) {
-        setShareOpen(false)
-      }
-    }
-
-    if (shareOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [shareOpen])
+  // Modal state for the Share popup
+  const [shareModalOpen, setShareModalOpen] = React.useState(false)
+  const [copied, setCopied] = React.useState(false) 
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : ""
 
@@ -42,7 +30,8 @@ const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
       await navigator.clipboard.writeText(currentUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-      setShareOpen(false)
+      // close the share modal after copying
+      setShareModalOpen(false)
     } catch (e) {
       console.error("Copy failed", e)
     }
@@ -52,23 +41,23 @@ const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
     if ((navigator as any).share) {
       try {
         await (navigator as any).share({ title: document.title, url: currentUrl })
-        setShareOpen(false)
+        setShareModalOpen(false)
       } catch (e) {
         console.error("Share failed", e)
       }
     } else {
-      // fallback: open facebook/twitter etc.
-      setShareOpen(true)
+      // fallback: keep modal open for manual share options
+      setShareModalOpen(true)
     }
   }
 
   const openPopup = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer,width=600,height=600")
-    setShareOpen(false)
+    setShareModalOpen(false)
   }
 
   return (
-    <div className="flex flex-wrap gap-3 mt-4 relative" ref={shareRef}>
+    <div className="flex flex-wrap gap-3 mt-4 relative">
       <Button
         variant="transparent"
         onClick={sizeGuideState.open}
@@ -98,54 +87,86 @@ const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
       <div className="relative">
         <Button
           variant="transparent"
-          onClick={() => setShareOpen((s) => !s)}
+          onClick={() => setShareModalOpen(true)}
           className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
+          aria-expanded={shareModalOpen}
+          aria-haspopup="dialog"
         >
-          <span aria-hidden>🔗</span>
-          Share
+          <FiShare2 className="w-4 h-4" aria-hidden />
+          <span>Share</span>
         </Button>
 
-        {shareOpen && (
-          <div className="absolute right-0 mt-2 w-[220px] bg-white border border-gray-200 shadow-lg rounded-md z-50 p-2">
-            <button
-              className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2"
-              onClick={() => openPopup(`https://wa.me/?text=${encodeURIComponent(currentUrl)}`)}
-            >
-              <span>💬</span>
-              <span className="text-sm">WhatsApp</span>
-            </button>
-            <button
-              className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2"
-              onClick={() => openPopup(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`)}
-            >
-              <span>📘</span>
-              <span className="text-sm">Facebook</span>
-            </button>
-            <button
-              className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2"
-              onClick={() => openPopup(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}`)}
-            >
-              <span>🐦</span>
-              <span className="text-sm">Twitter</span>
-            </button>
-            <button
-              className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2"
-              onClick={handleCopyLink}
-            >
-              <span>📋</span>
-              <span className="text-sm">{copied ? "Copied!" : "Copy link"}</span>
-            </button>
-            {(navigator as any).share && (
+        <Modal isOpen={shareModalOpen} close={() => setShareModalOpen(false)} size="small">
+          <Modal.Title>Share</Modal.Title>
+          <Modal.Body>
+            <div className="grid gap-3">
               <button
-                className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2"
-                onClick={handleShareNative}
+                className="w-full text-left px-4 py-3 rounded hover:bg-gray-50 flex items-center gap-4 border border-gray-100"
+                onClick={() => openPopup(`https://wa.me/?text=${encodeURIComponent(currentUrl)}`)}
+                aria-label="Share on WhatsApp"
               >
-                <span>🔗</span>
-                <span className="text-sm">Share...</span>
+                <FaWhatsapp className="w-6 h-6 text-green-600" aria-hidden />
+                <div>
+                  <div className="text-sm font-medium">WhatsApp</div>
+                  <div className="text-xs text-ui-fg-subtle">Share via WhatsApp</div>
+                </div>
               </button>
-            )}
-          </div>
-        )}
+
+              <button
+                className="w-full text-left px-4 py-3 rounded hover:bg-gray-50 flex items-center gap-4 border border-gray-100"
+                onClick={() => openPopup(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`)}
+                aria-label="Share on Facebook"
+              >
+                <FaFacebookF className="w-6 h-6 text-blue-600" aria-hidden />
+                <div>
+                  <div className="text-sm font-medium">Facebook</div>
+                  <div className="text-xs text-ui-fg-subtle">Share on Facebook</div>
+                </div>
+              </button>
+
+              <button
+                className="w-full text-left px-4 py-3 rounded hover:bg-gray-50 flex items-center gap-4 border border-gray-100"
+                onClick={() => openPopup(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}`)}
+                aria-label="Share on Twitter"
+              >
+                <FaTwitter className="w-6 h-6 text-sky-500" aria-hidden />
+                <div>
+                  <div className="text-sm font-medium">Twitter</div>
+                  <div className="text-xs text-ui-fg-subtle">Post a Tweet</div>
+                </div>
+              </button>
+
+              <button
+                className="w-full text-left px-4 py-3 rounded hover:bg-gray-50 flex items-center gap-4 border border-gray-100"
+                onClick={handleCopyLink}
+                aria-label="Copy link"
+              >
+                <FiCopy className="w-6 h-6 text-ui-fg-subtle" aria-hidden />
+                <div>
+                  <div className="text-sm font-medium">{copied ? "Copied!" : "Copy link"}</div>
+                  <div className="text-xs text-ui-fg-subtle">Copy product URL to clipboard</div>
+                </div>
+              </button>
+
+              {(navigator as any).share && (
+                <button
+                  className="w-full text-left px-4 py-3 rounded hover:bg-gray-50 flex items-center gap-4 border border-gray-100"
+                  onClick={handleShareNative}
+                  aria-label="Share"
+                >
+                  <FiShare2 className="w-6 h-6" aria-hidden />
+                  <div>
+                    <div className="text-sm font-medium">Share...</div>
+                    <div className="text-xs text-ui-fg-subtle">Use your device's share dialog</div>
+                  </div>
+                </button>
+              )}
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShareModalOpen(false)}>Close</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
 
       {/* Size Guide Modal */}      <Modal
@@ -518,7 +539,7 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
                       label="Country Code (Optional)"
                       value={formData.country_code}
                       onChange={handleChange}
-                      placeholder="e.g., US, UK"
+  
                     />
                   </div>
                 </div>

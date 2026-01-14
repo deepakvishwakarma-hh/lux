@@ -5,6 +5,8 @@ import AccountDropdown from "@modules/layout/components/account-dropdown"
 import CompareButton from "@modules/layout/components/compare-button"
 import LikedButton from "@modules/layout/components/liked-button"
 import NavSearch from "@modules/layout/components/nav-search"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 
 type NavHeaderProps = {
   cartButton: React.ReactNode
@@ -35,6 +37,15 @@ export default function NavHeader({
         >
           <NavSearchIcon />
         </button>
+
+        {/* Mobile cart icon (mobile only, placed after search) */}
+        <LocalizedClientLink
+          href="/cart"
+          className="md:hidden p-2 rounded-md hover:bg-ui-bg-subtle transition-colors"
+          aria-label="Cart"
+        >
+          <WoodMartIcon iconContent="f126" size={20} />
+        </LocalizedClientLink>
 
         {/* Account ONLY on desktop */}
         <div className="hidden md:block">

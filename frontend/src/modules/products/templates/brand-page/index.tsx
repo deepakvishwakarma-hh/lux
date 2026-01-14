@@ -61,7 +61,7 @@ function ProductPreviewClient({
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
       <div
         data-testid="product-wrapper"
-        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative"
+        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative h-full flex flex-col"
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
@@ -71,14 +71,17 @@ function ProductPreviewClient({
             </div>
           )}
         <HoverActions product={formattedProduct} />
-        <Thumbnail
-          thumbnail={product.thumbnail}
-          images={product.images}
-          size="full"
-        />
-        <div className="flex flex-col txt-compact-medium mt-4 justify-between px-4 pb-4">
+        <div className="flex-shrink-0">
+          <Thumbnail
+            thumbnail={product.thumbnail}
+            images={product.images}
+            size="full"
+          />
+        </div>
+
+        <div className="flex-1 flex flex-col justify-between txt-compact-medium mt-3 px-4 pb-4">
           <p
-            className="text-ui-fg-subtle text-center"
+            className="text-ui-fg-subtle text-center text-sm max-h-12 overflow-hidden"
             data-testid="product-title"
           >
             {product.title}
@@ -91,10 +94,12 @@ function ProductPreviewClient({
           <div className="flex items-center justify-center gap-x-2">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>
-          <AddToCartButton
-            product={formattedProduct}
-            countryCode={countryCode}
-          />
+          <div className="mt-3">
+            <AddToCartButton
+              product={formattedProduct}
+              countryCode={countryCode}
+            />
+          </div>
         </div>
       </div>
     </LocalizedClientLink>
@@ -598,16 +603,16 @@ export default function BrandPage({
         {/* Main Content */}
         <div className="flex-1">
           {/* Sort and Results Count */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
-              <p className="text-sm text-ui-fg-subtle">
+              <p className="text-sm text-ui-fg-subtle text-center sm:text-left">
                 {loading ? "Loading..." : `${count} products found`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
               <button
                 onClick={() => setShowMobileFilters(true)}
-                className="inline-flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-100 lg:hidden"
+                className="inline-flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-100 lg:hidden flex-shrink-0"
                 aria-label="Open filters"
                 aria-haspopup="dialog"
               >
@@ -616,14 +621,14 @@ export default function BrandPage({
                 </svg>
                 <span className="text-sm font-medium">Filters</span>
               </button>
-              <label className="text-sm font-medium">Sort by:</label>
+              <label className="text-sm font-medium hidden sm:inline">Sort by:</label>
               <select
                 value={`${filters.order}_${filters.orderDirection}`}
                 onChange={(e) => {
                   const [order, direction] = e.target.value.split("_")
                   handleSortChange(order, direction)
                 }}
-                className="px-3 py-2 border border-ui-border-base rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive"
+                className="px-3 py-2 border border-ui-border-base rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive w-full sm:w-auto flex-1 sm:flex-none min-w-0"
               >
                 <option value="created_at_desc">Newest First</option>
                 <option value="created_at_asc">Oldest First</option>
