@@ -6,6 +6,8 @@ import { getBaseURL } from "@lib/util/env"
 import HeroCarouselTemplate from "@modules/layout/templates/hero-carousel"
 import DiscountBar from "@modules/home/components/discount-bar"
 import TopCatalog from "@modules/home/components/top-catalog"
+import BrandSlider from "@modules/home/components/brand-slider"
+import KeyPillars from "@modules/home/components/KeyPillars"
 import HomepageListing from "@modules/home/components/homepage-listing"
 import { websiteConfig } from "@lib/website.config"
 
@@ -150,13 +152,20 @@ export default async function Home(props: Props) {
       <HeroCarouselTemplate />
       <DiscountBar />
       <TopCatalog />
-      <div className="content-container py-12 small:py-24">
-        <HomepageListing
-          sortBy="created_at"
-          page={1}
-          countryCode={countryCode}
-        />
-      </div>
+     <div className="space-y-12 sm:space-y-16">
+  <BrandSlider />
+
+  <div className="content-container">
+    <HomepageListing
+      sortBy="created_at"
+      page={1}
+      countryCode={countryCode}
+    />
+  </div>
+
+  <KeyPillars />
+</div>
+
       {/* <TopCatalog /> */}
     </>
   )

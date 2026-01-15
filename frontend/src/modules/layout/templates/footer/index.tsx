@@ -42,8 +42,8 @@ const Footer = () => {
                   href={websiteConfig.contact.phoneLink}
                   className="flex items-center gap-3 hover:text-white"
                 >
-                  <FaPhone size={14} />
-                  <span className="text-sm">{websiteConfig.contact.phoneFormatted}</span>
+                  {/* <FaPhone size={14} /> */}
+                  {/* <span className="text-sm">{websiteConfig.contact.phoneFormatted}</span> */}
                 </a>
 
                 <a
