@@ -127,16 +127,16 @@ export default function ProductImageCarousel({
       {/* ================= DESKTOP VIEW ================= */}
       <div className="hidden md:grid grid-cols-[80px_1fr] gap-6">
         {/* Thumbnails */}
+        {/* Thumbnails */}
         <div className="flex flex-col gap-4">
           {images.map((img, index) => (
             <button
               key={index}
-              onClick={() => setActiveImage(index)}
-              className={`relative aspect-square border rounded-md overflow-hidden ${
-                activeImage === index
-                  ? "border-black"
-                  : "border-gray-200"
-              }`}
+              type="button"
+              onMouseEnter={() => setActiveImage(index)}
+              onFocus={() => setActiveImage(index)}
+              className={`relative aspect-square border rounded-md overflow-hidden ${activeImage === index ? "border-black" : "border-gray-200"
+                }`}
             >
               <Image
                 src={img}
@@ -149,15 +149,15 @@ export default function ProductImageCarousel({
           ))}
         </div>
 
+
         {/* Main Image */}
         <div
-          className={`relative aspect-square bg-white rounded overflow-hidden ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
+          className={`relative aspect-square bg-white rounded overflow-hidden ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+            }`}
           ref={containerRef}
-          onMouseMove={onMouseMove}
-          onMouseEnter={() => setIsZoomed(true)}
-          onMouseLeave={() => setIsZoomed(false)}
+          onMouseMove={isZoomed ? onMouseMove : undefined} // move only when zoomed
+          onClick={() => setIsZoomed((prev) => !prev)} // ✅ zoom toggle on click
         >
-          
           <Image
             src={images[activeImage]}
             alt={getImageAlt(activeImage)}
@@ -169,7 +169,8 @@ export default function ProductImageCarousel({
 
           {/* zoom overlay */}
           <div
-            className={`absolute inset-0 pointer-events-none hidden md:block transition-opacity duration-150 ${isZoomed ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 pointer-events-none hidden md:block transition-opacity duration-150 ${isZoomed ? "opacity-100" : "opacity-0"
+              }`}
             aria-hidden
           >
             <div
@@ -194,11 +195,15 @@ export default function ProductImageCarousel({
 
           <button
             className="absolute top-3 left-3 z-20 w-10 h-10 rounded-full border-2 border-black bg-white flex items-center justify-center"
-            onClick={() => setLightboxOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation() // ✅ prevent zoom toggle on button click
+              setLightboxOpen(true)
+            }}
           >
             <BsArrowsFullscreen />
           </button>
         </div>
+
       </div>
 
       {/* ================= LIGHTBOX ================= */}

@@ -115,17 +115,24 @@ const ProductInfo = ({
     <div id="product-info">
       <header className="mb-3">
         {brand && (
-          <LocalizedClientLink
-            href={`/brands/${brand.slug || brand.id}`}
-            className="inline-flex items-center px-3 py-1 rounded bg-ui-bg-subtle hover:bg-ui-bg-muted text-sm font-semibold mb-2"
-            target="_blank"
-            rel="noopener noreferrer"
-            role="button"
-            aria-label={`View brand ${brand.name} in a new tab`}
-          >
-            {brand.name}
-          </LocalizedClientLink>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm font-semibold text-ui-fg-subtle">
+              Brand :
+            </span>
+
+            <LocalizedClientLink
+              href={`/brands/${brand.slug || brand.id}`}
+              className="text-sm font-semibold text-ui-fg-base hover:underline hover:text-ui-fg-base transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+              role="link"
+              aria-label={`View brand ${brand.name} in a new tab`}
+            >
+              {brand.name}
+            </LocalizedClientLink>
+          </div>
         )}
+
 
         <div className="flex flex-col gap-y-2">
           <Heading
@@ -146,15 +153,13 @@ const ProductInfo = ({
         {/* Availability Status */}
         <div className="flex items-center gap-2">
           <div
-            className={`w-3 h-3 rounded-full ${
-              isAvailable ? "bg-green-500" : "bg-red-500"
-            }`}
+            className={`w-3 h-3 rounded-full ${isAvailable ? "bg-green-500" : "bg-red-500"
+              }`}
             aria-hidden="true"
           />
           <p
-            className={`text-sm font-medium ${
-              isAvailable ? "text-green-700" : "text-red-700"
-            }`}
+            className={`text-sm font-medium ${isAvailable ? "text-green-700" : "text-red-700"
+              }`}
             data-testid="product-availability-status"
           >
             {isAvailable ? (

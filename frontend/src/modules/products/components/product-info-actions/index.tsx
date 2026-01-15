@@ -58,43 +58,46 @@ const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
 
   return (
     <div className="flex flex-wrap gap-3 mt-4 relative">
-      <Button
-        variant="transparent"
-        onClick={sizeGuideState.open}
-        className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
-      >
-        <WoodMartIcon iconContent="f13f" size={16} />
-        Size Guide
-      </Button>
-      <Button
-        variant="transparent"
-        onClick={deliveryReturnState.open}
-        className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
-      >
-        <WoodMartIcon iconContent="f123" size={16} />
-        Delivery & Return
-      </Button>
-      <Button
-        variant="transparent"
-        onClick={askQuestionState.open}
-        className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
-      >
-        <WoodMartIcon iconContent="f128" size={16} />
-        Ask a Question
-      </Button>
+  <div className="flex flex-wrap gap-3 mt-4">
+  <Button
+    variant="transparent"
+    onClick={sizeGuideState.open}
+    className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors whitespace-nowrap"
+  >
+    <WoodMartIcon iconContent="f13f" size={16} />
+    Size Guide
+  </Button>
 
-      {/* Share Button */}
-      <div className="relative">
-        <Button
-          variant="transparent"
-          onClick={() => setShareModalOpen(true)}
-          className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors"
-          aria-expanded={shareModalOpen}
-          aria-haspopup="dialog"
-        >
-          <FiShare2 className="w-4 h-4" aria-hidden />
-          <span>Share</span>
-        </Button>
+  <Button
+    variant="transparent"
+    onClick={deliveryReturnState.open}
+    className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors whitespace-nowrap"
+  >
+    <WoodMartIcon iconContent="f123" size={16} />
+    Delivery & Return
+  </Button>
+
+  <Button
+    variant="transparent"
+    onClick={askQuestionState.open}
+    className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors whitespace-nowrap"
+  >
+    <WoodMartIcon iconContent="f128" size={16} />
+    Ask a Question
+  </Button>
+
+  <Button
+    variant="transparent"
+    onClick={() => setShareModalOpen(true)}
+    className="text-sm flex items-center gap-2 bg-gray-50 border border-gray-400 rounded-md px-3 py-2 hover:bg-gray-200 transition-colors whitespace-nowrap"
+    aria-expanded={shareModalOpen}
+    aria-haspopup="dialog"
+  >
+    <FiShare2 className="w-4 h-4" aria-hidden />
+    Share
+  </Button>
+
+
 
         <Modal isOpen={shareModalOpen} close={() => setShareModalOpen(false)} size="small">
           <Modal.Title>Share</Modal.Title>
@@ -167,6 +170,7 @@ const ProductInfoActions = ({ productId }: ProductInfoActionsProps) => {
             <Button variant="secondary" onClick={() => setShareModalOpen(false)}>Close</Button>
           </Modal.Footer>
         </Modal>
+
       </div>
 
       {/* Size Guide Modal */}      <Modal

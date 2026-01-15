@@ -54,7 +54,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       <div className="content-container">
         {/* Breadcrumb */}
         <nav
-          className="flex items-center gap-2 py-4 text-sm text-ui-fg-subtle"
+          className="flex items-center gap-2 py-4 text-xs text-ui-fg-subtle"
           aria-label="Breadcrumb"
         >
           <LocalizedClientLink
