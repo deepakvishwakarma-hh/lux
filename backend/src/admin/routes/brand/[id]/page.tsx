@@ -17,6 +17,8 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { HttpTypes } from "@medusajs/framework/types";
+import { SEOPreviewComponent } from "../../../widgets/seo-preview-component";
+import { seoPreviewConfig } from "../../../widgets/seo-preview-config";
 
 type Brand = {
   id: string;
@@ -302,7 +304,33 @@ const BrandEditPage = () => {
               rows={3}
             />
           </div>
+        </div>
+      </form>
 
+      {/* SEO Preview */}
+      <div className="mt-6">
+        <SEOPreviewComponent
+          seoTitle={formData.meta_title || formData.name || ""}
+          metaDescription={
+            formData.meta_desc || formData.description?.substring(0, 160) || ""
+          }
+          slug={formData.slug || ""}
+          url={
+            formData.slug
+              ? `${
+                  seoPreviewConfig.baseUrl ||
+                  `https://${seoPreviewConfig.domain}`
+                }/brands/${formData.slug}`
+              : ""
+          }
+          entityType="brand"
+          defaultTitle="Brand Name"
+          defaultDescription="Brand description will appear here..."
+        />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="image_url">Image URL</Label>
             <Input
