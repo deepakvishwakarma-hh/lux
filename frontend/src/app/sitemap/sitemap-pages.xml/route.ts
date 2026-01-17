@@ -35,9 +35,15 @@ export async function GET() {
 
     // Add static pages
     const staticPages = [
-      { path: "store", priority: 0.9 },
-      { path: "filter", priority: 0.8 },
-      { path: "brands", priority: 0.8 },
+      { path: "store", priority: 0.9, changeFrequency: "daily" },
+      { path: "filter", priority: 0.8, changeFrequency: "daily" },
+      { path: "brands", priority: 0.8, changeFrequency: "weekly" },
+      { path: "about-us", priority: 0.7, changeFrequency: "monthly" },
+      { path: "contact-us", priority: 0.7, changeFrequency: "monthly" },
+      { path: "delivery-shipping", priority: 0.6, changeFrequency: "monthly" },
+      { path: "privacy-policy", priority: 0.5, changeFrequency: "yearly" },
+      { path: "return-refund-policy", priority: 0.5, changeFrequency: "yearly" },
+      { path: "terms-conditions", priority: 0.5, changeFrequency: "yearly" },
     ]
 
     for (const countryCode of countryCodes) {
@@ -45,7 +51,7 @@ export async function GET() {
         sitemapEntries.push({
           url: `${baseURL}/${countryCode}/${page.path}`,
           lastModified: new Date(),
-          changeFrequency: "weekly",
+          changeFrequency: page.changeFrequency || "weekly",
           priority: page.priority,
         })
       })
