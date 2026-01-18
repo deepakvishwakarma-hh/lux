@@ -62,6 +62,29 @@ async function getRegionMap(cacheId: string) {
   return regionMapCache.regionMap
 }
 
+
+type IpLocationData = {
+  ip: string
+  city: string
+  region: string
+  country: string
+  loc: string
+  org: string
+  postal: string
+  timezone: string
+  readme: string
+}
+
+const getUserCountryCode = async () => {
+  const ipResponse = await fetch("https://ipinfo.io/json", {
+    headers: {
+      Accept: "application/json",
+    },
+  })
+  const ipLocationData = await ipResponse.json() as IpLocationData
+  return ipLocationData.country.toLowerCase()
+}
+
 /**
  * Fetches regions from Medusa and sets the region cookie.
  * @param request
@@ -69,21 +92,16 @@ async function getRegionMap(cacheId: string) {
  */
 async function getCountryCode(
   request: NextRequest,
-  regionMap: Map<string, HttpTypes.StoreRegion | number>
+  regionMap: Map<string, HttpTypes.StoreRegion | number>,
 ) {
   try {
+    const ipLocationData = await getUserCountryCode()
     let countryCode
-
-    const ipCountry = request.headers
-      .get("x-country-code")
-      ?.toLowerCase()
-
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
-
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
-    } else if (ipCountry && regionMap.has(ipCountry)) {
-      countryCode = ipCountry
+    } else if (ipLocationData && regionMap.has(ipLocationData)) {
+      countryCode = ipLocationData
     } else if (regionMap.has(DEFAULT_REGION)) {
       countryCode = DEFAULT_REGION
     } else if (regionMap.keys().next().value) {
@@ -100,6 +118,7 @@ async function getCountryCode(
   }
 }
 
+
 /**
  * Middleware to handle region selection and onboarding status.
  */
@@ -113,6 +132,7 @@ export async function middleware(request: NextRequest) {
   let cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
   const regionMap = await getRegionMap(cacheId)
+
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
