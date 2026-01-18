@@ -17,10 +17,6 @@ const urbanist = Urbanist({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
-  other: {
-    "woodmart-font":
-      "https://db.onlinewebfonts.com/c/f890eea2e91e1270ce7109e36a42260a?family=woodmart-font",
-  },
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
@@ -30,7 +26,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       data-mode="light"
       className={`${inter.variable} ${urbanist.variable}`}
     >
-      <head>
+      <head suppressHydrationWarning>
         <link
           href="https://db.onlinewebfonts.com/c/f890eea2e91e1270ce7109e36a42260a?family=woodmart-font"
           rel="stylesheet"

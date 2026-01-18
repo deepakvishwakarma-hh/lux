@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Content Container - consistent max-width and padding for content sections */
+@layer components {
+  .content-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
 /* Google Translate Widget Styles */
 .google-translate-wrapper {
   display: inline-block;
