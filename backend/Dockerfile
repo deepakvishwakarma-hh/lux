@@ -56,8 +56,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Copy production dependencies
 COPY --from=deps --chown=medusa:nodejs /server/node_modules ./node_modules
 
-# Copy built application
-COPY --from=builder --chown=medusa:nodejs /server/dist ./dist
+# Copy built application (Medusa v2 runs from source, no dist directory needed)
 COPY --from=builder --chown=medusa:nodejs /server/src ./src
 COPY --from=builder --chown=medusa:nodejs /server/public ./public
 COPY --from=builder --chown=medusa:nodejs /server/package*.json ./
