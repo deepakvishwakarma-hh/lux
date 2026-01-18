@@ -71,7 +71,7 @@ export default async function ComparePage(props: Props) {
       <div>
         <div className="w-full bg-black py-8 mb-8">
           <div className="content-container text-center text-white">
-            <h1 className="text-3xl font-bold">Comp</h1>
+            <h1 className="text-3xl font-bold">Compare</h1>
             <div className="mt-1">
               <Breadcrumbs
                 items={[
