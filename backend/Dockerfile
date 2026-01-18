@@ -12,8 +12,12 @@ RUN apk add --no-cache libc6-compat python3 make g++
 COPY package*.json ./
 COPY package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install dependencies (use npm ci if lock file exists and is valid, otherwise npm install)
+RUN if [ -f package-lock.json ]; then \
+        npm ci --only=production --prefer-offline --no-audit || npm install --only=production --prefer-offline --no-audit; \
+    else \
+        npm install --only=production --prefer-offline --no-audit; \
+    fi && \
     npm cache clean --force
 
 # Build stage
@@ -25,7 +29,12 @@ COPY package*.json ./
 COPY package-lock.json* ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+# Use npm ci if lock file exists and is valid, otherwise npm install
+RUN if [ -f package-lock.json ]; then \
+        npm ci --prefer-offline --no-audit || npm install --prefer-offline --no-audit; \
+    else \
+        npm install --prefer-offline --no-audit; \
+    fi
 
 # Copy source code
 COPY . .
