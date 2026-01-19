@@ -1,5 +1,5 @@
 ﻿services:
-  backend:
+    backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -11,7 +11,7 @@
       NODE_ENV: production
       MEDUSA_ADMIN_ONBOARDING_TYPE:   
       HOST: 0.0.0.0
-      DATABASE_URL: postgresql://postgres:AhFcwyPhEVBlAcVvJRGctLzCJEnCciSA@turntable.proxy.rlwy.net:41329/railway
+      DATABASE_URL: postgresql://Luxury2123134:KPFEbH5C6WrdLEdw@localhost:5432/luxury2123
       REDIS_URL: redis://host.docker.internal:6379
       STORE_CORS: http://localhost:8000,https://docs.medusajs.com,https://admin.luxuriousonly.com
       ADMIN_CORS: http://localhost:8000,https://docs.medusajs.com,https://admin.luxuriousonly.com
