@@ -5,31 +5,23 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# Enable Corepack for Yarn version management
-RUN corepack enable
-
 # Install build dependencies
 RUN apk add --no-cache libc6-compat python3 make g++
 
 # Copy package files
 COPY package*.json ./
-COPY yarn.lock* package-lock.json* ./
+COPY package-lock.json* ./
 
-# Install dependencies (prefer yarn if yarn.lock exists, otherwise npm)
-RUN if [ -f yarn.lock ]; then \
-      yarn install --frozen-lockfile --production=false; \
-    elif [ -f package-lock.json ]; then \
-      npm ci; \
+# Install dependencies (use npm ci if lock file exists and is valid, otherwise npm install)
+RUN if [ -f package-lock.json ]; then \
+        npm ci --legacy-peer-deps || npm install --legacy-peer-deps; \
     else \
-      npm install; \
+        npm install --legacy-peer-deps; \
     fi
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
-
-# Enable Corepack
-RUN corepack enable
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
@@ -48,11 +40,7 @@ ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application
-RUN if [ -f yarn.lock ]; then \
-      yarn build; \
-    else \
-      npm run build; \
-    fi
+RUN npm run build
 
 # Production image
 FROM base AS runner
