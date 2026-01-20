@@ -238,9 +238,9 @@ function extractMetadata(headers: string[], row: string[]): Record<string, any> 
   return metadata
 }
 
-// Currency exchange rates (USD as base)
-// These rates can be updated or fetched from an API if needed
-const EXCHANGE_RATES: Record<string, number> = {
+// Fallback currency exchange rates (USD as base)
+// Used when live rates cannot be fetched
+const FALLBACK_EXCHANGE_RATES: Record<string, number> = {
   USD: 1.0,      // Base currency
   EUR: 0.92,     // 1 USD = 0.92 EUR
   GBP: 0.79,     // 1 USD = 0.79 GBP
@@ -248,9 +248,96 @@ const EXCHANGE_RATES: Record<string, number> = {
   // Add more currencies as needed
 }
 
+// Cache for live exchange rates
+let cachedExchangeRates: Record<string, number> | null = null
+let cacheTimestamp: number = 0
+const CACHE_DURATION = 60 * 60 * 1000 // 1 hour in milliseconds
+
+// Fetch live exchange rates optimistically
+// Falls back to hardcoded rates if fetch fails
+async function fetchLiveExchangeRates(): Promise<Record<string, number>> {
+  // Return cached rates if still valid
+  const now = Date.now()
+  if (cachedExchangeRates && (now - cacheTimestamp) < CACHE_DURATION) {
+    console.log('Using cached exchange rates')
+    return cachedExchangeRates
+  }
+
+  try {
+    // Use exchangerate-api.com free tier (no API key required for basic usage)
+    // Alternative: You can use other free APIs like fixer.io, exchangerate.host, etc.
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      throw new Error(`Exchange rate API returned ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (data && data.rates && typeof data.rates === 'object') {
+      // Convert rates to our format (USD as base = 1.0)
+      const rates: Record<string, number> = {
+        USD: 1.0, // Base currency
+      }
+
+      // Add all rates from API response
+      for (const [currency, rate] of Object.entries(data.rates)) {
+        if (typeof rate === 'number' && rate > 0) {
+          rates[currency.toUpperCase()] = rate
+        }
+      }
+
+      // Cache the rates
+      cachedExchangeRates = rates
+      cacheTimestamp = now
+
+      console.log(`Successfully fetched live exchange rates for ${Object.keys(rates).length} currencies`)
+      return rates
+    } else {
+      throw new Error('Invalid exchange rate API response format')
+    }
+  } catch (error: any) {
+    // Optimistic fallback: log warning but continue with fallback rates
+    if (error.name === 'AbortError') {
+      console.warn('Exchange rate API timeout, using fallback rates')
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      console.warn(`Exchange rate API network error: ${error.message}, using fallback rates`)
+    } else {
+      console.warn(`Failed to fetch live exchange rates: ${error.message || error}, using fallback rates`)
+    }
+
+    // Return fallback rates
+    return FALLBACK_EXCHANGE_RATES
+  }
+}
+
+// Get exchange rates (live or fallback)
+// This function never throws - always returns rates
+async function getExchangeRates(): Promise<Record<string, number>> {
+  try {
+    return await fetchLiveExchangeRates()
+  } catch (error: any) {
+    // Extra safety: if fetchLiveExchangeRates somehow throws, use fallback
+    console.warn('Error in getExchangeRates, using fallback rates:', error.message || error)
+    return FALLBACK_EXCHANGE_RATES
+  }
+}
+
 // Convert USD price to target currency
-function convertCurrency(usdAmount: number, targetCurrency: string): number {
-  const rate = EXCHANGE_RATES[targetCurrency.toUpperCase()] || 1.0
+// Uses live rates if available, falls back to hardcoded rates
+async function convertCurrency(usdAmount: number, targetCurrency: string, exchangeRates?: Record<string, number>): Promise<number> {
+  const rates = exchangeRates || FALLBACK_EXCHANGE_RATES
+  const rate = rates[targetCurrency.toUpperCase()] || 1.0
   return usdAmount * rate
 }
 
@@ -476,7 +563,8 @@ async function processProductRow(
   variantRows: any[] = [],
   supportedCurrencies: string[] = ["USD"],
   fileModuleService?: any,
-  backendUrl?: string
+  backendUrl?: string,
+  exchangeRates?: Record<string, number>
 ): Promise<{ productData: any; locationStock: { locationId: string; stock: number; sku?: string }; brandId?: string } | null> {
   const { sku, name } = rowData
 
@@ -643,8 +731,8 @@ async function processProductRow(
 
   if (usdPrice > 0) {
     for (const currencyCode of supportedCurrencies) {
-      // Convert USD price to target currency
-      const convertedPrice = convertCurrency(usdPrice, currencyCode)
+      // Convert USD price to target currency using exchange rates
+      const convertedPrice = await convertCurrency(usdPrice, currencyCode, exchangeRates)
       // Store price directly in dollars (do NOT multiply by 100)
       // usdPrice is in dollars (e.g., 70), store as 70 (not 7000)
       const priceAmount = Math.round(convertedPrice * 100) / 100 // Round to 2 decimal places
@@ -704,8 +792,8 @@ async function processProductRow(
 
     if (variantUsdPrice > 0) {
       for (const currencyCode of supportedCurrencies) {
-        // Convert USD price to target currency
-        const convertedPrice = convertCurrency(variantUsdPrice, currencyCode)
+        // Convert USD price to target currency using exchange rates
+        const convertedPrice = await convertCurrency(variantUsdPrice, currencyCode, exchangeRates)
         // Store price directly in dollars (do NOT multiply by 100)
         const variantPriceAmount = Math.round(convertedPrice * 100) / 100 // Round to 2 decimal places
 
@@ -1141,6 +1229,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // Group products by name
     const productGroups = groupProductsByName(productsForGrouping)
 
+    // Fetch exchange rates optimistically (falls back to hardcoded rates if fetch fails)
+    let exchangeRates: Record<string, number>
+    try {
+      exchangeRates = await getExchangeRates()
+      console.log(`Using exchange rates for ${Object.keys(exchangeRates).length} currencies`)
+    } catch (error: any) {
+      // Extra safety: if getExchangeRates somehow throws, use fallback
+      console.warn('Error fetching exchange rates, using fallback rates:', error.message || error)
+      exchangeRates = FALLBACK_EXCHANGE_RATES
+    }
+
     // Second pass: build create arrays (grouped by name, variants based on size)
     const processingErrors: Array<{ rowIndex: number; productName: string; error: string }> = []
 
@@ -1190,7 +1289,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           variantProducts.map((vp) => vp.data), // variant data
           currencyList, // supported currencies
           fileModuleService, // File module service for image downloads
-          backendUrl // Backend URL for fixing local URLs
+          backendUrl, // Backend URL for fixing local URLs
+          exchangeRates // Exchange rates for currency conversion
         )
       } catch (rowError: any) {
         const errorMessage = rowError instanceof Error ? rowError.message : String(rowError)
