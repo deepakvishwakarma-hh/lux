@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { batchProductsWorkflow, createInventoryLevelsWorkflow, updateProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { BRAND_MODULE } from "../../../../modules/brand"
+import * as path from "path"
 
 type ImportRequestBody = {
   csv?: string
@@ -253,6 +254,176 @@ function convertCurrency(usdAmount: number, targetCurrency: string): number {
   return usdAmount * rate
 }
 
+// Download image from URL and save locally using File module service
+// This function never throws - always returns a URL (original or downloaded)
+async function downloadAndSaveImage(
+  imageUrl: string,
+  fileModuleService: any,
+  backendUrl?: string
+): Promise<string> {
+  // Validate inputs
+  if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+    console.warn('Invalid image URL provided, skipping download')
+    return imageUrl || ''
+  }
+
+  if (!fileModuleService) {
+    console.warn('File module service not available, skipping download')
+    return imageUrl
+  }
+
+  try {
+    // Skip if URL is already a local URL (starts with http://localhost or backend URL)
+    if (backendUrl && imageUrl.startsWith(backendUrl)) {
+      return imageUrl
+    }
+    if (imageUrl.startsWith('http://localhost') || imageUrl.startsWith('https://localhost')) {
+      return imageUrl
+    }
+    // Skip if URL is already a relative path (starts with /)
+    if (imageUrl.startsWith('/')) {
+      return imageUrl
+    }
+
+    // Validate URL format
+    try {
+      new URL(imageUrl)
+    } catch {
+      console.warn(`Invalid image URL format: ${imageUrl}`)
+      return imageUrl
+    }
+
+    // Download the image with timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
+    const response = await fetch(imageUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      console.warn(`Failed to download image from ${imageUrl}: ${response.status} ${response.statusText}`)
+      return imageUrl // Return original URL if download fails
+    }
+
+    // Get the image buffer - wrap in try-catch for extra safety
+    let imageBuffer: Buffer
+    try {
+      imageBuffer = Buffer.from(await response.arrayBuffer())
+    } catch (bufferError: any) {
+      console.warn(`Failed to read image buffer from ${imageUrl}:`, bufferError.message || bufferError)
+      return imageUrl
+    }
+
+    // Validate buffer size (prevent extremely large files)
+    const maxSize = 50 * 1024 * 1024 // 50MB max
+    if (imageBuffer.length > maxSize) {
+      console.warn(`Image ${imageUrl} is too large (${(imageBuffer.length / 1024 / 1024).toFixed(2)}MB), skipping download`)
+      return imageUrl
+    }
+
+    if (imageBuffer.length === 0) {
+      console.warn(`Image ${imageUrl} is empty, skipping download`)
+      return imageUrl
+    }
+
+    // Determine file extension from URL or content type
+    let fileExtension = '.jpg' // default
+    const contentType = response.headers.get('content-type')
+    if (contentType) {
+      if (contentType.includes('png')) fileExtension = '.png'
+      else if (contentType.includes('gif')) fileExtension = '.gif'
+      else if (contentType.includes('webp')) fileExtension = '.webp'
+      else if (contentType.includes('jpeg') || contentType.includes('jpg')) fileExtension = '.jpg'
+    } else {
+      // Try to get extension from URL
+      const urlPath = new URL(imageUrl).pathname
+      const ext = path.extname(urlPath).toLowerCase()
+      if (ext && ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) {
+        fileExtension = ext
+      }
+    }
+
+    // Generate unique filename
+    const timestamp = Date.now()
+    const randomSuffix = Math.random().toString(36).substring(2, 8)
+    const filename = `product-${timestamp}-${randomSuffix}${fileExtension}`
+
+    // Determine MIME type
+    let mimeType = 'image/jpeg'
+    if (fileExtension === '.png') mimeType = 'image/png'
+    else if (fileExtension === '.gif') mimeType = 'image/gif'
+    else if (fileExtension === '.webp') mimeType = 'image/webp'
+
+    // Save file using File module service - wrap in try-catch for extra safety
+    let uploadedFiles: any[]
+    try {
+      // @ts-ignore
+      uploadedFiles = await fileModuleService.createFiles([{
+        filename,
+        mimeType,
+        content: imageBuffer,
+      }])
+    } catch (saveError: any) {
+      console.warn(`Failed to save image ${imageUrl} locally:`, saveError.message || saveError)
+      return imageUrl // Return original URL if save fails
+    }
+
+    if (!uploadedFiles || uploadedFiles.length === 0) {
+      console.warn(`Failed to save image ${imageUrl} locally - no files returned`)
+      return imageUrl // Return original URL if save fails
+    }
+
+    const uploadedFile = uploadedFiles[0]
+    let fileUrl = uploadedFile.url
+
+    // Fix URL if it contains localhost or is a relative path
+    if (backendUrl) {
+      const normalizedBackendUrl = backendUrl.replace(/\/$/, '')
+
+      // If URL contains localhost or 127.0.0.1, replace it with backend URL
+      if (fileUrl.includes('localhost') || fileUrl.includes('127.0.0.1')) {
+        try {
+          const url = new URL(fileUrl)
+          const backendUrlObj = new URL(normalizedBackendUrl)
+          fileUrl = fileUrl.replace(url.origin, backendUrlObj.origin)
+        } catch (e) {
+          fileUrl = fileUrl.replace(/https?:\/\/[^/]+/, normalizedBackendUrl)
+        }
+      }
+      // If URL is a relative path, prepend backend URL
+      else if (fileUrl.startsWith('/')) {
+        fileUrl = `${normalizedBackendUrl}${fileUrl}`
+      }
+      // If URL doesn't start with http/https, prepend backend URL
+      else if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+        fileUrl = `${normalizedBackendUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`
+      }
+    }
+
+    console.log(`Downloaded and saved image: ${imageUrl} -> ${fileUrl}`)
+    return fileUrl
+  } catch (error: any) {
+    // Handle timeout and other errors gracefully - never throw, always return a URL
+    if (error.name === 'AbortError') {
+      console.warn(`Timeout downloading image from ${imageUrl} (30s timeout), using original URL`)
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      console.warn(`Network error downloading image from ${imageUrl}: ${error.message}, using original URL`)
+    } else if (error.name === 'TypeError' && error.message?.includes('fetch')) {
+      console.warn(`Fetch error downloading image from ${imageUrl}: ${error.message}, using original URL`)
+    } else {
+      console.warn(`Error downloading image from ${imageUrl}: ${error.message || error}, using original URL`)
+    }
+    // Always return original URL on any error - never throw
+    return imageUrl || ''
+  }
+}
+
 // Group products by name (same name = same product, different sizes = variants)
 function groupProductsByName(
   products: Array<{ name: string; rowIndex: number; data: any }>
@@ -303,7 +474,9 @@ async function processProductRow(
   publishedIndex: number,
   sizeIndex: number,
   variantRows: any[] = [],
-  supportedCurrencies: string[] = ["USD"]
+  supportedCurrencies: string[] = ["USD"],
+  fileModuleService?: any,
+  backendUrl?: string
 ): Promise<{ productData: any; locationStock: { locationId: string; stock: number; sku?: string }; brandId?: string } | null> {
   const { sku, name } = rowData
 
@@ -350,33 +523,75 @@ async function processProductRow(
   }
 
   // Parse images from CSV (can be pipe-separated URLs or JSON array)
+  // Wrap in try-catch to ensure image processing errors don't break product import
   let images: Array<{ url: string }> = []
   let thumbnail: string | undefined = undefined
-  if (imagesIndex !== -1) {
-    const imagesValue = row[imagesIndex]?.trim()
-    if (imagesValue) {
-      try {
-        // Try to parse as JSON first
-        const parsed = JSON.parse(imagesValue)
-        if (Array.isArray(parsed)) {
-          images = parsed.map((img: any) => {
-            const url = typeof img === "string" ? img : (img.url || img)
-            return { url }
-          })
-        } else {
-          images = [{ url: parsed }]
+  try {
+    if (imagesIndex !== -1) {
+      const imagesValue = row[imagesIndex]?.trim()
+      if (imagesValue) {
+        try {
+          // Try to parse as JSON first
+          const parsed = JSON.parse(imagesValue)
+          if (Array.isArray(parsed)) {
+            images = parsed.map((img: any) => {
+              const url = typeof img === "string" ? img : (img.url || img)
+              return { url }
+            })
+          } else {
+            images = [{ url: parsed }]
+          }
+        } catch {
+          // If not JSON, treat as pipe-separated URLs (or comma-separated)
+          const separator = imagesValue.includes("|") ? "|" : ","
+          const urls = imagesValue.split(separator).map((url) => url.trim()).filter(Boolean)
+          images = urls.map((url) => ({ url }))
         }
-      } catch {
-        // If not JSON, treat as pipe-separated URLs (or comma-separated)
-        const separator = imagesValue.includes("|") ? "|" : ","
-        const urls = imagesValue.split(separator).map((url) => url.trim()).filter(Boolean)
-        images = urls.map((url) => ({ url }))
-      }
-      // Use first image as thumbnail
-      if (images.length > 0) {
-        thumbnail = images[0].url
+
+        // Download images and save locally if fileModuleService is available
+        // Use Promise.allSettled to handle failures optimistically - continue even if some downloads fail
+        if (fileModuleService && images.length > 0) {
+          try {
+            const downloadResults = await Promise.allSettled(
+              images.map(async (img) => {
+                try {
+                  const localUrl = await downloadAndSaveImage(img.url, fileModuleService, backendUrl)
+                  return { url: localUrl }
+                } catch (error: any) {
+                  // Extra safety: if downloadAndSaveImage somehow throws, catch it here
+                  console.warn(`Failed to download image ${img.url}, using original URL:`, error.message || error)
+                  return { url: img.url } // Return original URL on any error
+                }
+              })
+            )
+            // Extract successful results or use original URL on failure
+            images = downloadResults.map((result, index) => {
+              if (result.status === 'fulfilled') {
+                return result.value
+              } else {
+                // If promise was rejected, use original URL
+                console.warn(`Image download promise rejected for ${images[index].url}, using original URL`)
+                return { url: images[index].url }
+              }
+            })
+          } catch (downloadError: any) {
+            // If entire download process fails, just use original URLs
+            console.warn(`Error during image download process, using original URLs:`, downloadError.message || downloadError)
+            // images already contains original URLs, so we can continue
+          }
+        }
+
+        // Use first image as thumbnail
+        if (images.length > 0) {
+          thumbnail = images[0].url
+        }
       }
     }
+  } catch (imageProcessingError: any) {
+    // If anything goes wrong with image processing, log and continue with empty images
+    console.warn(`Error processing images for product, continuing without images:`, imageProcessingError.message || imageProcessingError)
+    images = []
+    thumbnail = undefined
   }
 
   // Parse categories from CSV (comma-separated category names)
@@ -512,26 +727,66 @@ async function processProductRow(
     }
 
     // Parse variant images from CSV
+    // Wrap in try-catch to ensure variant image processing errors don't break product import
     let variantImages: Array<{ url: string }> = []
-    if (imagesIndex !== -1) {
-      const variantImagesValue = variantRow[imagesIndex]?.trim()
-      if (variantImagesValue) {
-        try {
-          const parsed = JSON.parse(variantImagesValue)
-          if (Array.isArray(parsed)) {
-            variantImages = parsed.map((img: any) => {
-              const url = typeof img === "string" ? img : (img.url || img)
-              return { url }
-            })
-          } else {
-            variantImages = [{ url: parsed }]
+    try {
+      if (imagesIndex !== -1) {
+        const variantImagesValue = variantRow[imagesIndex]?.trim()
+        if (variantImagesValue) {
+          try {
+            const parsed = JSON.parse(variantImagesValue)
+            if (Array.isArray(parsed)) {
+              variantImages = parsed.map((img: any) => {
+                const url = typeof img === "string" ? img : (img.url || img)
+                return { url }
+              })
+            } else {
+              variantImages = [{ url: parsed }]
+            }
+          } catch {
+            const separator = variantImagesValue.includes("|") ? "|" : ","
+            const urls = variantImagesValue.split(separator).map((url) => url.trim()).filter(Boolean)
+            variantImages = urls.map((url) => ({ url }))
           }
-        } catch {
-          const separator = variantImagesValue.includes("|") ? "|" : ","
-          const urls = variantImagesValue.split(separator).map((url) => url.trim()).filter(Boolean)
-          variantImages = urls.map((url) => ({ url }))
+
+          // Download variant images and save locally if fileModuleService is available
+          // Use Promise.allSettled to handle failures optimistically - continue even if some downloads fail
+          if (fileModuleService && variantImages.length > 0) {
+            try {
+              const downloadResults = await Promise.allSettled(
+                variantImages.map(async (img) => {
+                  try {
+                    const localUrl = await downloadAndSaveImage(img.url, fileModuleService, backendUrl)
+                    return { url: localUrl }
+                  } catch (error: any) {
+                    // Extra safety: if downloadAndSaveImage somehow throws, catch it here
+                    console.warn(`Failed to download variant image ${img.url}, using original URL:`, error.message || error)
+                    return { url: img.url } // Return original URL on any error
+                  }
+                })
+              )
+              // Extract successful results or use original URL on failure
+              variantImages = downloadResults.map((result, index) => {
+                if (result.status === 'fulfilled') {
+                  return result.value
+                } else {
+                  // If promise was rejected, use original URL
+                  console.warn(`Variant image download promise rejected for ${variantImages[index].url}, using original URL`)
+                  return { url: variantImages[index].url }
+                }
+              })
+            } catch (downloadError: any) {
+              // If entire download process fails, just use original URLs
+              console.warn(`Error during variant image download process, using original URLs:`, downloadError.message || downloadError)
+              // variantImages already contains original URLs, so we can continue
+            }
+          }
         }
       }
+    } catch (variantImageProcessingError: any) {
+      // If anything goes wrong with variant image processing, log and continue with empty images
+      console.warn(`Error processing variant images, continuing without variant images:`, variantImageProcessingError.message || variantImageProcessingError)
+      variantImages = []
     }
 
     // Add variant images to product images if they're not already there
@@ -903,6 +1158,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       // Process main product with variants
       let mainProductProcessed: any = null
       try {
+        // Resolve File module service for image downloads
+        const fileModuleService = req.scope.resolve(Modules.FILE)
+        const backendUrl = process.env.BACKEND_URL
+
         mainProductProcessed = await processProductRow(
           mainRow,
           headers,
@@ -929,7 +1188,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           publishedIndex,
           sizeIndex,
           variantProducts.map((vp) => vp.data), // variant data
-          currencyList // supported currencies
+          currencyList, // supported currencies
+          fileModuleService, // File module service for image downloads
+          backendUrl // Backend URL for fixing local URLs
         )
       } catch (rowError: any) {
         const errorMessage = rowError instanceof Error ? rowError.message : String(rowError)
