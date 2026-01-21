@@ -6,28 +6,12 @@
       args:
         NODE_ENV: production
     container_name: luxuriousonly-backend
+    env_file:
+      - ./backend/.env
     environment:
-      PORT: 9000
       NODE_ENV: production
-      MEDUSA_ADMIN_ONBOARDING_TYPE:
       HOST: 0.0.0.0
-      DATABASE_URL: postgresql://luxuryone123w:LJNk3jrLBfCZZ5ZN@localhost:5432/luxuryone123w
       REDIS_URL: redis://host.docker.internal:6379
-      STORE_CORS: http://localhost:8000,https://docs.medusajs.com,https://admin.luxuriousonly.com
-      ADMIN_CORS: http://localhost:8000,https://docs.medusajs.com,https://admin.luxuriousonly.com
-      AUTH_CORS: http://localhost:8000,https://docs.medusajs.com,https://admin.luxuriousonly.com
-      JWT_SECRET: supersecret
-      COOKIE_SECRET: supersecret
-      BACKEND_URL: https://admin.luxuriousonly.com
-      VITE_BACKEND_URL: https://admin.luxuriousonly.com
-      VITE_SERVER_ALLOWED_HOSTS: admin.luxuriousonly.com
-      MEDUSA_STOREFRONT_URL: https://www.brand.luxuriousonly.com
-      SMTP_HOST: smtp.zeptomail.in
-      SMTP_PORT: 587
-      SMTP_USER: emailapikey
-      SMTP_PASS: PHtE6r1bE+nigzEv9RUAsfbqR87yNIos9e1lfQdOt44TXKIGGk1S+NEvkTXhqB55XPVHEKGSwIxqubuUu+7UcW+4YWsaXWqyqK3sx/VYSPOZsbq6x00asV8Zf0zeVIXmcdFr0CTXuN7eNA==
-      SMTP_FROM: LuxuriousOnly <no-reply@luxuriousonly.com>
-      SMTP_SECURE: false
     ports:
       - "9000:9000"
     volumes:
@@ -60,15 +44,14 @@
         NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: pk_7ad58452281751c42b4d6ad573ba6271910609ad48199ad8b1b15ef495a365ea
         NEXT_PUBLIC_BASE_URL: https://brand.luxuriousonly.com
     container_name: luxuriousonly-frontend
+    env_file:
+      - ./frontend/.env
     environment:
       NODE_ENV: production
       PORT: 8000
       HOSTNAME: "0.0.0.0"
       NEXT_TELEMETRY_DISABLED: 1
       MEDUSA_BACKEND_URL: http://backend:9000
-      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
-      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: pk_7ad58452281751c42b4d6ad573ba6271910609ad48199ad8b1b15ef495a365ea
-      NEXT_PUBLIC_BASE_URL: https://brand.luxuriousonly.com
     ports:
       - "8000:8000"
     depends_on:
