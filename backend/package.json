@@ -14,7 +14,6 @@
   ],
   "scripts": {
     "build": "medusa build",
-    "build:script": "medusa build && node src/scripts/build-script.js",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "start": "medusa start",
     "dev": "medusa develop",
