@@ -61,28 +61,7 @@ if (process.platform === "win32") {
         console.log("Symbolic link failed, copying files instead...");
         console.log("Error:", error.message);
 
-        // Ensure publicPath is removed before creating directory
-        if (fs.existsSync(publicPath)) {
-            try {
-                const stat = fs.lstatSync(publicPath);
-                if (stat.isSymbolicLink()) {
-                    fs.unlinkSync(publicPath);
-                    console.log("Removed existing symbolic link");
-                } else {
-                    fs.rmSync(publicPath, { recursive: true, force: true });
-                    console.log("Removed existing public directory");
-                }
-            } catch (removeError) {
-                console.log("Warning: Could not remove existing public path:", removeError.message);
-            }
-        }
-
-        // Ensure parent directory exists and create public directory
-        const parentDir = path.dirname(publicPath);
-        if (!fs.existsSync(parentDir)) {
-            fs.mkdirSync(parentDir, { recursive: true });
-        }
-        
+        // Fallback to copying files
         if (!fs.existsSync(publicPath)) {
             fs.mkdirSync(publicPath, { recursive: true });
         }
