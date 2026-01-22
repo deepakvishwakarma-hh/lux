@@ -62,49 +62,89 @@ export async function GET(
       console.warn("Failed to fetch USD currency, using default 'usd':", currencyError);
     }
 
+    // Get all variant IDs to query inventory in batch
+    const allVariantIds: string[] = [];
+    products.forEach((product: any) => {
+      if (product.variants && product.variants.length > 0) {
+        product.variants.forEach((variant: any) => {
+          if (variant.id) {
+            allVariantIds.push(variant.id);
+          }
+        });
+      }
+    });
+
+    // Batch query inventory item links for all variants
+    const variantToInventoryItemMap = new Map<string, string>();
+    if (allVariantIds.length > 0) {
+      try {
+        const { data: variantLinks } = await query.graph({
+          entity: "link_product_variant_inventory_item",
+          fields: ["variant_id", "inventory_item_id"],
+          filters: {
+            variant_id: allVariantIds,
+          },
+        });
+
+        if (variantLinks && variantLinks.length > 0) {
+          variantLinks.forEach((link: any) => {
+            if (link.variant_id && link.inventory_item_id) {
+              variantToInventoryItemMap.set(link.variant_id, link.inventory_item_id);
+            }
+          });
+        }
+      } catch (error) {
+        console.warn("[products-list] Failed to query variant links:", error);
+      }
+    }
+
+    // Get all unique inventory item IDs
+    const inventoryItemIds = Array.from(new Set(variantToInventoryItemMap.values()));
+
+    // Batch query all inventory levels
+    const inventoryItemStockMap = new Map<string, number>();
+    if (inventoryItemIds.length > 0) {
+      try {
+        const { data: inventoryLevels } = await query.graph({
+          entity: "inventory_level",
+          fields: ["inventory_item_id", "stocked_quantity", "available_quantity"],
+          filters: {
+            inventory_item_id: inventoryItemIds,
+          },
+        });
+
+        if (inventoryLevels && inventoryLevels.length > 0) {
+          // Sum stock for each inventory item across all locations
+          inventoryLevels.forEach((level: any) => {
+            if (level.inventory_item_id) {
+              const currentStock = inventoryItemStockMap.get(level.inventory_item_id) || 0;
+              const quantity = level.available_quantity !== undefined && level.available_quantity !== null
+                ? level.available_quantity 
+                : (level.stocked_quantity !== undefined && level.stocked_quantity !== null ? level.stocked_quantity : 0);
+              inventoryItemStockMap.set(level.inventory_item_id, currentStock + quantity);
+            }
+          });
+        }
+      } catch (error) {
+        console.warn("[products-list] Failed to query inventory levels:", error);
+      }
+    }
+
     // Transform products to include first image, title, stock, and USD price
-    const transformedProducts = await Promise.all(
-      products.map(async (product: any) => {
+    const transformedProducts = products.map((product: any) => {
         // Get first image
         const firstImage = product.images?.[0]?.url || product.thumbnail || null;
 
-        // Calculate total stock across all variants
+        // Calculate total stock across all variants using pre-queried inventory data
         let totalStock = 0;
         if (product.variants && product.variants.length > 0) {
-          for (const variant of product.variants) {
-            try {
-              // Query inventory item link
-              const { data: variantLinks } = await query.graph({
-                entity: "link_product_variant_inventory_item",
-                fields: ["inventory_item_id"],
-                filters: {
-                  variant_id: variant.id,
-                },
-              });
-
-              if (variantLinks && variantLinks.length > 0) {
-                const inventoryItemId = (variantLinks[0] as any).inventory_item_id;
-
-                // Query inventory levels for this item
-                const { data: inventoryLevels } = await query.graph({
-                  entity: "inventory_level",
-                  fields: ["stocked_quantity", "available_quantity"],
-                  filters: {
-                    inventory_item_id: inventoryItemId,
-                  },
-                });
-
-                if (inventoryLevels && inventoryLevels.length > 0) {
-                  inventoryLevels.forEach((level: any) => {
-                    totalStock += level.available_quantity || level.stocked_quantity || 0;
-                  });
-                }
-              }
-            } catch (inventoryError) {
-              // If inventory query fails, continue with 0 stock
-              console.warn(`Failed to query inventory for variant ${variant.id}:`, inventoryError);
+          product.variants.forEach((variant: any) => {
+            const inventoryItemId = variantToInventoryItemMap.get(variant.id);
+            if (inventoryItemId) {
+              const stock = inventoryItemStockMap.get(inventoryItemId) || 0;
+              totalStock += stock;
             }
-          }
+          });
         }
 
         // Get USD price from first variant
@@ -124,6 +164,17 @@ export async function GET(
               currency: "USD",
             }).format(usdPrice);
           }
+        }
+
+        // Debug logging for stock
+        if (totalStock === 0 && product.variants && product.variants.length > 0) {
+          const variantIds = product.variants.map((v: any) => v.id).join(", ");
+          console.log(`[products-list] Product "${product.title}" (${product.id}) has ${product.variants.length} variants [${variantIds}] but stock is 0`);
+          product.variants.forEach((variant: any) => {
+            const invItemId = variantToInventoryItemMap.get(variant.id);
+            const stock = invItemId ? inventoryItemStockMap.get(invItemId) : null;
+            console.log(`  - Variant ${variant.id}: inventoryItemId=${invItemId || "none"}, stock=${stock !== null ? stock : "N/A"}`);
+          });
         }
 
         return {

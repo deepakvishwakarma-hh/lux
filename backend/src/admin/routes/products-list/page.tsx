@@ -17,13 +17,13 @@ import {
 } from "@medusajs/ui";
 import { sdk } from "../../lib/config";
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 
 type ProductListItem = {
   id: string;
   title: string;
   image: string | null;
-  stock: number;
   price: number | null;
   price_formatted: string | null;
 };
@@ -37,12 +37,12 @@ const columns = [
     cell: ({ row }) => {
       const imageUrl = row.original.image;
       return (
-        <div className="w-16 h-16 flex items-center justify-center bg-ui-bg-subtle rounded">
+        <div className="w-16 h-16 flex items-center justify-center bg-ui-bg-subtle rounded bg-white border border-gray-100">
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={row.original.title}
-              className="w-full h-full object-cover rounded"
+              className="w-full h-full object-contain rounded"
               onError={(e) => {
                 // Fallback to placeholder if image fails to load
                 const target = e.target as HTMLImageElement;
@@ -62,15 +62,13 @@ const columns = [
   columnHelper.accessor("title", {
     header: "Title",
     cell: ({ row }) => (
-      <Text className="font-medium">{row.original.title}</Text>
-    ),
-  }),
-  columnHelper.accessor("stock", {
-    header: "Stock",
-    cell: ({ row }) => (
-      <Text className={row.original.stock === 0 ? "text-red-600" : ""}>
-        {row.original.stock}
-      </Text>
+      <Link 
+        to={`/products/${row.original.id}`}
+        className="font-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover hover:underline"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {row.original.title}
+      </Link>
     ),
   }),
   columnHelper.accessor("price_formatted", {
@@ -153,6 +151,7 @@ const useCommands = (
 const limit = 50;
 
 const ProductsListPage = () => {
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState<DataTablePaginationState>({
     pageSize: limit,
     pageIndex: 0,
@@ -202,30 +201,60 @@ const ProductsListPage = () => {
     },
   });
 
+  // Handle row clicks
+  const handleRowClick = (productId: string) => {
+    navigate(`/products/${productId}`);
+  };
+
   const hasProducts = !isLoading && (data?.count ?? 0) > 0;
 
   return (
     <Container>
-      <DataTable instance={table}>
-        <DataTable.Toolbar className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <Heading>Products</Heading>
-        </DataTable.Toolbar>
-        {hasProducts ? (
-          <>
-            <DataTable.Table />
-            <DataTable.Pagination />
-            <DataTable.CommandBar
-              selectedLabel={(count) => `${count} selected`}
-            />
-          </>
-        ) : (
-          !isLoading && (
-            <div className="py-12 flex justify-center">
-              <Text className="text-ui-fg-subtle">No products found</Text>
-            </div>
-          )
-        )}
-      </DataTable>
+      <div className="flex flex-col gap-4 h-[calc(100vh-8rem)]">
+        <DataTable instance={table}>
+          <DataTable.Toolbar className="flex-shrink-0 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <Heading>Products</Heading>
+          </DataTable.Toolbar>
+          {hasProducts ? (
+            <>
+              <div className="flex-1 min-h-0 overflow-hidden border border-ui-border-base rounded-lg bg-ui-bg-base shadow-sm">
+                <div 
+                  className="h-full overflow-y-auto overflow-x-auto [&_tbody_tr]:cursor-pointer [&_tbody_tr]:hover:bg-ui-bg-subtle-hover [&_tbody_tr]:transition-colors"
+                  onClick={(e) => {
+                    // Find the closest table row (skip header row)
+                    const target = (e.target as HTMLElement).closest('tbody tr');
+                    if (target && !(e.target as HTMLElement).closest('a, button, input, label')) {
+                      // Get the row data from the table instance
+                      const rowElement = target;
+                      const rowIndex = Array.from(target.parentElement?.children || []).indexOf(rowElement);
+                      const product = data?.products?.[rowIndex];
+                      if (product) {
+                        handleRowClick(product.id);
+                      }
+                    }
+                  }}
+                >
+                  <DataTable.Table />
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <DataTable.Pagination />
+              </div>
+              <div className="flex-shrink-0">
+                <DataTable.CommandBar
+                  selectedLabel={(count) => `${count} selected`}
+                />
+              </div>
+            </>
+          ) : (
+            !isLoading && (
+              <div className="py-12 flex justify-center">
+                <Text className="text-ui-fg-subtle">No products found</Text>
+              </div>
+            )
+          )}
+        </DataTable>
+      </div>
       <Toaster />
     </Container>
   );
