@@ -128,7 +128,7 @@ const ProductInfo = ({
               role="link"
               aria-label={`View brand ${brand.name} in a new tab`}
             >
-              {brand.name}
+             { brand.image_url ? <Image src={brand.image_url} alt={brand.name} width={100} height={100} /> : brand.name}
             </LocalizedClientLink>
           </div>
         )}

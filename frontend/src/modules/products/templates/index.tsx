@@ -63,17 +63,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           >
             Home
           </LocalizedClientLink>
-          {product.collection && (
-            <>
-              <span>/</span>
-              <LocalizedClientLink
-                href={`/collections/${product.collection.handle}`}
-                className="hover:text-ui-fg-base transition-colors"
-              >
-                {product.collection.title}
-              </LocalizedClientLink>
-            </>
-          )}
           <span>/</span>
           <span className="text-ui-fg-base">{product.title}</span>
         </nav>

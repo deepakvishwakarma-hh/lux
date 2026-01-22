@@ -33,6 +33,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "admin.luxuriousonly.com",
+      },
+      {
+        protocol: "https",
         hostname: "luxuryeyewear.in",
       },
       {
