@@ -341,6 +341,11 @@ export default defineMiddlewares({
         }),
       ],
     },
+    {
+      matcher: "/admin/products/import",
+      method: ["POST"],
+      bodyParser: { sizeLimit: "15mb" }, // Increase limit to 15MB for large CSV imports
+    },
 
 
   ],
