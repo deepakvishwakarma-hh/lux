@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "luxurious-backend",
+      name: "be",
       cwd: "./backend",
       script: "npm",
       args: "run start",
@@ -10,7 +10,7 @@ module.exports = {
       },
     },
     {
-      name: "luxurious-frontend",
+      name: "fe",
       cwd: "./frontend",
       script: "npm",
       args: "run start",
