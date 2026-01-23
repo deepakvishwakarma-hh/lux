@@ -8,7 +8,7 @@ export const websiteConfig = {
     // Brand Identity
     name: "brand.luxuriousonly.com",
     tagline: "Brand Luxurious Only",
-    shortName: "Brand Luxurious Only",
+    shortName: "luxuriousonly",
     displayName: "brand.luxuriousonly.com",
 
     // Contact Information
