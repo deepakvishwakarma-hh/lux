@@ -119,7 +119,7 @@ const REQUIRED_FIELDS = [
   "frame_material",
   "size",
   "lens_width",
-  "leng_bridge",
+  "lens_bridge",
   "arm_length",
   "condition",
   "keywords",

@@ -220,7 +220,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       "frame_material",
       "size",
       "lens_width",
-      "leng_bridge",
+      "lens_bridge",
       "arm_length",
       "condition",
       "keywords",
@@ -325,7 +325,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       const frameMaterial = getMetadataValue(metadata, "frame_material") || ""
       const size = getMetadataValue(metadata, "size") || ""
       const lensWidth = getMetadataValue(metadata, "lens_width") || ""
-      const lengBridge = getMetadataValue(metadata, "leng_bridge") || ""
+      const lensBridge = getMetadataValue(metadata, "lens_bridge") || ""
       const armLength = getMetadataValue(metadata, "arm_length") || ""
       const condition = getMetadataValue(metadata, "condition") || ""
       const keywords = getMetadataValue(metadata, "keywords") || ""
@@ -368,7 +368,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         frameMaterial, // frame_material
         size, // size
         lensWidth, // lens_width
-        lengBridge, // leng_bridge
+        lensBridge, // lens_bridge
         armLength, // arm_length
         condition, // condition
         keywords, // keywords
