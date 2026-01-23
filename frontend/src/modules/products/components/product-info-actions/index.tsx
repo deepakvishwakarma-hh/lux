@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@medusajs/ui"
 import Modal from "@modules/common/components/modal"
 import useToggleState from "@lib/hooks/use-toggle-state"
-import Input from "@modules/common/components/input"
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 import { sdk } from "@lib/config"
 import { FiShare2, FiCopy } from "react-icons/fi"
@@ -300,6 +299,7 @@ const ProductInfoActions = ({ productId, product }: ProductInfoActionsProps) => 
         isOpen={askQuestionState.state}
         close={askQuestionState.close}
         productId={productId}
+        type="question"
       />
     </div>
   )
@@ -309,13 +309,15 @@ type AskQuestionModalProps = {
   isOpen: boolean
   close: () => void
   productId: string
+  type?: "question" | "custom_delivery" | "customize_product"
 }
 
-const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) => {
+const AskQuestionModal = ({ isOpen, close, productId, type = "question" }: AskQuestionModalProps) => {
   const [formData, setFormData] = useState({
-    type: "question" as "question" | "custom_delivery" | "customize_product",
+    type: type as "question" | "custom_delivery" | "customize_product",
     name: "",
     email: "",
+    customer_mobile: "",
     subject: "",
     message: "",
     address_1: "",
@@ -329,6 +331,14 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Update formData.type when type prop changes
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      type: type,
+    }))
+  }, [type])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -346,6 +356,28 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
     setError(null)
 
     try {
+      // For question type, set address fields to "n/a"
+      const isQuestionType = formData.type === "question"
+      const addressData = isQuestionType
+        ? {
+            address_1: "n/a",
+            address_2: "n/a",
+            city: "n/a",
+            state: "n/a",
+            postal_code: "n/a",
+            country: "n/a",
+            country_code: "n/a",
+          }
+        : {
+            address_1: formData.address_1,
+            address_2: formData.address_2 || null,
+            city: formData.city,
+            state: formData.state || null,
+            postal_code: formData.postal_code,
+            country: formData.country,
+            country_code: formData.country_code || null,
+          }
+
       const response = await sdk.client.fetch<{ product_query: any }>(
         `/store/product-queries`,
         {
@@ -355,17 +387,10 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
             product_id: productId,
             customer_name: formData.name,
             customer_email: formData.email,
+            customer_mobile: formData.customer_mobile,
             subject: formData.subject,
             message: formData.message,
-            address: {
-              address_1: formData.address_1,
-              address_2: formData.address_2 || null,
-              city: formData.city,
-              state: formData.state || null,
-              postal_code: formData.postal_code,
-              country: formData.country,
-              country_code: formData.country_code || null,
-            },
+            address: addressData,
           },
         }
       )
@@ -374,9 +399,10 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
       setTimeout(() => {
         setSubmitSuccess(false)
         setFormData({
-          type: "question",
+          type: type,
           name: "",
           email: "",
+          customer_mobile: "",
           subject: "",
           message: "",
           address_1: "",
@@ -400,7 +426,7 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
 
   return (
     <Modal isOpen={isOpen} close={close} size="large">
-      <Modal.Title>Ask a Question / Request</Modal.Title>
+      <Modal.Title>Ask a Question</Modal.Title>
       <Modal.Body>
         <div className="w-full max-w-full overflow-hidden">
           {submitSuccess ? (
@@ -413,62 +439,88 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
               </p>
             </div>
           ) : (
-            <div className="max-h-[60vh] overflow-y-auto pr-2">
+            <div className="max-h-[60vh] overflow-y-auto p-2">
               <form id="product-query-form" onSubmit={handleSubmit} className="space-y-3 py-2">
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
                     {error}
                   </div>
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium mb-1 text-ui-fg-base"
+                    >
+                      Your Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="Enter your full name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium mb-1 text-ui-fg-base"
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      placeholder="Enter your email address"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                    />
+                  </div>
+                </div>
                 
                 <div>
                   <label
-                    htmlFor="type"
+                    htmlFor="customer_mobile"
                     className="block text-sm font-medium mb-1 text-ui-fg-base"
                   >
-                    Query Type <span className="text-red-500">*</span>
+                    Mobile Number <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    id="type"
-                    name="type"
-                    value={formData.type}
+                  <input
+                    id="customer_mobile"
+                    name="customer_mobile"
+                    type="tel"
+                    value={formData.customer_mobile}
                     onChange={handleChange}
                     required
+                    placeholder="Enter your mobile number"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
-                  >
-                    <option value="question">Question</option>
-                    <option value="custom_delivery">Custom Delivery Request</option>
-                    <option value="customize_product">Product Customization Request</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input
-                    name="name"
-                    type="text"
-                    label="Your Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                  <Input
-                    name="email"
-                    type="email"
-                    label="Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
                   />
                 </div>
                 
-                <div className="grid grid-cols-1 gap-3">
-                  <Input
+                <div>
+                  <label
+                    htmlFor="subject"
+                    className="block text-sm font-medium mb-1 text-ui-fg-base"
+                  >
+                    Subject <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="subject"
                     name="subject"
                     type="text"
-                    label="Subject"
                     value={formData.subject}
                     onChange={handleChange}
                     required
+                    placeholder="Enter the subject of your question"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
                   />
                 </div>
                 
@@ -491,69 +543,141 @@ const AskQuestionModal = ({ isOpen, close, productId }: AskQuestionModalProps) =
                   />
                 </div>
 
-                <div className="border-t pt-3 mt-3">
-                  <h3 className="text-sm font-semibold mb-3 text-ui-fg-base">Address</h3>
-                  <div className="space-y-3">
-                    <Input
-                      name="address_1"
-                      type="text"
-                      label="Address Line 1"
-                      value={formData.address_1}
-                      onChange={handleChange}
-                      required
-                    />
-                    <Input
-                      name="address_2"
-                      type="text"
-                      label="Address Line 2 (Optional)"
-                      value={formData.address_2}
-                      onChange={handleChange}
-                    />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        name="city"
-                        type="text"
-                        label="City"
-                        value={formData.city}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        name="state"
-                        type="text"
-                        label="State/Province"
-                        value={formData.state}
-                        onChange={handleChange}
-                      />
+                {/* Only show address fields for non-question types */}
+                {formData.type !== "question" && (
+                  <div className="border-t pt-3 mt-3">
+                    <h3 className="text-sm font-semibold mb-3 text-ui-fg-base">Address</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label
+                          htmlFor="address_1"
+                          className="block text-sm font-medium mb-1 text-ui-fg-base"
+                        >
+                          Address Line 1 <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="address_1"
+                          name="address_1"
+                          type="text"
+                          value={formData.address_1}
+                          onChange={handleChange}
+                          required
+                          placeholder="Street address, P.O. box"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="address_2"
+                          className="block text-sm font-medium mb-1 text-ui-fg-base"
+                        >
+                          Address Line 2 (Optional)
+                        </label>
+                        <input
+                          id="address_2"
+                          name="address_2"
+                          type="text"
+                          value={formData.address_2}
+                          onChange={handleChange}
+                          placeholder="Apartment, suite, unit, building, floor, etc."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label
+                            htmlFor="city"
+                            className="block text-sm font-medium mb-1 text-ui-fg-base"
+                          >
+                            City <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="city"
+                            name="city"
+                            type="text"
+                            value={formData.city}
+                            onChange={handleChange}
+                            required
+                            placeholder="Enter city"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="state"
+                            className="block text-sm font-medium mb-1 text-ui-fg-base"
+                          >
+                            State/Province
+                          </label>
+                          <input
+                            id="state"
+                            name="state"
+                            type="text"
+                            value={formData.state}
+                            onChange={handleChange}
+                            placeholder="Enter state or province"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label
+                            htmlFor="postal_code"
+                            className="block text-sm font-medium mb-1 text-ui-fg-base"
+                          >
+                            Postal Code <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="postal_code"
+                            name="postal_code"
+                            type="text"
+                            value={formData.postal_code}
+                            onChange={handleChange}
+                            required
+                            placeholder="Enter postal code"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="country"
+                            className="block text-sm font-medium mb-1 text-ui-fg-base"
+                          >
+                            Country <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="country"
+                            name="country"
+                            type="text"
+                            value={formData.country}
+                            onChange={handleChange}
+                            required
+                            placeholder="Enter country"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="country_code"
+                          className="block text-sm font-medium mb-1 text-ui-fg-base"
+                        >
+                          Country Code (Optional)
+                        </label>
+                        <input
+                          id="country_code"
+                          name="country_code"
+                          type="text"
+                          value={formData.country_code}
+                          onChange={handleChange}
+                          placeholder="e.g., +1, +44"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
+                        />
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        name="postal_code"
-                        type="text"
-                        label="Postal Code"
-                        value={formData.postal_code}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        name="country"
-                        type="text"
-                        label="Country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    <Input
-                      name="country_code"
-                      type="text"
-                      label="Country Code (Optional)"
-                      value={formData.country_code}
-                      onChange={handleChange}
-  
-                    />
                   </div>
-                </div>
+                )}
               </form>
             </div>
           )}
