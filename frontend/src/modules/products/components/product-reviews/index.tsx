@@ -43,27 +43,41 @@ function ReviewItem({ review }: { review: Review }) {
   })
 
   return (
-    <div className="h-full p-3 sm:p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div className="h-full p-4 sm:p-5 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200">
       <div className="flex flex-col h-full">
-        <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+        {/* Header: Name and Date */}
+        <div className="flex items-start justify-between mb-3 gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-              <Text className="font-semibold text-gray-900 text-xs sm:text-sm truncate">
-                {review.first_name} {review.last_name}
-              </Text>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs sm:text-sm font-semibold text-gray-600 uppercase">
+                  {review.first_name?.[0] || "U"}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <Text className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                  {review.first_name} {review.last_name}
+                </Text>
+                <Text className="text-xs text-gray-500 mt-0.5">
+                  {formattedDate}
+                </Text>
+              </div>
             </div>
-            <StarRating rating={review.rating} />
+            <div className="ml-10 sm:ml-12">
+              <StarRating rating={review.rating} />
+            </div>
           </div>
-          <Text className="text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">
-            {formattedDate}
-          </Text>
         </div>
+        
+        {/* Review Title */}
         {review.title && (
-          <Text className="text-sm sm:text-base font-medium text-gray-800 mb-1 sm:mb-2 line-clamp-2">
+          <Text className="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
             {review.title}
           </Text>
         )}
-        <Text className="text-xs sm:text-sm text-gray-700 leading-relaxed flex-1 line-clamp-4">
+        
+        {/* Review Content */}
+        <Text className="text-sm sm:text-base text-gray-700 leading-relaxed flex-1 line-clamp-5">
           {review.content}
         </Text>
       </div>
@@ -157,8 +171,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   if (isLoading) {
     return (
       <div className="product-page-constraint pb-4">
-        <div className="flex flex-col mt-3 sm:mt-5 mb-3 sm:mb-5">
-          <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
+        <div className="flex flex-col mt-5 mb-5">
+          <span className="text-2xl font-semibold text-gray-700 font-urbanist">
             Reviews
           </span>
         </div>
@@ -174,8 +188,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   if (error) {
     return (
       <div className="product-page-constraint pb-5">
-        <div className="flex flex-col mt-3 sm:mt-5 mb-1 sm:mb-3">
-          <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
+        <div className="flex flex-col mt-5 mb-5">
+          <span className="text-2xl font-semibold text-gray-700 font-urbanist">
             Reviews
           </span>
         </div>
@@ -186,8 +200,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
   return (
     <div className="product-page-constraint pb-10">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 sm:mt-5 mb-3 sm:mb-5 gap-3 sm:gap-4">
-        <span className="text-lg sm:text-2xl font-urbanist font-semibold text-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-5 mb-5 gap-3 sm:gap-4">
+        <span className="text-2xl font-semibold text-gray-700 font-urbanist">
           Reviews
         </span>
 
@@ -202,14 +216,16 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
       {/* Average Rating Summary */}
       {count > 0 && (
-        <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-200">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="text-3xl sm:text-4xl font-bold text-gray-900">
-              {averageRating.toFixed(1)}
+        <div className="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-200">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 shadow-md">
+              <div className="text-2xl sm:text-3xl font-bold text-white">
+                {averageRating.toFixed(1)}
+              </div>
             </div>
-            <div>
+            <div className="flex-1">
               <StarRating rating={Math.round(averageRating)} />
-              <Text className="text-xs sm:text-sm text-gray-600 mt-1">
+              <Text className="text-sm sm:text-base text-gray-700 mt-2 font-medium">
                 Based on {count} {count === 1 ? "review" : "reviews"}
               </Text>
             </div>
@@ -219,10 +235,10 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
       {/* Reviews Carousel */}
       {reviews.length > 0 ? (
-        <div className="mb-2 sm:mb-4">
+        <div className="mb-4 sm:mb-6">
           <Swiper
             modules={[Pagination]}
-            spaceBetween={12}
+            spaceBetween={16}
             slidesPerView={1}
             slidesPerGroup={1}
             pagination={{
@@ -234,13 +250,14 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               640: {
                 slidesPerView: 2,
                 slidesPerGroup: 2,
+                spaceBetween: 16,
               },
               1024: {
                 slidesPerView: 3,
                 slidesPerGroup: 3,
+                spaceBetween: 20,
               },
             }}
-
             className="reviews-carousel"
           >
             {reviews.map((review) => (
@@ -251,13 +268,9 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
           </Swiper>
 
           {/* Centered pagination placed after the cards */}
-          <div className="flex items-center justify-center mt-2">
+          <div className="flex items-center justify-center mt-4 sm:mt-6">
             <div className="reviews-pagination"></div>
           </div>
-
-
-
-          
         </div>
       ) : (
         <div className="mb-4 sm:mb-6 py-6 sm:py-8 text-center">

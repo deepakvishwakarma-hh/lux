@@ -22,7 +22,7 @@ export default function ProductPrice({
   }
 
   return (
-    <div className="flex gap-2 text-ui-fg-base items-center font-urbanist font-bold ">
+    <div className="flex gap-2 text-ui-fg-base items-center font-bold font-urbanist">
       <span className={clx("text-2xl", {})}>
         {!variant && "From "}
         <span

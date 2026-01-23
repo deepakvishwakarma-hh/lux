@@ -238,7 +238,7 @@ const ProductInfoActions = ({ productId, product }: ProductInfoActionsProps) => 
       >
         <Modal.Title>Delivery & Return</Modal.Title>
         <Modal.Body>
-          <div className="w-full py-6 space-y-6">
+          <div className="w-full max-h-[60vh] overflow-y-auto py-6 space-y-6 pr-2">
             <div>
               <h3 className="font-semibold text-base mb-3">Delivery</h3>
               <div className="text-small-regular text-ui-fg-base space-y-3">

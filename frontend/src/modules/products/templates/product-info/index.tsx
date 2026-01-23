@@ -13,6 +13,8 @@ type ProductInfoProps = {
   brand: Brand | null
   reviewSummary: ReviewsResponse | null
   availability: ProductAvailabilityResponse | null
+  region: HttpTypes.StoreRegion
+  countryCode: string
 }
 
 // Helper function to check if a variant is in stock
@@ -84,6 +86,8 @@ const ProductInfo = ({
   brand,
   reviewSummary,
   availability,
+  region,
+  countryCode,
 }: ProductInfoProps) => {
   // Check stock availability from product data
   const isInStock = (() => {
@@ -97,8 +101,48 @@ const ProductInfo = ({
   const hasBackorder =
     product.variants?.some((variant) => variant.allow_backorder) ?? false
 
-  // Product is available if region is available AND (in stock OR has backorder)
+  // Check region availability first
   const regionAvailable = availability?.region_available ?? true
+
+  // Get region display name
+  const regionName = region?.countries?.find((c) => c.iso_2 === countryCode)?.display_name || 
+                     region?.name || 
+                     countryCode.toUpperCase()
+
+  // Determine availability status
+  const getAvailabilityStatus = () => {
+    // First check: Is product available in this region?
+    if (!regionAvailable) {
+      return { 
+        text: "Not Available in Your Region", 
+        color: "text-red-700", 
+        bg: "bg-red-50", 
+        dot: "bg-red-500" 
+      }
+    }
+    
+    // Second check: Stock status (only if available in region)
+    if (isInStock) {
+      return { 
+        text: "In Stock", 
+        color: "text-green-700", 
+        bg: "bg-green-50", 
+        dot: "bg-green-500" 
+      }
+    }
+    
+    // Out of stock (but available in region)
+    return { 
+      text: "Out of Stock", 
+      color: "text-red-700", 
+      bg: "bg-red-50", 
+      dot: "bg-red-500" 
+    }
+  }
+
+  const availabilityStatus = getAvailabilityStatus()
+  
+  // Product is available if region is available AND (in stock OR has backorder)
   const isAvailable = regionAvailable && (isInStock || hasBackorder)
 
   // Use ETA from region metadata if available, otherwise calculate from product metadata based on stock status
@@ -133,72 +177,87 @@ const ProductInfo = ({
   })()
 
   return (
-    <div id="product-info">
-      <header className="mb-3">
+    <div id="product-info" className="space-y-6">
+      <header className="space-y-4">
         {brand && (
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-semibold text-ui-fg-subtle">
-              Brand :
+          <div className="flex items-center gap-3 pb-3 border-b border-gray-200">
+            <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Brand
             </span>
-
             <LocalizedClientLink
               href={`/brands/${brand.slug || brand.id}`}
-              className="text-sm font-semibold text-ui-fg-base hover:underline hover:text-ui-fg-base transition-colors"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               target="_blank"
               rel="noopener noreferrer"
               role="link"
               aria-label={`View brand ${brand.name} in a new tab`}
             >
-             { brand.image_url ? <Image src={brand.image_url} alt={brand.name} width={100} height={100} /> : brand.name}
+              {brand.image_url ? (
+                <Image 
+                  src={brand.image_url} 
+                  alt={brand.name} 
+                  width={80} 
+                  height={80}
+                  className="object-contain max-h-12 w-auto"
+                />
+              ) : (
+                <span className="text-sm sm:text-base font-semibold text-gray-900 font-urbanist">
+                  {brand.name}
+                </span>
+              )}
             </LocalizedClientLink>
           </div>
         )}
 
-
-        <div className="flex flex-col gap-y-2">
+        <div className="space-y-1">
           <Heading
             level="h1"
-            className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight sm:leading-9 md:leading-10 text-ui-fg-base pr-2 sm:pr-5 font-urbanist break-words overflow-hidden line-clamp-1 sm:line-clamp-3"
+            className="text-lg sm:text-xl md:text-2xl font-bold leading-tight text-gray-900 break-words font-urbanist"
             data-testid="product-title"
           >
             {product.title}
           </Heading>
 
           {product.subtitle && (
-            <p className="text-sm sm:text-base text-ui-fg-subtle font-medium">
+            <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed">
               {product.subtitle}
             </p>
           )}
 
-          <p className="text-sm font-medium">Item No : {itemNo}</p>
+          {/* Review Summary - Inline with title/subtitle */}
+          <div className="pt-2">
+            <ProductReviewSummary reviewSummary={reviewSummary} />
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
+            <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Item No:
+            </span>
+            <span className="text-sm sm:text-base font-semibold text-gray-900 font-urbanist">
+              {itemNo}
+            </span>
+          </div>
         </div>
       </header>
 
-      <div className="flex flex-col gap-y-3">
-        {/* Review Summary */}
-        <ProductReviewSummary reviewSummary={reviewSummary} />
+      <div className="space-y-4 pt-4 border-t border-gray-200">
         {/* Availability Status */}
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-md border ${availabilityStatus.bg} border-gray-200`}>
           <div
-            className={`w-3 h-3 rounded-full ${isAvailable ? "bg-green-500" : "bg-red-500"
-              }`}
+            className={`w-2 h-2 rounded-full flex-shrink-0 ${availabilityStatus.dot}`}
             aria-hidden="true"
           />
-          <p
-            className={`text-sm font-medium ${isAvailable ? "text-green-700" : "text-red-700"
-              }`}
-            data-testid="product-availability-status"
-          >
-            {isAvailable ? (
-              <>Available</>
-            ) : (
-              "This item is not available"
-            )}
-          </p>
+          <span className={`text-xs font-medium ${availabilityStatus.color}`}>
+            {availabilityStatus.text}
+          </span>
         </div>
 
         {/* Availability Details - Expected Delivery Date */}
-        {isAvailable && eta && <AvailabilityDetails eta={eta} />}
+        {isAvailable && eta && (
+          <div className="pb-2">
+            <AvailabilityDetails eta={eta} />
+          </div>
+        )}
       </div>
     </div>
   )

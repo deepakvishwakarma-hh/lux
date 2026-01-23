@@ -54,7 +54,7 @@ const ProductTabs = ({
   ]
 
   return (
-    <div className="w-full mt-3">
+    <div className="w-full mt-6 border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm">
       <Accordion type="multiple">
         {tabs.map((tab, i) => (
           <Accordion.Item
@@ -138,17 +138,26 @@ const ProductInfoTab = ({ product, visibleFields, brand }: ProductTabProps) => {
       : []
 
   return (
-    <div className="text-small-regular border border-gray-200">
-      <div className="flex flex-col">
+    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+      <div className="flex flex-col divide-y divide-gray-100">
         {fieldsToRender.length > 0 ? (
           fieldsToRender.map((field, index) => (
-            <div key={index} className="flex flex-row gap-4 even:border-y">
-              <span className="font-semibold min-w-[50%] p-2">{field.key}</span>
-              <span className="text-ui-fg-base border-l p-2">{field.value}</span>
+            <div 
+              key={index} 
+              className="flex flex-col sm:flex-row gap-2 sm:gap-4 px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors duration-150"
+            >
+              <span className="font-semibold text-gray-700 min-w-[40%] sm:min-w-[35%] text-sm sm:text-base font-urbanist">
+                {field.key}
+              </span>
+              <span className="text-gray-900 sm:border-l sm:border-gray-200 sm:pl-4 sm:ml-4 text-sm sm:text-base leading-relaxed">
+                {field.value}
+              </span>
             </div>
           ))
         ) : (
-          <div className="p-4 text-gray-500">No details available</div>
+          <div className="p-8 text-center text-gray-500 text-sm">
+            No details available
+          </div>
         )}
       </div>
     </div>
@@ -156,8 +165,10 @@ const ProductInfoTab = ({ product, visibleFields, brand }: ProductTabProps) => {
 }
 const ProductDescriptionTab = ({ product }: ProductTabProps) => {
   return (
-    <div className="text-sm text-gray-700 py-8">
-      <p>{product.description}</p>
+    <div className="text-sm sm:text-base text-gray-700 py-6 px-2 leading-relaxed">
+      <div className="prose prose-sm max-w-none">
+        <p className="whitespace-pre-wrap">{product.description}</p>
+      </div>
     </div>
   )
 }

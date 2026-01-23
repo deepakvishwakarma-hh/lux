@@ -27,13 +27,13 @@ const Footer = () => {
 
   return (
     <footer className="w-full bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="px-5 md:px-5">
         {/* ================= TOP SECTION ================= */}
         <div className="py-8 lg:py-12 border-b border-gray-800">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* LEFT: Brand & About Content */}
             <div>
-              <h2 className="text-3xl font-bold uppercase mb-2">
+              <h2 className="text-3xl font-bold uppercase mb-2 font-urbanist">
                 {websiteConfig.shortName}
               </h2>
               <div className="h-px bg-gray-700 w-16 mb-3"></div>
@@ -56,7 +56,7 @@ const Footer = () => {
 
             {/* RIGHT: Newsletter */}
             <div>
-              <h3 className="text-white font-semibold text-lg mb-4">
+              <h3 className="text-white font-semibold text-lg mb-4 font-urbanist">
                 Subscribe for exclusive offers
               </h3>
               <form
@@ -97,7 +97,7 @@ const Footer = () => {
           <div className="hidden lg:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* INFORMATION */}
             <div>
-              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase">
+              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase font-urbanist">
                 Information
               </h4>
               <ul className="space-y-2 text-sm">
@@ -123,7 +123,7 @@ const Footer = () => {
 
             {/* POPULAR BRANDS */}
             <div>
-              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase">
+              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase font-urbanist">
                 Popular Brands
               </h4>
               <ul className="space-y-2 text-sm">
@@ -157,7 +157,7 @@ const Footer = () => {
 
             {/* QUICK SHOP */}
             <div>
-              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase">
+              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase font-urbanist">
                 Quick Shop
               </h4>
               <ul className="space-y-2 text-sm">
@@ -184,7 +184,7 @@ const Footer = () => {
 
             {/* QUICK LINKS */}
             <div>
-              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase">
+              <h4 className="text-gray-400 font-semibold text-sm mb-4 uppercase font-urbanist">
                 Quick Links
               </h4>
               <ul className="space-y-2 text-sm">
@@ -215,7 +215,7 @@ const Footer = () => {
                 onClick={informationState.toggle}
                 className="w-full flex items-center justify-between text-left"
               >
-                <h4 className="text-gray-400 font-semibold text-sm uppercase">
+                <h4 className="text-gray-400 font-semibold text-sm uppercase font-urbanist">
                   Information
                 </h4>
                 <IoChevronDown
@@ -253,7 +253,7 @@ const Footer = () => {
                 onClick={popularBrandsState.toggle}
                 className="w-full flex items-center justify-between text-left"
               >
-                <h4 className="text-gray-400 font-semibold text-sm uppercase">
+                <h4 className="text-gray-400 font-semibold text-sm uppercase font-urbanist">
                   Popular Brands
                 </h4>
                 <IoChevronDown
@@ -299,7 +299,7 @@ const Footer = () => {
                 onClick={quickShopState.toggle}
                 className="w-full flex items-center justify-between text-left"
               >
-                <h4 className="text-gray-400 font-semibold text-sm uppercase">
+                <h4 className="text-gray-400 font-semibold text-sm uppercase font-urbanist">
                   Quick Shop
                 </h4>
                 <IoChevronDown
@@ -338,7 +338,7 @@ const Footer = () => {
                 onClick={quickLinksState.toggle}
                 className="w-full flex items-center justify-between text-left"
               >
-                <h4 className="text-gray-400 font-semibold text-sm uppercase">
+                <h4 className="text-gray-400 font-semibold text-sm uppercase font-urbanist">
                   Quick Links
                 </h4>
                 <IoChevronDown

@@ -27,13 +27,25 @@ function StarRating({ rating }: { rating: number }) {
 export default function ProductReviewSummary({
   reviewSummary,
 }: ProductReviewSummaryProps) {
-  // If no reviews, don't show anything
+  // If no reviews, show 0 stars with zero review text
   if (
     !reviewSummary ||
     reviewSummary.count === 0 ||
     reviewSummary.average_rating === 0
   ) {
-    return null
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <StarRating rating={0} />
+          <span className="text-sm font-semibold text-gray-900">
+            0.0
+          </span>
+        </div>
+        <span className="text-sm text-gray-600">
+          (zero review)
+        </span>
+      </div>
+    )
   }
 
   return (

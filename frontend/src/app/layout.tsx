@@ -11,6 +11,7 @@ const inter = Inter({
 
 const urbanist = Urbanist({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-urbanist",
   display: "swap",
 })

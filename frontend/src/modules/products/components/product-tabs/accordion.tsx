@@ -47,24 +47,24 @@ const Item: React.FC<AccordionItemProps> = ({
     <AccordionPrimitive.Item
       {...props}
       className={clx(
-        "border-grey-20 group border-t last:mb-0 last:border-b",
-        "py-3",
+        "border-gray-200 group border-t first:border-t-0 last:mb-0",
+        "py-2",
         className
       )}
     >
-      <AccordionPrimitive.Header className="px-1">
-        <AccordionPrimitive.Trigger className="w-full text-left hover:bg-gray-50 rounded-md transition-colors cursor-pointer">
+      <AccordionPrimitive.Header className="px-2 sm:px-4">
+        <AccordionPrimitive.Trigger className="w-full text-left hover:bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer py-3 px-2 -mx-2">
           <div className="flex flex-col">
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-4">
-                <Text className="text-[14px] font-semibold text-gray-700">
+                <Text className="text-base sm:text-lg font-semibold text-gray-900 font-urbanist">
                   {title}
                 </Text>
               </div>
               {customTrigger || <MorphingTrigger />}
             </div>
             {subtitle && (
-              <Text as="span" size="small" className="mt-1">
+              <Text as="span" size="small" className="mt-1 text-gray-600">
                 {subtitle}
               </Text>
             )}
@@ -74,11 +74,11 @@ const Item: React.FC<AccordionItemProps> = ({
       <AccordionPrimitive.Content
         forceMount={forceMountContent}
         className={clx(
-          "radix-state-closed:animate-accordion-close radix-state-open:animate-accordion-open radix-state-closed:pointer-events-none px-1"
+          "radix-state-closed:animate-accordion-close radix-state-open:animate-accordion-open radix-state-closed:pointer-events-none px-2 sm:px-4 pb-4"
         )}
       >
-        <div className="inter-base-regular group-radix-state-closed:animate-accordion-close">
-          {description && <Text>{description}</Text>}
+        <div className="inter-base-regular group-radix-state-closed:animate-accordion-close pt-2">
+          {description && <Text className="text-gray-600">{description}</Text>}
           <div className="w-full">{children}</div>
         </div>
       </AccordionPrimitive.Content>

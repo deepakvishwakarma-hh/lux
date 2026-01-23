@@ -1,9 +1,10 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { Pagination } from "swiper/modules"
+import { IoChevronBack, IoChevronForward } from "react-icons/io5"
 
 import "swiper/css"
 import "swiper/css/pagination"
@@ -22,6 +23,35 @@ export default function ProductImageCarousel({
   ean,
 }: ProductImageCarouselProps) {
   const [activeImage, setActiveImage] = useState(0)
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && activeImage > 0) {
+        setActiveImage(activeImage - 1)
+      } else if (e.key === "ArrowRight" && activeImage < images.length - 1) {
+        setActiveImage(activeImage + 1)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [activeImage, images.length])
+
+  const handlePrevious = () => {
+    if (activeImage > 0) {
+      setActiveImage(activeImage - 1)
+    }
+  }
+
+  const handleNext = () => {
+    if (activeImage < images.length - 1) {
+      setActiveImage(activeImage + 1)
+    }
+  }
+
+  const hasPrevious = activeImage > 0
+  const hasNext = activeImage < images.length - 1
 
   if (!images || images.length === 0) {
     return (
@@ -106,7 +136,7 @@ export default function ProductImageCarousel({
 
 
         {/* Main Image */}
-        <div className="relative aspect-square bg-white rounded overflow-hidden">
+        <div className="relative aspect-square bg-white rounded overflow-hidden border border-gray-100">
           <Image
             src={images[activeImage]}
             alt={getImageAlt(activeImage)}
@@ -115,6 +145,29 @@ export default function ProductImageCarousel({
             priority
             aria-describedby={getImageDescribedBy(activeImage)}
           />
+          
+          {/* Navigation Buttons */}
+          {hasPrevious && (
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-lg transition-all z-10"
+              aria-label="Previous image"
+            >
+              <IoChevronBack className="w-5 h-5 text-gray-800" />
+            </button>
+          )}
+          
+          {hasNext && (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-lg transition-all z-10"
+              aria-label="Next image"
+            >
+              <IoChevronForward className="w-5 h-5 text-gray-800" />
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -262,9 +262,14 @@ export default function ProductActions({
     <>
       <div className="flex flex-col gap-y-2 mt-2" ref={actionsRef}>
         <ProductPrice product={product} variant={selectedVariant} />
-        <p className="text-sm font-medium">
-          Condition : {(product?.metadata?.condition as string) ?? "N/A"}
-        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wide">
+            Condition:
+          </span>
+          <span className="text-sm sm:text-base font-semibold text-gray-900 font-urbanist">
+            {(product?.metadata?.condition as string) ?? "N/A"}
+          </span>
+        </div>
         <div>
           {(product.variants?.length ?? 0) > 1 && (
             <div className="flex flex-col gap-y-4">

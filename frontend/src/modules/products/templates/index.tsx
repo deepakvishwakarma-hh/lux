@@ -8,6 +8,7 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { FaHome } from "react-icons/fa"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 import ProductImageCarousel from "@modules/products/components/image-gallery/product-image"
@@ -49,24 +50,49 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           handle: product.handle,
           thumbnail: product.thumbnail,
           title: product.title,
-        }}
+        }}  
       />
-      <div className="content-container">
+      <div className="content-container-- px-5 md:px-5">
         {/* Breadcrumb */}
         <nav
-          className="flex items-center gap-2 py-4 text-xs text-ui-fg-subtle"
+          className="flex items-center gap-2 py-4 text-sm"
           aria-label="Breadcrumb"
         >
           <LocalizedClientLink
             href="/"
-            className="hover:text-ui-fg-base transition-colors"
+            className="text-gray-900 hover:text-gray-700 transition-colors"
+            aria-label="Home"
           >
-            Home
+            <FaHome className="w-4 h-4" />
           </LocalizedClientLink>
-          <span>/</span>
-          <span className="text-ui-fg-base">{product.title}</span>
+          
+          {/* Category breadcrumbs */}
+          {product.categories && product.categories.length > 0 && (
+            <>
+              {product.categories.map((category, index) => (
+                <React.Fragment key={category.id}>
+                  <span className="text-gray-400" aria-hidden="true">/</span>
+                  <LocalizedClientLink
+                    href={`/categories/${category.handle}`}
+                    className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium hidden md:inline-block"
+                  >
+                    {category.name}
+                  </LocalizedClientLink>
+                </React.Fragment>
+              ))}
+            </>
+          )}
+          
+          <span className="text-gray-400" aria-hidden="true">/</span>
+          <span className="text-gray-900 font-semibold hidden md:inline-block" title={product.title}>
+            {product.title}
+          </span>
+          {/* Mobile: Show truncated version */}
+          <span className="text-gray-900 font-semibold md:hidden truncate max-w-[200px]" title={product.title}>
+            {product.title}
+          </span>
         </nav>
-        <div className="flex flex-col md:flex-row gap-10">
+        <div className="flex flex-col md:flex-row gap-5">
           {/* left side  */}
           <div className="w-full md:w-3/5 md:self-start md:sticky md:top-24 md:z-10">
             <ProductImageCarousel
@@ -83,6 +109,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
               brand={brand}
               reviewSummary={reviewSummary}
               availability={availability}
+              region={region}
+              countryCode={countryCode}
             />
             <Suspense
               fallback={
@@ -121,13 +149,13 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </div>
       </div>
       <div
-        className="content-container"
+        className="px-5 md:px-5"
         data-testid="product-reviews-container"
       >
         <ProductReviews productId={product.id} />
       </div>
       <div
-        className="content-container"
+        className="px-5 md:px-5"
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>

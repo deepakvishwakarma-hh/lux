@@ -72,7 +72,7 @@ export default function RecentlyViewedProducts({
             <SwiperSlide key={product.id}>
               <LocalizedClientLink
                 href={`/products/${product.handle}`}
-                className="group block"
+                className="group block border border-gray-200 rounded-lg bg-gray-50"
               >
                 <div
                   data-testid="product-wrapper"
