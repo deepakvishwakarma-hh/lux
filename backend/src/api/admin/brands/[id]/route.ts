@@ -9,6 +9,7 @@ import { z } from "zod"
 
 export const UpdateBrandSchema = z.object({
     name: z.string().min(1).optional(),
+    title: z.string().nullable().optional(),
     slug: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     meta_title: z.string().nullable().optional(),
@@ -53,11 +54,12 @@ export async function PUT(
 ) {
     try {
         const { id } = req.params
-        const { name, slug, description, meta_title, meta_desc, image_url } = req.validatedBody
+        const { name, title, slug, description, meta_title, meta_desc, image_url } = req.validatedBody
 
         console.log("Brand update request:", {
             id,
             name,
+            title,
             slug,
             description,
             meta_title,
@@ -69,6 +71,7 @@ export async function PUT(
             input: {
                 id,
                 name,
+                title,
                 slug,
                 description,
                 meta_title,

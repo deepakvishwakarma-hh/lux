@@ -11,6 +11,7 @@ export const GetAdminBrandsSchema = createFindParams()
 
 export const CreateBrandSchema = z.object({
     name: z.string().min(1),
+    title: z.string().optional(),
     slug: z.string().optional(),
     description: z.string().optional(),
     meta_title: z.string().optional(),
@@ -64,11 +65,12 @@ export const POST = async (
     res: MedusaResponse
 ) => {
     try {
-        const { name, slug, description, meta_title, meta_desc, image_url } = req.validatedBody
+        const { name, title, slug, description, meta_title, meta_desc, image_url } = req.validatedBody
 
         const { result } = await createBrandWorkflow(req.scope).run({
             input: {
                 name,
+                title,
                 slug,
                 description,
                 meta_title,

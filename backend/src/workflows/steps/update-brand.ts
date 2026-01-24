@@ -8,6 +8,7 @@ import BrandModuleService from "../../modules/brand/service"
 export type UpdateBrandStepInput = {
     id: string
     name?: string
+    title?: string | null
     slug?: string | null
     description?: string | null
     meta_title?: string | null
@@ -52,6 +53,7 @@ export const updateBrandStep = createStep(
         await brandModuleService.updateBrands({
             id: originalData.id,
             name: originalData.name,
+            title: originalData.title,
             slug: originalData.slug,
             description: originalData.description,
             meta_title: originalData.meta_title,

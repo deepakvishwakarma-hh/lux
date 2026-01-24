@@ -7,6 +7,7 @@ import { updateBrandStep } from "./steps/update-brand"
 export type UpdateBrandInput = {
     id: string
     name?: string
+    title?: string | null
     slug?: string | null
     description?: string | null
     meta_title?: string | null

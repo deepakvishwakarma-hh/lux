@@ -44,6 +44,7 @@ const ExternalLinkIcon = ({ className }: { className?: string }) => (
 type Brand = {
   id: string;
   name: string;
+  title?: string | null;
   slug?: string | null;
   description?: string | null;
   meta_title?: string | null;
@@ -59,6 +60,7 @@ type Product = {
 
 type BrandFormData = {
   name: string;
+  title?: string;
   slug?: string;
   description?: string;
   meta_title?: string;
@@ -72,6 +74,7 @@ const BrandEditPage = () => {
 
   const [formData, setFormData] = useState<BrandFormData>({
     name: "",
+    title: "",
     slug: "",
     description: "",
     meta_title: "",
@@ -122,6 +125,7 @@ const BrandEditPage = () => {
       const brand = brandData.brand;
       setFormData({
         name: brand.name,
+        title: brand.title || "",
         slug: brand.slug || "",
         description: brand.description || "",
         meta_title: brand.meta_title || "",
@@ -333,6 +337,18 @@ const BrandEditPage = () => {
                     onChange={(e) => handleNameChange(e.target.value)}
                     required
                     placeholder="Enter brand name"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    placeholder="Enter brand title"
                   />
                 </div>
 

@@ -26,6 +26,7 @@ import "react-quill/dist/quill.snow.css";
 type Brand = {
   id: string;
   name: string;
+  title?: string | null;
   slug?: string | null;
   description?: string | null;
   meta_title?: string | null;
@@ -38,6 +39,7 @@ type Brand = {
 
 type BrandFormData = {
   name: string;
+  title?: string;
   slug?: string;
   description?: string;
   meta_title?: string;
@@ -164,6 +166,7 @@ const BrandsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<BrandFormData>({
     name: "",
+    title: "",
     slug: "",
     description: "",
     meta_title: "",
@@ -230,6 +233,7 @@ const BrandsPage = () => {
   const resetForm = () => {
     setFormData({
       name: "",
+      title: "",
       slug: "",
       description: "",
       meta_title: "",
@@ -322,6 +326,18 @@ const BrandsPage = () => {
                     value={formData.name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    placeholder="Enter brand title"
                   />
                 </div>
 

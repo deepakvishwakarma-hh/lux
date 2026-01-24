@@ -24,6 +24,24 @@
           "nullable": false,
           "mappedType": "text"
         },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
         "description": {
           "name": "description",
           "type": "text",
@@ -44,6 +62,15 @@
         },
         "meta_desc": {
           "name": "meta_desc",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "image_url": {
+          "name": "image_url",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,

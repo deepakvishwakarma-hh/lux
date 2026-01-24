@@ -113,6 +113,7 @@ export default defineMiddlewares({
           defaults: [
             "id",
             "name",
+            "title",
             "slug",
             "description",
             "meta_title",
@@ -139,6 +140,7 @@ export default defineMiddlewares({
           defaults: [
             "id",
             "name",
+            "title",
             "slug",
             "description",
             "meta_title",
