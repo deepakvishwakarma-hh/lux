@@ -5,6 +5,7 @@ import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import AddToCartButton from "./add-to-cart-button"
 import HoverActions from "./hover-actions"
+import { getBrandsByProductId } from "@lib/data/brands"
 
 export default async function ProductPreview({
   product,
@@ -25,6 +26,37 @@ export default async function ProductPreview({
   // if (!pricedProduct) {
   //   return null
   // }
+
+  // Fetch brand for item number calculation
+  const brand = product.id ? await getBrandsByProductId(product.id) : null
+
+  // Derive item number from brandname + model + color_code + size
+  const itemNo = (() => {
+    const parts: string[] = []
+    
+    // Get brandname
+    if (brand?.name) {
+      parts.push(brand.name)
+    }
+    
+    // Get model from metadata
+    if (product.metadata?.model) {
+      parts.push(String(product.metadata.model))
+    }
+    
+    // Get color_code from metadata
+    if (product.metadata?.color_code) {
+      parts.push(String(product.metadata.color_code))
+    }
+    
+    // Get size from metadata
+    if (product.metadata?.size) {
+      parts.push(String(product.metadata.size))
+    }
+    
+    // Return joined parts or fallback
+    return parts.length > 0 ? parts.join(" ") : "N/A"
+  })()
 
   const brandName = product.title.split(" ")[0]
 
@@ -61,7 +93,7 @@ export default async function ProductPreview({
             className="text-ui-fg-subtle text-center font-semibold"
             data-testid="product-title"
           >
-            {product.title}
+            {itemNo}
           </p>
           <p className="text-ui-fg-subtle text-center text-sm my-1">
             {brandName}
