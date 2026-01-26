@@ -289,6 +289,12 @@ export default async function ProductPage(props: Props) {
     }
   }
 
+  // Always include offers field (required by Schema.org Product)
+  // If we have a price, use it; otherwise include basic offer info
+  const hasInventory = pricedProduct.variants?.some(
+    (v) => v.inventory_quantity && v.inventory_quantity > 0
+  )
+  
   if (cheapestPrice) {
     productStructuredData.offers = {
       "@type": "Offer",
@@ -298,9 +304,20 @@ export default async function ProductPage(props: Props) {
       priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
-      availability: pricedProduct.variants?.some(
-        (v) => v.inventory_quantity && v.inventory_quantity > 0
-      )
+      availability: hasInventory
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: {
+        "@type": "Organization",
+        name: websiteConfig.shortName,
+      },
+    }
+  } else {
+    // Include basic offers field even without price to satisfy Schema.org requirements
+    productStructuredData.offers = {
+      "@type": "Offer",
+      url: productUrl,
+      availability: hasInventory
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
       seller: {
