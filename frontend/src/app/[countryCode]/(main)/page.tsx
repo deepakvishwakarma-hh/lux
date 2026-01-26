@@ -11,8 +11,6 @@ import KeyPillars from "@modules/home/components/KeyPillars";
 import HomepageListing from "@modules/home/components/homepage-listing";
 import { websiteConfig } from "@lib/website.config";
 
-export const dynamic = "force-dynamic";
-
 type Props = {
   params: Promise<{ countryCode: string }>;
 };
