@@ -26,6 +26,10 @@ type Props = {
   }>
 }
 
+// Enable ISR (Incremental Static Regeneration) to refresh category data periodically
+// This ensures category changes in Medusa admin are reflected on the frontend
+export const revalidate = 60 // Revalidate every 60 seconds (1 minute)
+
 export async function generateStaticParams() {
   try {
     const product_categories = await listCategories()

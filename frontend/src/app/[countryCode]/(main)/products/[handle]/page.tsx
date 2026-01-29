@@ -31,6 +31,10 @@ type Props = {
   searchParams: Promise<{ v_id?: string }>
 }
 
+// Enable ISR (Incremental Static Regeneration) to refresh product data periodically
+// This ensures product changes in Medusa admin are reflected on the frontend
+export const revalidate = 60 // Revalidate every 60 seconds (1 minute)
+
 export async function generateStaticParams() {
   try {
     const countryCodes = await listRegions().then((regions) =>
@@ -294,7 +298,7 @@ export default async function ProductPage(props: Props) {
   const hasInventory = pricedProduct.variants?.some(
     (v) => v.inventory_quantity && v.inventory_quantity > 0
   )
-  
+
   if (cheapestPrice) {
     productStructuredData.offers = {
       "@type": "Offer",

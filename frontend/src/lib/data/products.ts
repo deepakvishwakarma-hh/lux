@@ -56,6 +56,7 @@ export const listProducts = async ({
   }
 
   const next = {
+    revalidate: 60, // Align with page-level ISR revalidation
     ...(await getCacheOptions("products")),
   }
 
@@ -395,6 +396,7 @@ export const getProductAvailability = async ({
     }
 
     const next = {
+      revalidate: 60, // Align with page-level ISR revalidation
       ...(await getCacheOptions("product-availability")),
     }
 
@@ -469,6 +471,7 @@ export const getProductsByIds = async ({
   }
 
   const next = {
+    revalidate: 60, // Align with page-level ISR revalidation
     ...(await getCacheOptions("products")),
   }
 
@@ -543,6 +546,7 @@ export const getSameModalProducts = async ({
     }
 
     const next = {
+      revalidate: 60, // Align with page-level ISR revalidation
       ...(await getCacheOptions("products")),
     }
 

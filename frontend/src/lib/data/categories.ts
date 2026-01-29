@@ -4,6 +4,7 @@ import { getCacheOptions } from "./cookies"
 
 export const listCategories = async (query?: Record<string, any>) => {
   const next = {
+    revalidate: 60, // Align with page-level ISR revalidation
     ...(await getCacheOptions("categories")),
   }
 
@@ -30,6 +31,7 @@ export const getCategoryByHandle = async (categoryHandle: string[]) => {
   const handle = `${categoryHandle.join("/")}`
 
   const next = {
+    revalidate: 60, // Align with page-level ISR revalidation
     ...(await getCacheOptions("categories")),
   }
 

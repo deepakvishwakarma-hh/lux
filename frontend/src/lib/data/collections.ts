@@ -24,6 +24,7 @@ export const listCollections = async (
   queryParams: Record<string, string> = {}
 ): Promise<{ collections: HttpTypes.StoreCollection[]; count: number }> => {
   const next = {
+    revalidate: 60, // Align with page-level ISR revalidation
     ...(await getCacheOptions("collections")),
   }
 
@@ -46,6 +47,7 @@ export const getCollectionByHandle = async (
   handle: string
 ): Promise<HttpTypes.StoreCollection> => {
   const next = {
+    revalidate: 60, // Align with page-level ISR revalidation
     ...(await getCacheOptions("collections")),
   }
 

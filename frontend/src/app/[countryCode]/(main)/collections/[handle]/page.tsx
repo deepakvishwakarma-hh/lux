@@ -17,6 +17,10 @@ type Props = {
 
 export const PRODUCT_LIMIT = 12
 
+// Enable ISR (Incremental Static Regeneration) to refresh collection data periodically
+// This ensures collection changes in Medusa admin are reflected on the frontend
+export const revalidate = 60 // Revalidate every 60 seconds (1 minute)
+
 export async function generateStaticParams() {
   try {
     const { collections } = await listCollections({
