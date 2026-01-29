@@ -88,7 +88,7 @@ export default function ReturnRefundPolicyPage(props: Props) {
           <section>
             <h2 className="text-2xl font-semibold mt-8 mb-4">Return Process</h2>
             <ol className="list-decimal pl-6 space-y-3">
-              <li>Contact our customer service team at <a href={websiteConfig.contact.emailLink} className="text-blue-600 hover:underline">{websiteConfig.contact.email}</a> or call us at <a href={websiteConfig.contact.phoneLink} className="text-blue-600 hover:underline">{websiteConfig.contact.phoneFormatted}</a> to initiate a return.</li>
+              <li>Contact our customer service team at <a href={websiteConfig.contact.emailLink} className="text-blue-600 hover:underline">{websiteConfig.contact.email}</a> to initiate a return.</li>
               <li>Provide your order number and reason for return.</li>
               <li>Our team will provide you with a Return Authorization (RA) number and return instructions.</li>
               <li>Package the item securely in its original packaging and include the RA number.</li>
@@ -149,7 +149,6 @@ export default function ReturnRefundPolicyPage(props: Props) {
             </p>
             <div className="mt-4 space-y-2">
               <p><strong>Email:</strong> <a href={websiteConfig.contact.emailLink} className="text-blue-600 hover:underline">{websiteConfig.contact.email}</a></p>
-              <p><strong>Phone:</strong> <a href={websiteConfig.contact.phoneLink} className="text-blue-600 hover:underline">{websiteConfig.contact.phoneFormatted}</a></p>
             </div>
           </section>
         </div>

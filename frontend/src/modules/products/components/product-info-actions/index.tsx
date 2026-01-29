@@ -332,7 +332,6 @@ const AskQuestionModal = ({ isOpen, close, productId, type = "question" }: AskQu
     type: type as "question" | "custom_delivery" | "customize_product",
     name: "",
     email: "",
-    customer_mobile: "",
     subject: "",
     message: "",
     address_1: "",
@@ -402,7 +401,7 @@ const AskQuestionModal = ({ isOpen, close, productId, type = "question" }: AskQu
             product_id: productId,
             customer_name: formData.name,
             customer_email: formData.email,
-            customer_mobile: formData.customer_mobile,
+            customer_mobile: "",
             subject: formData.subject,
             message: formData.message,
             address: addressData,
@@ -417,7 +416,6 @@ const AskQuestionModal = ({ isOpen, close, productId, type = "question" }: AskQu
           type: type,
           name: "",
           email: "",
-          customer_mobile: "",
           subject: "",
           message: "",
           address_1: "",
@@ -499,25 +497,6 @@ const AskQuestionModal = ({ isOpen, close, productId, type = "question" }: AskQu
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
                     />
                   </div>
-                </div>
-                
-                <div>
-                  <label
-                    htmlFor="customer_mobile"
-                    className="block text-sm font-medium mb-1 text-ui-fg-base"
-                  >
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="customer_mobile"
-                    name="customer_mobile"
-                    type="tel"
-                    value={formData.customer_mobile}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your mobile number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ui-fg-interactive focus:border-transparent text-sm"
-                  />
                 </div>
                 
                 <div>

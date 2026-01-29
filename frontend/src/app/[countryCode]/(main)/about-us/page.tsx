@@ -118,15 +118,6 @@ export default function AboutUsPage(props: Props) {
             </p>
             <div className="mt-4 space-y-2">
               <p>
-                <strong>Phone:</strong>{" "}
-                <a
-                  href={websiteConfig.contact.phoneLink}
-                  className="text-blue-600 hover:underline"
-                >
-                  {websiteConfig.contact.phoneFormatted}
-                </a>
-              </p>
-              <p>
                 <strong>Email:</strong>{" "}
                 <a
                   href={websiteConfig.contact.emailLink}

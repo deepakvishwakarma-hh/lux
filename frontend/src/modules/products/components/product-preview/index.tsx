@@ -6,6 +6,7 @@ import PreviewPrice from "./price"
 import AddToCartButton from "./add-to-cart-button"
 import HoverActions from "./hover-actions"
 import { getBrandsByProductId } from "@lib/data/brands"
+import BrandLink from "./brand-link"
 
 export default async function ProductPreview({
   product,
@@ -95,9 +96,13 @@ export default async function ProductPreview({
           >
             {itemNo}
           </p>
-          <p className="text-ui-fg-subtle text-center text-sm my-1">
-            {brandName}
-          </p>
+          {brand?.slug ? (
+            <BrandLink brandSlug={brand.slug} brandName={brand.name || brandName} />
+          ) : (
+            <p className="text-ui-fg-subtle text-center text-sm my-1">
+              {brandName}
+            </p>
+          )}
           <div className="flex items-center justify-center gap-x-2">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>

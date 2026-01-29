@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Transition } from "@headlessui/react"
 import { Fragment } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -27,26 +27,68 @@ export default function CategoryNav({
   brands = [],
 }: CategoryNavProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        // Check if click is not on nav items
+        const navElement = (event.target as HTMLElement).closest('nav')
+        if (!navElement) {
+          setOpenDropdown(null)
+        }
+      }
+    }
+
+    if (openDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openDropdown])
 
   // Split brands into two columns
   const brandsPerColumn = Math.ceil(brands.length / 2)
   const brandsColumn1 = brands.slice(0, brandsPerColumn)
   const brandsColumn2 = brands.slice(brandsPerColumn)
 
+  // Find category handles for sunglasses and eyeglasses
+  const sunglassesCategory = categories?.find(
+    (cat) => cat.name?.toLowerCase().includes("sunglass") || cat.handle?.toLowerCase().includes("sunglass")
+  )
+  const eyeglassesCategory = categories?.find(
+    (cat) => cat.name?.toLowerCase().includes("eyeglass") || cat.handle?.toLowerCase().includes("eyeglass")
+  )
+
+  const sunglassesHref = sunglassesCategory?.handle 
+    ? `/categories/${sunglassesCategory.handle}` 
+    : "/store?category=sunglasses"
+  const eyeglassesHref = eyeglassesCategory?.handle 
+    ? `/categories/${eyeglassesCategory.handle}` 
+    : "/store?category=eyeglasses"
+
   const navItems = [
     {
       label: "SUNGLASSES",
-      href: "/store?category=sunglasses",
+      href: sunglassesHref,
       dropdown: true,
       content: {
         collections: [
           {
             name: "Man Sunglasses",
-            href: "/store?category=sunglasses&gender=man",
+            href: sunglassesCategory?.handle 
+              ? `/categories/${sunglassesCategory.handle}?gender=man`
+              : "/store?category=sunglasses&gender=man",
           },
           {
             name: "Women Sunglasses",
-            href: "/store?category=sunglasses&gender=women",
+            href: sunglassesCategory?.handle 
+              ? `/categories/${sunglassesCategory.handle}?gender=women`
+              : "/store?category=sunglasses&gender=women",
           },
         ],
         brands: brands,
@@ -55,17 +97,21 @@ export default function CategoryNav({
     },
     {
       label: "EYEGLASSES",
-      href: "/store?category=eyeglasses",
+      href: eyeglassesHref,
       dropdown: true,
       content: {
         collections: [
           {
             name: "Man Eyeglasses",
-            href: "/store?category=eyeglasses&gender=man",
+            href: eyeglassesCategory?.handle 
+              ? `/categories/${eyeglassesCategory.handle}?gender=man`
+              : "/store?category=eyeglasses&gender=man",
           },
           {
             name: "Women Eyeglasses",
-            href: "/store?category=eyeglasses&gender=women",
+            href: eyeglassesCategory?.handle 
+              ? `/categories/${eyeglassesCategory.handle}?gender=women`
+              : "/store?category=eyeglasses&gender=women",
           },
         ],
         brands: brands,
@@ -85,8 +131,27 @@ export default function CategoryNav({
   <div className="px-2 sm:px-6 md:px-10">
     <div className="flex items-center justify-center h-12 overflow-x-auto">
       {navItems.map((item) => (
-        <div key={item.label} className="relative flex-shrink-0">
-          <button
+        <div 
+          key={item.label} 
+          className="relative flex-shrink-0"
+          onMouseEnter={() => {
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current)
+              timeoutRef.current = null
+            }
+            if (item.dropdown) {
+              setOpenDropdown(item.label)
+            }
+          }}
+          onMouseLeave={() => {
+            // Delay closing to allow moving to dropdown
+            timeoutRef.current = setTimeout(() => {
+              setOpenDropdown(null)
+            }, 150)
+          }}
+        >
+          <LocalizedClientLink
+            href={item.href}
             className="
               flex items-center gap-1
               text-[10px] sm:text-[11px] md:text-[13px] lg:text-sm
@@ -99,8 +164,8 @@ export default function CategoryNav({
             "
           >
             {item.label}
-            <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />
-          </button>
+            {item.dropdown && <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />}
+          </LocalizedClientLink>
         </div>
       ))}
     </div>
@@ -120,7 +185,25 @@ export default function CategoryNav({
           leaveFrom="opacity-100 translate-y-0"
           leaveTo="opacity-0 translate-y-1"
         >
-          <div className="absolute left-0 md:left-[60px]-- right-0 top-[128px] bg-white border-b border-gray-200 shadow-lg z-40 overflow-x-hidden ">
+          <div 
+            ref={dropdownRef}
+            className="category-dropdown absolute left-0 md:left-[60px]-- right-0 top-[128px] bg-white border-b border-gray-200 shadow-lg z-40 overflow-x-hidden overflow-y-auto"
+            style={{ maxHeight: '70vh' }}
+            onMouseEnter={() => {
+              // Cancel any pending close timeout
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+                timeoutRef.current = null
+              }
+              // Keep dropdown open when hovering over it
+              if (openDropdown) {
+                setOpenDropdown(openDropdown)
+              }
+            }}
+            onMouseLeave={() => {
+              setOpenDropdown(null)
+            }}
+          >
             <div className="p-6 grid grid-cols-3 gap-8 max-w-3xl mx-auto">
               {(() => {
                 const item = navItems.find((i) => i.label === openDropdown)

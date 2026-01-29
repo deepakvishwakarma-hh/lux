@@ -26,7 +26,7 @@ export default function FilterPage({
 }: FilterPageProps) {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const filters = useFilterParams()
-  const [viewMode, setViewMode] = useState<'list' | 'grid-2' | 'grid-3' | 'grid-4'>('grid-3')
+  const [viewMode, setViewMode] = useState<'list' | 'grid-2' | 'grid-3' | 'grid-4'>('grid-4')
   const [isSmallScreen, setIsSmallScreen] = useState(false)
 
   // Detect small screens (mobile). On small screens we force 2-column grid and hide grid options

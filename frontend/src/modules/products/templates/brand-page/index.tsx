@@ -11,19 +11,24 @@ import PreviewPrice from "@modules/products/components/product-preview/price"
 import AddToCartButton from "@modules/products/components/product-preview/add-to-cart-button"
 import HoverActions from "@modules/products/components/product-preview/hover-actions"
 import { getProductPrice } from "@lib/util/get-product-price"
+import Image from "next/image"
 import FilterSidebar from "../filter-page/components/filter-sidebar"
 import { usePriceRange } from "../filter-page/hooks/use-price-range"
+import GridLayoutSelector from "@modules/products/components/grid-layout-selector"
 
 // Client-side product preview component
 function ProductPreviewClient({
   product,
   region,
   countryCode,
+  gridLayout = "grid-4",
 }: {
   product: any
   region: HttpTypes.StoreRegion
   countryCode: string
+  gridLayout?: "grid-1" | "grid-2" | "grid-3" | "grid-4"
 }) {
+  const isList = gridLayout === "grid-1"
   // Convert filter API product format to match expected format
   const formattedProduct: HttpTypes.StoreProduct = {
     ...product,
@@ -42,9 +47,63 @@ function ProductPreviewClient({
     })),
   }
 
-  // Get price for display
+  // Get price for display - try multiple methods
   let cheapestPrice: any = null
-  if (product.price !== null && product.price !== undefined) {
+  
+  // Method 1: Try using getProductPrice utility if product has proper structure
+  try {
+    if (formattedProduct.id && formattedProduct.variants?.length > 0) {
+      const priceResult = getProductPrice({ product: formattedProduct })
+      if (priceResult.cheapestPrice) {
+        cheapestPrice = priceResult.cheapestPrice
+      }
+    }
+  } catch (e) {
+    // Ignore errors and try other methods
+  }
+  
+  // Method 2: Check variants for calculated_price (from API)
+  if (!cheapestPrice && product.variants && product.variants.length > 0) {
+    const variantWithPrice = product.variants.find((v: any) => v.calculated_price?.calculated_amount)
+    if (variantWithPrice) {
+      const price = variantWithPrice.calculated_price
+      cheapestPrice = {
+        calculated_price_number: price.calculated_amount,
+        calculated_price: price.calculated_price?.formatted || `$${(price.calculated_amount / 100).toFixed(2)}`,
+        original_price_number: price.original_amount,
+        original_price: price.original_price?.formatted || `$${(price.original_amount / 100).toFixed(2)}`,
+        currency_code: price.currency_code || "USD",
+        price_type: price.calculated_price?.price_list_type || "default",
+        percentage_diff: price.original_amount && price.calculated_amount && price.original_amount > price.calculated_amount
+          ? Math.round(((price.original_amount - price.calculated_amount) / price.original_amount) * 100)
+          : null,
+      }
+    }
+  }
+  
+  // Method 3: Check if variants have price property (from filter API)
+  if (!cheapestPrice && product.variants && product.variants.length > 0) {
+    const variantsWithPrice = product.variants
+      .filter((v: any) => v.price !== null && v.price !== undefined)
+      .sort((a: any, b: any) => a.price - b.price)
+    
+    if (variantsWithPrice.length > 0) {
+      const cheapestVariant = variantsWithPrice[0]
+      const priceAmount = cheapestVariant.price / 100 // Convert from cents
+      cheapestPrice = {
+        calculated_price_number: priceAmount,
+        calculated_price: cheapestVariant.price_formatted || `$${priceAmount.toFixed(2)}`,
+        original_price_number: priceAmount,
+        original_price: cheapestVariant.price_formatted || `$${priceAmount.toFixed(2)}`,
+        currency_code: product.currency_code || cheapestVariant.currency_code || "USD",
+        price_type: "default",
+        percentage_diff: null,
+      }
+    }
+  }
+  
+  // Method 4: Fallback to product.price if no variant prices found
+  if (!cheapestPrice && product.price !== null && product.price !== undefined) {
     const priceAmount = product.price / 100 // Convert from cents
     cheapestPrice = {
       calculated_price_number: priceAmount,
@@ -57,51 +116,130 @@ function ProductPreviewClient({
     }
   }
 
+  // Basic stock detection
+  const firstVariant = product.variants?.[0]
+  const inStock = (() => {
+    if (!firstVariant) return false
+    if (!firstVariant.manage_inventory) return true
+    if (firstVariant.allow_backorder) return true
+    if ((firstVariant.inventory_quantity || 0) > 0) return true
+    return false
+  })()
+
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
+    <LocalizedClientLink href={`/products/${product.handle}`} className={`group ${isList ? 'w-full' : 'h-full'}`}>
       <div
         data-testid="product-wrapper"
-        className="shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 overflow-hidden relative h-full flex flex-col"
+        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${
+          isList 
+            ? 'relative flex flex-row gap-4 items-start p-4 sm:p-5 border border-gray-100 rounded-lg bg-white' 
+            : 'overflow-hidden relative h-full flex flex-col'
+        }`}
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
           cheapestPrice.percentage_diff && (
-            <div className="absolute top-2 left-2 z-10 bg-black text-white px-2 py-1 rounded-full text-[11px] font-semibold">
+            <div className={`absolute z-10 bg-black text-white px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold ${
+              isList ? 'top-2 left-2' : 'top-2 left-2'
+            }`}>
               -{cheapestPrice.percentage_diff}%
             </div>
           )}
         <HoverActions product={formattedProduct} />
-        <div className="flex-shrink-0">
-          <Thumbnail
-            thumbnail={product.thumbnail}
-            images={product.images}
-            size="full"
-          />
-        </div>
+        
+        {isList ? (
+          <div className="w-40 sm:w-48 h-40 sm:h-48 flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-gray-50 relative">
+            {product.thumbnail || product.images?.[0]?.url ? (
+              <Image
+                src={product.thumbnail || product.images?.[0]?.url}
+                alt={product.title}
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 640px) 160px, 192px"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex-shrink-0">
+            <Thumbnail
+              thumbnail={product.thumbnail}
+              images={product.images}
+              size="full"
+            />
+          </div>
+        )}
 
-        <div className="flex-1 flex flex-col justify-between txt-compact-medium mt-3 px-4 pb-4">
-          <div className="space-y-1">
+        <div className={`flex flex-col txt-compact-medium ${
+          isList 
+            ? 'flex-1 justify-between px-0 py-0' 
+            : 'mt-3 justify-between px-4 pb-4 flex-1'
+        }`}>
+          <div className={isList ? 'space-y-2' : 'space-y-1'}>
             {product.brand && (
-              <p className="text-ui-fg-subtle text-center font-semibold text-xs uppercase tracking-wide font-urbanist">
+              <p className={`${
+                isList 
+                  ? 'text-left text-sm text-gray-500 font-medium uppercase tracking-wide font-urbanist' 
+                  : 'text-ui-fg-subtle text-center font-semibold text-xs uppercase tracking-wide font-urbanist'
+              }`}>
                 {product.brand.name}
               </p>
             )}
             <p
-              className="text-gray-900 text-center text-sm font-medium leading-tight max-h-12 overflow-hidden font-urbanist"
+              className={`${
+                isList
+                  ? 'text-left text-base sm:text-lg font-semibold text-gray-900 leading-tight font-urbanist'
+                  : 'text-gray-900 text-center text-sm font-medium leading-tight max-h-12 overflow-hidden font-urbanist'
+              }`}
               data-testid="product-title"
             >
               {product.title}
             </p>
+            {isList && product.description && (
+              <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
+            )}
           </div>
-          <div className="flex items-center justify-center gap-x-2 mt-2">
-            {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
-          </div>
-          <div className="mt-3">
-            <AddToCartButton
-              product={formattedProduct}
-              countryCode={countryCode}
-            />
-          </div>
+          
+          {isList ? (
+            <div className="flex items-center justify-between gap-4 w-full mt-4">
+              <div className="flex flex-col">
+                {cheapestPrice && (
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                    {cheapestPrice.calculated_price}
+                  </div>
+                )}
+              </div>
+              <div className="flex-shrink-0">
+                {inStock ? (
+                  <AddToCartButton
+                    product={formattedProduct}
+                    countryCode={countryCode}
+                  />
+                ) : (
+                  <span className="bg-gray-100 text-gray-700 text-xs px-3 py-2 rounded-md font-medium">
+                    Out of stock
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-center gap-x-2 mt-2">
+                {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
+              </div>
+              <div className="mt-3">
+                <AddToCartButton
+                  product={formattedProduct}
+                  countryCode={countryCode}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </LocalizedClientLink>
@@ -156,6 +294,7 @@ export default function BrandPage({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [gridLayout, setGridLayout] = useState<"grid-1" | "grid-2" | "grid-3" | "grid-4">("grid-4")
 
   // Memoize filter values to prevent unnecessary re-renders
   const filters = useMemo(() => {
@@ -656,6 +795,7 @@ export default function BrandPage({
                 <option value="price_asc">Price: Low to High</option>
                 <option value="price_desc">Price: High to Low</option>
               </select>
+              <GridLayoutSelector value={gridLayout} onChange={setGridLayout} storageKey="brand-grid-layout" />
             </div>
           </div>
 
@@ -682,13 +822,19 @@ export default function BrandPage({
               <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className={`grid gap-6 ${
+              gridLayout === "grid-1" ? "grid-cols-1" :
+              gridLayout === "grid-2" ? "grid-cols-1 sm:grid-cols-2" :
+              gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
+              "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            }`}>
               {products.map((product: any) => (
                 <ProductPreviewClient
                   key={product.id}
                   product={product}
                   region={region}
                   countryCode={countryCode}
+                  gridLayout={gridLayout}
                 />
               ))}
             </div>

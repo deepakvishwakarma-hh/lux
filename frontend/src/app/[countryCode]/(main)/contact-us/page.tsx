@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { FaPhone, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa"
+import { FaEnvelope } from "react-icons/fa"
 import { websiteConfig } from "@lib/website.config"
 import { getBaseURL } from "@lib/util/env"
 
@@ -15,7 +15,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const contactUrl = `${baseURL}/${countryCode}/contact-us`
 
   const title = `Contact Us | ${companyName}`
-  const description = `Get in touch with ${companyName}. Contact us for inquiries, support, or assistance with your luxury eyewear needs. Phone: ${websiteConfig.contact.phoneFormatted}, Email: ${websiteConfig.contact.email}`
+  const description = `Get in touch with ${companyName}. Contact us for inquiries, support, or assistance with your luxury eyewear needs. Email: ${websiteConfig.contact.email}`
 
   return {
     title,
@@ -25,7 +25,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       "customer service",
       companyName,
       "luxury eyewear support",
-      websiteConfig.contact.phone,
       websiteConfig.contact.email,
     ],
     authors: [{ name: companyName }],
@@ -73,20 +72,7 @@ export default function ContactUsPage(props: Props) {
             with an order, or want to provide feedback, our team is here to help.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <FaPhone className="text-blue-600" size={20} />
-                <h3 className="text-xl font-semibold">Phone</h3>
-              </div>
-              <p className="text-gray-600">
-                <a href={websiteConfig.contact.phoneLink} className="text-blue-600 hover:underline">
-                  {websiteConfig.contact.phoneFormatted}
-                </a>
-              </p>
-              <p className="text-sm text-gray-500 mt-2">{websiteConfig.contact.businessHours.weekdays}</p>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-8">
             <div className="bg-gray-50 p-6 rounded-lg">
               <div className="flex items-center gap-3 mb-3">
                 <FaEnvelope className="text-blue-600" size={20} />

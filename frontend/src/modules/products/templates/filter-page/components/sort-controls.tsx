@@ -1,5 +1,7 @@
 "use client"
 
+import GridLayoutSelector from "@modules/products/components/grid-layout-selector"
+
 type SortControlsProps = {
   count: number
   isLoading: boolean
@@ -63,18 +65,15 @@ export default function SortControls({
           <option value="price_desc">Price: High to Low</option>
         </select>
 
-        {showViewSelector !== false && (
-          <select
-            value={viewMode}
-            onChange={(e) => onViewModeChange?.(e.target.value as 'list' | 'grid-2' | 'grid-3' | 'grid-4')}
-            className="px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black w-full sm:w-40 mt-2 sm:mt-0 sm:ml-2"
-            aria-label="View mode"
-          >
-            <option value="list">View - List</option>
-            <option value="grid-2">View - Grid 2</option>
-            <option value="grid-3">View - Grid 3</option>
-            <option value="grid-4">View - Grid 4</option>
-          </select>
+        {showViewSelector !== false && viewMode && onViewModeChange && (
+          <GridLayoutSelector
+            value={viewMode === 'list' ? 'grid-1' : viewMode === 'grid-2' ? 'grid-2' : viewMode === 'grid-3' ? 'grid-3' : 'grid-4'}
+            onChange={(value) => {
+              const mappedValue = value === 'grid-1' ? 'list' : value === 'grid-2' ? 'grid-2' : value === 'grid-3' ? 'grid-3' : 'grid-4'
+              onViewModeChange(mappedValue as 'list' | 'grid-2' | 'grid-3' | 'grid-4')
+            }}
+            storageKey="filter-grid-layout"
+          />
         )}
       </div>
     </div>

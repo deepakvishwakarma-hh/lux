@@ -164,11 +164,28 @@ export default async function BrandsPage(props: Props) {
           __html: JSON.stringify(breadcrumbStructuredData),
         }}
       />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Brands</h1>
+      <div className="px-5 pb-8">
+        {/* Brand Header */}
+        <div className="mb-12 pb-8 border-b border-gray-200 bg-gray-100 pt-8">
+          <div className="flex flex-col items-center gap-6">
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold leading-tight text-gray-900 font-urbanist">
+                Shop by Brands
+              </h1>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                Discover our curated collection of premium luxury brands. Explore designer eyewear from the world's most renowned fashion houses.
+              </p>
+              <div className="pt-2">
+                <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider font-urbanist">
+                  {count} {count === 1 ? "brand" : "brands"} available
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Brands Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {brands.map((brand) => (
             <Link
               key={brand.id}
@@ -184,9 +201,10 @@ export default async function BrandsPage(props: Props) {
               )}
               <h3 className="text-xl font-semibold mb-2">{brand.name}</h3>
               {brand.description && (
-                <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                  {brand.description}
-                </p>
+                <p
+                  dangerouslySetInnerHTML={{ __html: brand.description }}
+                  className="text-gray-600 text-sm mb-2 line-clamp-2"
+                />
               )}
               {brand.products && brand.products.length > 0 && (
                 <p className="text-sm text-gray-500">
