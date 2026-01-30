@@ -48,11 +48,15 @@ export default function FilterPage({
     data,
     error,
     isLoading,
+    isLoadingMore,
+    isEmpty,
+    isReachingEnd,
     mutate,
     updateFilters,
     handleFilterChange,
     handleSortChange,
     clearFilters,
+    loadMore,
   } = useProductFilters(filters, initialData)
 
   const products = data?.products || []
@@ -122,14 +126,6 @@ export default function FilterPage({
     },
   })
 
-  const handlePageChange = () => {
-    const nextPage = filters.page + 1
-    updateFilters({ page: String(nextPage) })
-  }
-
-  const totalPages = Math.ceil(count / 20)
-  const hasMore = filters.page < totalPages
-
   useEffect(() => {
     if (typeof document === "undefined") return
     if (showMobileFilters) {
@@ -145,9 +141,10 @@ export default function FilterPage({
 
   return (
     <div className="relative" style={{ zIndex: 0 }}>
-      <LoadingOverlay isLoading={isLoading} />
+      {/* Only show overlay for non-initial loads (when products already exist) */}
+      <LoadingOverlay isLoading={isLoading && products.length > 0} />
       <SearchQueryIndicator searchQuery={filters.search} />
-      <div className="content-container py-4 sm:py-6 md:py-8">
+      <div className="max-w-8xl mx-auto px-5 py-4 sm:py-6 md:py-8">
         {/* Mobile hamburger moved into SortControls for proper placement with sorting */}
 
         {/* Mobile Drawer */}
@@ -249,15 +246,15 @@ export default function FilterPage({
               showViewSelector={!isSmallScreen}
             />
             <InfiniteScroll
-              onLoadMore={handlePageChange}
-              isLoading={isLoading}
-              hasMore={hasMore}
+              onLoadMore={loadMore}
+              isLoading={isLoadingMore}
+              hasMore={!isReachingEnd}
             >
               <ProductGrid
                 products={products}
                 region={region}
                 countryCode={countryCode}
-                isLoading={isLoading}
+                isLoading={isLoading && products.length === 0}
                 error={error}
                 viewMode={viewMode}
                 onRetry={() => mutate()}

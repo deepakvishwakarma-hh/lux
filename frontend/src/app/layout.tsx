@@ -2,6 +2,7 @@ import "styles/globals.css"
 import { Metadata } from "next"
 import { getBaseURL } from "@lib/util/env"
 import { Inter, Urbanist } from "next/font/google"
+import { SWRProvider } from "@lib/providers/swr-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,7 +35,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         />
       </head>
       <body className={inter.className}>
-        <main className="relative">{props.children}</main>
+        <SWRProvider>
+          <main className="relative">{props.children}</main>
+        </SWRProvider>
       </body>
     </html>
   )

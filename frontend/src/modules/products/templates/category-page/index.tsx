@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import useSWR from "swr"
 import { FilterProductsResponse } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -15,6 +14,8 @@ import Image from "next/image"
 import FilterSidebar from "@modules/products/templates/filter-page/components/filter-sidebar"
 import { usePriceRange } from "@modules/products/templates/filter-page/hooks/use-price-range"
 import GridLayoutSelector from "@modules/products/components/grid-layout-selector"
+import InfiniteScroll from "@modules/products/templates/filter-page/components/infinite-scroll"
+import { useProductFiltersInfinite } from "@modules/products/templates/filter-page/hooks/use-product-filters-infinite"
 
 // Client-side product preview component
 function ProductPreviewClient({
@@ -256,25 +257,6 @@ type CategoryPageProps = {
   initialData?: FilterProductsResponse
 }
 
-// Fetcher function for useSWR
-const fetcher = async (url: string): Promise<FilterProductsResponse> => {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY && {
-        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
-      }),
-    },
-    cache: "no-store",
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch products: ${response.statusText}`)
-  }
-
-  return response.json()
-}
 
 export default function CategoryPage({
   countryCode,
@@ -292,11 +274,8 @@ export default function CategoryPage({
 
   // Memoize filter values to prevent unnecessary re-renders
   const filters = useMemo(() => {
-    const pageParam = searchParams.get("page")
-    const page = pageParam ? parseInt(pageParam) : 1
-    
     return {
-      brand: searchParams.get("brand") || "",
+      brand: searchParams.get("brand") ? [searchParams.get("brand")!] : [],
       rimStyle: searchParams.getAll("rim_style"),
       gender: searchParams.getAll("gender"),
       shapes: searchParams.getAll("shapes"),
@@ -308,54 +287,45 @@ export default function CategoryPage({
       maxPrice: searchParams.get("max_price"),
       order: searchParams.get("order") || "created_at",
       orderDirection: searchParams.get("order_direction") || "desc",
-      page,
     }
   }, [searchParams])
 
-  // Build API URL - always filter by category_name
-  const apiUrl = useMemo(() => {
-    const queryParams = new URLSearchParams()
-    queryParams.set("category_name", categoryName) // Always filter by category
-    if (filters.brand) queryParams.set("brand_slug", filters.brand)
-    filters.rimStyle.forEach((v) => queryParams.append("rim_style", v))
-    filters.gender.forEach((v) => queryParams.append("gender", v))
-    filters.shapes.forEach((v) => queryParams.append("shapes", v))
-    filters.size.forEach((v) => queryParams.append("size", v))
-    filters.frameMaterial.forEach((v) => queryParams.append("frame_material", v))
-    filters.shapeFilter.forEach((v) => queryParams.append("shape_filter", v))
-    filters.shape.forEach((v) => queryParams.append("shape", v))
-    if (filters.minPrice) queryParams.set("min_price", filters.minPrice)
-    if (filters.maxPrice) queryParams.set("max_price", filters.maxPrice)
-    queryParams.set("order", filters.order)
-    queryParams.set("order_direction", filters.orderDirection)
-    queryParams.set("limit", "20")
-    queryParams.set("offset", String((filters.page - 1) * 20))
-    queryParams.set("include_filter_options", "true")
-
-    const backendUrl = process.env.MEDUSA_BACKEND_URL
-    if (!backendUrl) {
-      return null
-    }
-    
-    return `${backendUrl}/store/products/filter?${queryParams.toString()}`
-  }, [filters, categoryName])
-
-  // Use SWR to fetch data
-  const { data, error, isLoading, mutate } = useSWR<FilterProductsResponse>(
-    apiUrl,
-    fetcher,
+  // Use infinite scroll hook
+  const {
+    products,
+    count,
+    filterOptions,
+    error,
+    isLoading,
+    isLoadingMore,
+    isEmpty,
+    isReachingEnd,
+    mutate,
+    updateFilters,
+    handleFilterChange,
+    handleSortChange,
+    clearFilters,
+    loadMore,
+  } = useProductFiltersInfinite(
     {
-      fallbackData: initialData,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: 2000,
-    }
+      categoryName: categoryName, // Fixed filter - always filter by category
+      brand: filters.brand,
+      rimStyle: filters.rimStyle,
+      gender: filters.gender,
+      shapes: filters.shapes,
+      size: filters.size,
+      frameMaterial: filters.frameMaterial,
+      shapeFilter: filters.shapeFilter,
+      shape: filters.shape,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      order: filters.order,
+      orderDirection: filters.orderDirection,
+    },
+    initialData
   )
 
-  const products = data?.products || []
-  const count = data?.count || 0
-  const filterOptions = data?.filter_options
-  const loading = isLoading
+  const loading = isLoading && products.length === 0
 
   const { priceRange, priceValues, handlePriceChange } = usePriceRange({
     products,
@@ -379,54 +349,13 @@ export default function CategoryPage({
     }
   }, [showMobileFilters])
 
-  // Update URL with filters
-  const updateFilters = (updates: Record<string, string | string[] | null>) => {
-    const params = new URLSearchParams(searchParams.toString())
-    
-    // Reset to first page when filters change (except when updating page itself)
-    if (!updates.page) {
-      params.delete("page")
-    }
-
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
-        params.delete(key)
-      } else if (Array.isArray(value)) {
-        params.delete(key)
-        value.forEach((v) => params.append(key, v))
-      } else {
-        params.set(key, value)
-      }
-    })
-
-    router.push(`?${params.toString()}`)
-  }
-
-  const handleFilterChange = (key: string, value: string, isMulti = false) => {
-    if (isMulti) {
-      const current = searchParams.getAll(key)
-      const newValue = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value]
-      updateFilters({ [key]: newValue })
-    } else {
-      updateFilters({ [key]: value || null })
-    }
-  }
-
-  const handleSortChange = (order: string, direction: string) => {
-    updateFilters({ order, order_direction: direction })
-  }
-
-  const clearFilters = () => {
-    router.push("?")
-  }
 
   return (
     <div className="px-5 pb-8">
       {/* Category Header */}
       <div className="mb-12 pb-8 border-b border-gray-200 bg-gray-100 pt-8">
-        <div className="flex flex-col items-center gap-6">
+        <div className="max-w-8xl mx-auto px-5">
+          <div className="flex flex-col items-center gap-6">
           {/* Breadcrumbs */}
           {parentCategories && parentCategories.length > 0 && (
             <div className="flex flex-row text-sm gap-2 mb-2">
@@ -485,9 +414,11 @@ export default function CategoryPage({
             </div>
           )}
         </div>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="max-w-8xl mx-auto px-5">
+        <div className="flex flex-col md:flex-row gap-8">
         {/* Mobile Drawer */}
         {showMobileFilters && (
           <div
@@ -619,74 +550,59 @@ export default function CategoryPage({
             </div>
           </div>
 
-          {/* Products Grid */}
-          {error ? (
-            <div className="text-center py-16">
-              <p className="text-red-600 font-medium mb-4 font-urbanist">
-                Error loading products. Please try again.
-              </p>
-              <button
-                onClick={() => mutate()}
-                className="px-6 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm font-urbanist"
-              >
-                Retry
-              </button>
-            </div>
-          ) : loading ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 font-medium font-urbanist">Loading products...</p>
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 font-medium text-lg font-urbanist">No products found</p>
-              <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
-            </div>
-          ) : (
-            <div className={`grid gap-6 ${
-              gridLayout === "grid-1" ? "grid-cols-1" :
-              gridLayout === "grid-2" ? "grid-cols-1 sm:grid-cols-2" :
-              gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
-              "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            }`}>
-              {products.map((product: any) => (
-                <ProductPreviewClient
-                  key={product.id}
-                  product={product}
-                  region={region}
-                  countryCode={countryCode}
-                  gridLayout={gridLayout}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {count > 20 && (
-            <div className="flex justify-center items-center gap-3 mt-12 pt-8 border-t border-gray-200">
-              <button
-                onClick={() =>
-                  updateFilters({ page: String(Math.max(1, filters.page - 1)) })
-                }
-                disabled={filters.page === 1}
-                className="px-5 py-2.5 border border-gray-300 rounded-md bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm font-urbanist"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2 text-sm font-medium text-gray-700 font-urbanist">
-                Page <span className="font-semibold">{filters.page}</span> of{" "}
-                <span className="font-semibold">{Math.ceil(count / 20)}</span>
-              </span>
-              <button
-                onClick={() =>
-                  updateFilters({ page: String(filters.page + 1) })
-                }
-                disabled={filters.page >= Math.ceil(count / 20)}
-                className="px-5 py-2.5 border border-gray-300 rounded-md bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm font-urbanist"
-              >
-                Next
-              </button>
-            </div>
-          )}
+          {/* Products Grid with Infinite Scroll */}
+          <InfiniteScroll
+            onLoadMore={loadMore}
+            isLoading={isLoadingMore}
+            hasMore={!isReachingEnd}
+          >
+            {error ? (
+              <div className="text-center py-16">
+                <p className="text-red-600 font-medium mb-4 font-urbanist">
+                  Error loading products. Please try again.
+                </p>
+                <button
+                  onClick={() => mutate()}
+                  className="px-6 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm font-urbanist"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : loading ? (
+              <div className="flex items-center justify-center" style={{ minHeight: '80vh' }}>
+                <div className="flex flex-col items-center justify-center gap-4">
+                  <div className="relative w-12 h-12">
+                    <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-200 rounded-full"></div>
+                    <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                  <p className="text-gray-700 text-base font-medium font-urbanist">Loading products...</p>
+                </div>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-gray-500 font-medium text-lg font-urbanist">No products found</p>
+                <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
+              </div>
+            ) : (
+              <div className={`grid gap-6 ${
+                gridLayout === "grid-1" ? "grid-cols-1" :
+                gridLayout === "grid-2" ? "grid-cols-1 sm:grid-cols-2" :
+                gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
+                "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              }`}>
+                {products.map((product: any) => (
+                  <ProductPreviewClient
+                    key={product.id}
+                    product={product}
+                    region={region}
+                    countryCode={countryCode}
+                    gridLayout={gridLayout}
+                  />
+                ))}
+              </div>
+            )}
+          </InfiniteScroll>
+        </div>
         </div>
       </div>
     </div>
