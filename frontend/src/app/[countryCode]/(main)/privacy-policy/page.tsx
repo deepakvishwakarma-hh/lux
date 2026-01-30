@@ -200,7 +200,6 @@ export default function PrivacyPolicyPage(props: Props) {
             </p>
             <div className="mt-4 space-y-2">
               <p><strong>Email:</strong> <a href={websiteConfig.contact.emailLink} className="text-blue-600 hover:underline">{websiteConfig.contact.email}</a></p>
-              <p><strong>Phone:</strong> <a href={websiteConfig.contact.phoneLink} className="text-blue-600 hover:underline">{websiteConfig.contact.phoneFormatted}</a></p>
             </div>
           </section>
 

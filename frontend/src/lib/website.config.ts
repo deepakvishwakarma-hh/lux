@@ -13,9 +13,6 @@ export const websiteConfig = {
 
     // Contact Information
     contact: {
-        phone: "+91 9871981806",
-        phoneFormatted: "+91 9871981806",
-        phoneLink: "tel:+919871981806",
         email: "support@luxuriousonly.com",
         emailLink: "mailto:support@luxuriousonly.com",
         businessHours: {
@@ -66,7 +63,6 @@ export const websiteConfig = {
 export const getBrandName = () => websiteConfig.name
 export const getBrandDisplayName = () => websiteConfig.displayName
 export const getBrandShortName = () => websiteConfig.shortName
-export const getContactPhone = () => websiteConfig.contact.phone
 export const getContactEmail = () => websiteConfig.contact.email
 export const getLogoPath = () => websiteConfig.logo.path
 export const getCopyright = () => websiteConfig.company.copyright
