@@ -23,7 +23,7 @@ import { GetAdminProductQueriesSchema } from "./admin/product-queries/route";
 import { UpdateProductQueryStatusSchema } from "./admin/product-queries/[id]/route";
 import { UpdateVariantPricesSchema } from "./admin/variants/[variantId]/prices/route";
 import { GetProductsListSchema } from "./admin/products-list/route";
-// import { GetAdminBrandsSchema } from "./admin/brands/route";
+import { GetAdminBrandsSchema } from "./admin/brands/route";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators"
 
 export const GetBrandsSchema = createFindParams();
@@ -136,7 +136,7 @@ export default defineMiddlewares({
       matcher: "/admin/brands",
       method: ["GET"],
       middlewares: [
-        validateAndTransformQuery(GetBrandsSchema, {
+        validateAndTransformQuery(GetAdminBrandsSchema, {
           defaults: [
             "id",
             "name",

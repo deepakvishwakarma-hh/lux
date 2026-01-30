@@ -163,6 +163,8 @@ const BrandsPage = () => {
     pageIndex: 0,
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<BrandFormData>({
     name: "",
@@ -183,13 +185,14 @@ const BrandsPage = () => {
     limit: number;
     offset: number;
   }>({
-    queryKey: ["brands", pagination.pageIndex, pagination.pageSize],
+    queryKey: ["brands", pagination.pageIndex, pagination.pageSize, searchQuery],
     queryFn: () =>
       sdk.client.fetch("/admin/brands", {
         query: {
           offset: pagination.pageIndex * pagination.pageSize,
           limit: pagination.pageSize,
           order: "-created_at",
+          ...(searchQuery && { search: searchQuery }),
           // fields: ["*", "products.*"],
         },
       }),
@@ -295,7 +298,18 @@ const BrandsPage = () => {
       <DataTable instance={table}>
         <DataTable.Toolbar className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <Heading>Brands</Heading>
-          <Button onClick={handleOpenCreate}>Create Brand</Button>
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Search brands..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPagination({ ...pagination, pageIndex: 0 }); // Reset to first page on search
+              }}
+              className="w-64"
+            />
+            <Button onClick={handleOpenCreate}>Create Brand</Button>
+          </div>
         </DataTable.Toolbar>
         {hasBrands ? (
           <>

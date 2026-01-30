@@ -23,8 +23,15 @@ export const GET = async (
             metadata: { count, take, skip } = {},
         } = await query.graph(queryConfig)
 
+        // Sort brands by name (a-z) by default
+        const sortedBrands = (brands || []).sort((a: any, b: any) => {
+            const nameA = (a.name || "").toLowerCase()
+            const nameB = (b.name || "").toLowerCase()
+            return nameA.localeCompare(nameB)
+        })
+
         return res.json({
-            brands: brands || [],
+            brands: sortedBrands,
             count: count || 0,
             limit: take,
             offset: skip,

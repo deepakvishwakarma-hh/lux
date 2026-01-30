@@ -36,23 +36,23 @@ function ProductPreviewClient({
       ...v,
       calculated_price: v.price
         ? {
-            calculated_amount: v.price,
-            currency_code: product.currency_code || "USD",
-            original_amount: v.price,
-            calculated_price: {
-              price_list_type: "sale",
-            },
-          }
+          calculated_amount: v.price,
+          currency_code: product.currency_code || "USD",
+          original_amount: v.price,
+          calculated_price: {
+            price_list_type: "sale",
+          },
+        }
         : undefined,
     })),
   }
 
   // Get price for display - try multiple methods
   let cheapestPrice: any = null
-  
+
   // Method 1: Try using getProductPrice utility if product has proper structure
   try {
-    if (formattedProduct.id && formattedProduct.variants?.length > 0) {
+    if (formattedProduct.id && formattedProduct.variants && formattedProduct.variants.length > 0) {
       const priceResult = getProductPrice({ product: formattedProduct })
       if (priceResult.cheapestPrice) {
         cheapestPrice = priceResult.cheapestPrice
@@ -61,7 +61,7 @@ function ProductPreviewClient({
   } catch (e) {
     // Ignore errors and try other methods
   }
-  
+
   // Method 2: Check variants for calculated_price (from API)
   if (!cheapestPrice && product.variants && product.variants.length > 0) {
     const variantWithPrice = product.variants.find((v: any) => v.calculated_price?.calculated_amount)
@@ -80,13 +80,13 @@ function ProductPreviewClient({
       }
     }
   }
-  
+
   // Method 3: Check if variants have price property (from filter API)
   if (!cheapestPrice && product.variants && product.variants.length > 0) {
     const variantsWithPrice = product.variants
       .filter((v: any) => v.price !== null && v.price !== undefined)
       .sort((a: any, b: any) => a.price - b.price)
-    
+
     if (variantsWithPrice.length > 0) {
       const cheapestVariant = variantsWithPrice[0]
       const priceAmount = cheapestVariant.price / 100 // Convert from cents
@@ -101,7 +101,7 @@ function ProductPreviewClient({
       }
     }
   }
-  
+
   // Method 4: Fallback to product.price if no variant prices found
   if (!cheapestPrice && product.price !== null && product.price !== undefined) {
     const priceAmount = product.price / 100 // Convert from cents
@@ -130,23 +130,21 @@ function ProductPreviewClient({
     <LocalizedClientLink href={`/products/${product.handle}`} className={`group ${isList ? 'w-full' : 'h-full'}`}>
       <div
         data-testid="product-wrapper"
-        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${
-          isList 
-            ? 'relative flex flex-row gap-4 items-start p-4 sm:p-5 border border-gray-100 rounded-lg bg-white' 
-            : 'overflow-hidden relative h-full flex flex-col'
-        }`}
+        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${isList
+          ? 'relative flex flex-row gap-4 items-start p-4 sm:p-5 border border-gray-100 rounded-lg bg-white'
+          : 'overflow-hidden relative h-full flex flex-col'
+          }`}
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
           cheapestPrice.percentage_diff && (
-            <div className={`absolute z-10 bg-black text-white px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold ${
-              isList ? 'top-2 left-2' : 'top-2 left-2'
-            }`}>
+            <div className={`absolute z-10 bg-black text-white px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold ${isList ? 'top-2 left-2' : 'top-2 left-2'
+              }`}>
               -{cheapestPrice.percentage_diff}%
             </div>
           )}
         <HoverActions product={formattedProduct} />
-        
+
         {isList ? (
           <div className="w-40 sm:w-48 h-40 sm:h-48 flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-gray-50 relative">
             {product.thumbnail || product.images?.[0]?.url ? (
@@ -175,27 +173,24 @@ function ProductPreviewClient({
           </div>
         )}
 
-        <div className={`flex flex-col txt-compact-medium ${
-          isList 
-            ? 'flex-1 justify-between px-0 py-0' 
-            : 'mt-3 justify-between px-4 pb-4 flex-1'
-        }`}>
+        <div className={`flex flex-col txt-compact-medium ${isList
+          ? 'flex-1 justify-between px-0 py-0'
+          : 'mt-3 justify-between px-4 pb-4 flex-1'
+          }`}>
           <div className={isList ? 'space-y-2' : 'space-y-1'}>
             {product.brand && (
-              <p className={`${
-                isList 
-                  ? 'text-left text-sm text-gray-500 font-medium uppercase tracking-wide font-urbanist' 
-                  : 'text-ui-fg-subtle text-center font-semibold text-xs uppercase tracking-wide font-urbanist'
-              }`}>
+              <p className={`${isList
+                ? 'text-left text-sm text-gray-500 font-medium uppercase tracking-wide font-urbanist'
+                : 'text-ui-fg-subtle text-center font-semibold text-xs uppercase tracking-wide font-urbanist'
+                }`}>
                 {product.brand.name}
               </p>
             )}
             <p
-              className={`${
-                isList
-                  ? 'text-left text-base sm:text-lg font-semibold text-gray-900 leading-tight font-urbanist'
-                  : 'text-gray-900 text-center text-sm font-medium leading-tight max-h-12 overflow-hidden font-urbanist'
-              }`}
+              className={`${isList
+                ? 'text-left text-base sm:text-lg font-semibold text-gray-900 leading-tight font-urbanist'
+                : 'text-gray-900 text-center text-sm font-medium leading-tight max-h-12 overflow-hidden font-urbanist'
+                }`}
               data-testid="product-title"
             >
               {product.title}
@@ -204,7 +199,7 @@ function ProductPreviewClient({
               <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
             )}
           </div>
-          
+
           {isList ? (
             <div className="flex items-center justify-between gap-4 w-full mt-4">
               <div className="flex flex-col">
@@ -361,7 +356,9 @@ export default function BrandPage({
   const products = data?.products || []
   const count = data?.count || 0
   const filterOptions = data?.filter_options
-  const loading = isLoading
+  // Only show loading if we don't have data yet (prevents hydration mismatch)
+  // When initialData is provided, we should not show loading state
+  const loading = isLoading && !data && !initialData
 
   const { priceRange, priceValues, handlePriceChange } = usePriceRange({
     products,
@@ -630,11 +627,11 @@ export default function BrandPage({
   )
 
   return (
-    <div className="px-5 pb-8">
+    <div>
       {/* Brand Header */}
       {(brandName || brandMetaTitle || brandImage || brandMetaDesc || brandDescription) && (
         <div className="mb-12 pb-8 border-b border-gray-200 bg-gray-100 pt-8">
-          <div className="flex flex-col items-center gap-6">            
+          <div className="flex flex-col items-center gap-6">
             {/* {brandImage && (
               <div className="mb-4">
                 <img 
@@ -667,7 +664,7 @@ export default function BrandPage({
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-8 px-5 pb-8">
         {/* Mobile Drawer */}
         {showMobileFilters && (
           <div
@@ -822,12 +819,11 @@ export default function BrandPage({
               <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
             </div>
           ) : (
-            <div className={`grid gap-6 ${
-              gridLayout === "grid-1" ? "grid-cols-1" :
+            <div className={`grid gap-6 ${gridLayout === "grid-1" ? "grid-cols-1" :
               gridLayout === "grid-2" ? "grid-cols-1 sm:grid-cols-2" :
-              gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
-              "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            }`}>
+                gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
+                  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              }`}>
               {products.map((product: any) => (
                 <ProductPreviewClient
                   key={product.id}
