@@ -49,8 +49,11 @@ export async function getProductReviews(
                     limit,
                     offset,
                 },
-                next,
-                cache: "no-store", // Reviews can change, so don't cache aggressively
+                next: {
+                    ...next,
+                    revalidate: 60, // Revalidate every 60 seconds to match page revalidation
+                },
+                cache: "force-cache", // Allow static generation, revalidation handled by next.revalidate
             }
         )
 

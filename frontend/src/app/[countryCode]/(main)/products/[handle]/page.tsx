@@ -10,9 +10,10 @@ import ProductTemplate from "@modules/products/templates"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { listProducts, getProductAvailability } from "@lib/data/products"
-const getProductOptions = (products: HttpTypes.StoreProduct[]) => {
+const getProductOptions = (products: HttpTypes.StoreProduct[], model: string) => {
 
-  const normaize = products.map((product: HttpTypes.StoreProduct) => {
+  // added a filter based on the model to get the actual product because q effect;
+  const normaize = products.filter(products => products.title.includes(model)).map((product: HttpTypes.StoreProduct) => {
     return {
       title: product.title,
       id: product.id,
@@ -28,7 +29,7 @@ const getProductOptions = (products: HttpTypes.StoreProduct[]) => {
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
-  searchParams: Promise<{ v_id?: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 // Enable ISR (Incremental Static Regeneration) to refresh product data periodically
@@ -77,20 +78,9 @@ export async function generateStaticParams() {
 }
 
 function getImagesForVariant(
-  product: HttpTypes.StoreProduct,
-  selectedVariantId?: string
+  product: HttpTypes.StoreProduct
 ) {
-  if (!selectedVariantId || !product.variants) {
-    return product?.images ?? []
-  }
-
-  const variant = product.variants!.find((v) => v.id === selectedVariantId)
-  if (!variant || !variant.images?.length) {
-    return product?.images ?? []
-  }
-
-  const imageIdsMap = new Map(variant.images!.map((i) => [i.id, true]))
-  return product?.images!.filter((i) => imageIdsMap.has(i.id)) ?? []
+  return product?.images ?? []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -215,9 +205,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function ProductPage(props: Props) {
   const params = await props.params
   const region = await getRegion(params.countryCode)
-  const searchParams = await props.searchParams
-
-  const selectedVariantId = searchParams.v_id
 
   if (!region) {
     notFound()
@@ -228,7 +215,7 @@ export default async function ProductPage(props: Props) {
     queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0])
 
-  const images = getImagesForVariant(pricedProduct, selectedVariantId)
+  const images = getImagesForVariant(pricedProduct)
 
   if (!pricedProduct) {
     notFound()
@@ -408,10 +395,12 @@ export default async function ProductPage(props: Props) {
           __html: JSON.stringify(breadcrumbStructuredData),
         }}
       />
-
+      {/* <pre>
+        {JSON.stringify(getProductOptions(sameModalProducts, pricedProduct.metadata?.model as string), null, 2)}
+      </pre> */}
       <ProductTemplate
         // @ts-ignore
-        productOptions={getProductOptions(sameModalProducts as HttpTypes.StoreProduct[]) || []}
+        productOptions={getProductOptions(sameModalProducts as HttpTypes.StoreProduct[], pricedProduct.metadata?.model as string || "") || []}
         product={pricedProduct}
         region={region}
         countryCode={params.countryCode}

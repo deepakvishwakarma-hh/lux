@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useMemo } from "react"
-import Image from "next/image"
 import Link from "next/link"
+import Image from "next/image"
+import React, { useMemo } from "react"
 import { useParams } from "next/navigation"
 
 interface ProductOption {
@@ -42,13 +42,32 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
             })
     }, [options])
 
-    // Colors available for active product's size
-    const colorsForActiveSize = useMemo(() => {
-        if (!activeProduct) return []
-        return options.filter((opt) => opt.size === activeProduct.size)
-    }, [options, activeProduct])
+    // Unique colors with their thumbnails, preserve order (Amazon-style: show ALL colors)
+    const uniqueColors = useMemo(() => {
+        const colorMap = new Map<string, ProductOption>()
+        options.forEach((opt) => {
+            if (!colorMap.has(opt.color)) {
+                colorMap.set(opt.color, opt)
+            }
+        })
+        return Array.from(colorMap.values())
+    }, [options])
 
-    // Get href for size - try to find product with same color as active, otherwise use first available
+    // Check if a size is available for the active color
+    const isSizeAvailableForActiveColor = (size: string) => {
+        return options.some(
+            (opt) => opt.size === size && opt.color === activeProduct.color
+        )
+    }
+
+    // Check if a color is available for the active size
+    const isColorAvailableForActiveSize = (color: string) => {
+        return options.some(
+            (opt) => opt.size === activeProduct.size && opt.color === color
+        )
+    }
+
+    // Get href for size - Amazon-style: try same color first, then first available
     const getSizeHref = (size: string) => {
         if (size === activeProduct.size) return null // Already on this size
 
@@ -63,13 +82,17 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
         return targetProduct ? `/${countryCode}/products/${targetProduct.handle}` : null
     }
 
-    // Get href for color - navigate to product with active size and selected color
+    // Get href for color - Amazon-style: try same size first, then first available
     const getColorHref = (color: string) => {
         if (color === activeProduct.color) return null // Already on this color
 
-        const targetProduct = options.find(
+        // Try to find product with same size as active product
+        const sameSizeProduct = options.find(
             (opt) => opt.size === activeProduct.size && opt.color === color
         )
+
+        // If found, use it; otherwise use first product with that color
+        const targetProduct = sameSizeProduct || options.find((opt) => opt.color === color)
 
         return targetProduct ? `/${countryCode}/products/${targetProduct.handle}` : null
     }
@@ -81,24 +104,30 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
     return (
         <div className="space-y-6 py-4 border-t border-gray-200">
 
-            {/* Color Selection */}
-            {colorsForActiveSize.length > 0 && (
+            {/* Color Selection - Amazon-style: Show ALL colors */}
+            {uniqueColors.length > 0 && (
                 <div className="flex flex-col gap-y-3">
                     <span className="text-sm font-medium text-gray-500 uppercase">
                         Select Colors
                     </span>
                     <div className="flex flex-wrap gap-3">
-                        {colorsForActiveSize.map((opt) => {
+                        {uniqueColors.map((opt) => {
                             const isActive = opt.color === activeProduct.color
+                            const isAvailable = isColorAvailableForActiveSize(opt.color)
                             const href = getColorHref(opt.color)
+
+                            // Amazon-style: Show all colors, but indicate availability
                             const className = `relative group transition-all rounded-lg overflow-hidden ${isActive
                                 ? "ring-2 ring-black ring-offset-2"
-                                : "border border-gray-300 hover:border-gray-400 hover:shadow-md"
+                                : isAvailable
+                                    ? "border border-gray-300 hover:border-gray-400 hover:shadow-md"
+                                    : "border border-gray-200 opacity-60 hover:opacity-80"
                                 }`
 
                             const content = (
                                 <>
-                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden bg-gray-50">
+                                    <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden bg-gray-50 ${!isAvailable && !isActive ? "opacity-5  0" : ""
+                                        }`}>
                                         <Image
                                             src={opt.thumbnail}
                                             alt={opt.color}
@@ -107,6 +136,11 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                                             sizes="(max-width: 640px) 64px, 80px"
                                         />
                                     </div>
+                                    {!isAvailable && !isActive && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <p className="text-xs black text-center">Not available in this size</p>
+                                        </div>
+                                    )}
                                 </>
                             )
 
@@ -115,7 +149,7 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                                     <div
                                         key={opt.color}
                                         className={className}
-                                        title={opt.color}
+                                        title={`${opt.color}${!isAvailable && !isActive ? " (not available in this size)" : ""}`}
                                     >
                                         {content}
                                     </div>
@@ -127,7 +161,7 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                                     key={opt.color}
                                     href={href}
                                     className={className}
-                                    title={opt.color}
+                                    title={`${opt.color}${!isAvailable ? " (will change size)" : ""}`}
                                 >
                                     {content}
                                 </Link>
@@ -137,7 +171,7 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                 </div>
             )}
 
-            {/* Size Selection */}
+            {/* Size Selection - Amazon-style: Show ALL sizes with availability indication */}
             <div className="flex flex-col gap-y-3">
                 <span className="text-sm font-medium text-gray-500 uppercase">
                     Select Size
@@ -145,10 +179,15 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                 <div className="flex flex-wrap gap-2">
                     {sizes.map((size) => {
                         const isActive = size === activeProduct.size
+                        const isAvailable = isSizeAvailableForActiveColor(size)
                         const href = getSizeHref(size)
+
+                        // Amazon-style: Show all sizes, but indicate availability
                         const className = `border text-sm font-medium h-10 rounded-full px-5 transition-all flex items-center justify-center ${isActive
                             ? "border-black bg-white text-black shadow-sm"
-                            : "border-gray-300 bg-gray-50 text-gray-700 hover:border-gray-400 hover:bg-gray-100 hover:shadow-sm"
+                            : isAvailable
+                                ? "border-gray-300 bg-gray-50 text-gray-700 hover:border-gray-400 hover:bg-gray-100 hover:shadow-sm"
+                                : "border-gray-200 bg-gray-50 text-gray-400 opacity-60 hover:opacity-80"
                             }`
 
                         if (isActive || !href) {
@@ -156,6 +195,7 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                                 <span
                                     key={size}
                                     className={className}
+                                    title={!isAvailable && !isActive ? `${size} (not available in this color)` : size}
                                 >
                                     {size}
                                 </span>
@@ -167,6 +207,7 @@ const ProductOptions = ({ options, activeProductId }: ProductOptionsProps) => {
                                 key={size}
                                 href={href}
                                 className={className}
+                                title={!isAvailable ? `${size} (will change color)` : size}
                             >
                                 {size}
                             </Link>

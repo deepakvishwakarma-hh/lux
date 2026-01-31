@@ -7,11 +7,10 @@ import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
-import { useParams, usePathname, useSearchParams } from "next/navigation"
+import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
-import { useRouter } from "next/navigation"
 import Heart from "@modules/common/icons/heart"
 import {
   addToLikedAPI,
@@ -43,10 +42,6 @@ export default function ProductActions({
   productOptions,
   activeProductId,
 }: ProductActionsProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const [quantity, setQuantity] = useState(1)
@@ -67,29 +62,13 @@ export default function ProductActions({
       product.variants.length > 0 &&
       !hasInitializedVariant.current
     ) {
-      // Check if there's a variant ID in URL params
-      const variantIdFromUrl = searchParams.get("v_id")
-
-      // If URL has a variant ID, find and select that variant
-      if (variantIdFromUrl) {
-        const variantFromUrl = product.variants.find(
-          (v) => v.id === variantIdFromUrl
-        )
-        if (variantFromUrl) {
-          const variantOptions = optionsAsKeymap(variantFromUrl.options)
-          setOptions(variantOptions ?? {})
-          hasInitializedVariant.current = true
-          return
-        }
-      }
-
       // Auto-select the first variant optimistically
       const firstVariant = product.variants[0]
       const variantOptions = optionsAsKeymap(firstVariant.options)
       setOptions(variantOptions ?? {})
       hasInitializedVariant.current = true
     }
-  }, [product.variants, product.id, searchParams])
+  }, [product.variants, product.id])
 
   // Check if product is liked
   useEffect(() => {
@@ -146,23 +125,6 @@ export default function ProductActions({
       return isEqual(variantOptions, options)
     })
   }, [product.variants, options])
-
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
-    const value = isValidVariant ? selectedVariant?.id : null
-
-    if (params.get("v_id") === value) {
-      return
-    }
-
-    if (value) {
-      params.set("v_id", value)
-    } else {
-      params.delete("v_id")
-    }
-
-    router.replace(pathname + "?" + params.toString())
-  }, [selectedVariant, isValidVariant])
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
