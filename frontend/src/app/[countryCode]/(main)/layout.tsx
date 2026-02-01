@@ -11,6 +11,7 @@ import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import CategoryNavigation from "@modules/layout/templates/category-nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
+import CartButton from "@modules/layout/components/cart-button"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -37,7 +38,9 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
         {/* <Aside /> */}
 
         <main className="border-dashed flex-1  ml-0 md:ml-[60px]-- w-full h-screen --overflow-y-auto overflow-x-hidden--  ">
-          <Nav />
+          <Nav
+            cartButton={<CartButton />}
+          />
           <Suspense fallback={null}>
             <CategoryNavigation />
           </Suspense>

@@ -7,12 +7,11 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import NavSearch from "@modules/layout/components/nav-search"
 import NavHeader from "@modules/layout/components/nav-header"
 import MobileMenu from "@modules/layout/components/mobile-menu"
-import CartButton from "@modules/layout/components/cart-button"
 import WoodMartIcon from "@modules/common/icons/woodmart-icon"
 import User from "@modules/common/icons/user"
 import { websiteConfig } from "@lib/website.config"
 
-export default function Nav() {
+export default function Nav({ cartButton }: { cartButton: React.ReactNode }) {
   const [showMobileSearch, setShowMobileSearch] = useState(false)
 
   return (
@@ -75,7 +74,7 @@ export default function Nav() {
                   </LocalizedClientLink>
                 }
               >
-                {/* <CartButton /> */}
+                {cartButton}
               </Suspense>
             }
           />
