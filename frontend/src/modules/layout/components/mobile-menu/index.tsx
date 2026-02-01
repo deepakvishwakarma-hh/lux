@@ -46,15 +46,15 @@ export default function MobileMenu() {
 
             {/* NAV LINKS */}
             <div className="flex flex-col text-sm">
-              <LocalizedClientLink href="/brand" onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200">
+              <LocalizedClientLink href="/categories/sunglasses" onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200">
                 SUNGLASSES
               </LocalizedClientLink>
 
-              <LocalizedClientLink href="/brand" onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200">
+              <LocalizedClientLink href="/categories/eyeglasses" onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200">
                 EYEGLASSES
               </LocalizedClientLink>
 
-              <LocalizedClientLink href="/brand" onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200">
+              <LocalizedClientLink href="/brands  " onClick={() => setMenuOpen(false)} className="py-4 border-b border-gray-200">
                 SHOP BY BRAND
               </LocalizedClientLink>
 
