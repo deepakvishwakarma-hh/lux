@@ -23,7 +23,7 @@ export const websiteConfig = {
 
     // Logo Configuration
     logo: {
-        path: "/logo.avif",
+        path: "/logo.jpeg",
         alt: "brand.luxuriousonly.com",
         desktop: {
             width: 205,
