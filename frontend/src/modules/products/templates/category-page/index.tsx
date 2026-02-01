@@ -37,20 +37,20 @@ function ProductPreviewClient({
       ...v,
       calculated_price: v.price
         ? {
-            calculated_amount: v.price,
-            currency_code: product.currency_code || "USD",
-            original_amount: v.price,
-            calculated_price: {
-              price_list_type: "sale",
-            },
-          }
+          calculated_amount: v.price,
+          currency_code: product.currency_code || "USD",
+          original_amount: v.price,
+          calculated_price: {
+            price_list_type: "sale",
+          },
+        }
         : undefined,
     })),
   }
 
   // Get price for display - try multiple methods
   let cheapestPrice: any = null
-  
+
   // Method 1: Try using getProductPrice utility if product has proper structure
   try {
     if (formattedProduct.id && formattedProduct.variants?.length > 0) {
@@ -62,7 +62,7 @@ function ProductPreviewClient({
   } catch (e) {
     // Ignore errors and try other methods
   }
-  
+
   // Method 2: Check variants for calculated_price (from API)
   if (!cheapestPrice && product.variants && product.variants.length > 0) {
     const variantWithPrice = product.variants.find((v: any) => v.calculated_price?.calculated_amount)
@@ -81,13 +81,13 @@ function ProductPreviewClient({
       }
     }
   }
-  
+
   // Method 3: Check if variants have price property (from filter API)
   if (!cheapestPrice && product.variants && product.variants.length > 0) {
     const variantsWithPrice = product.variants
       .filter((v: any) => v.price !== null && v.price !== undefined)
       .sort((a: any, b: any) => a.price - b.price)
-    
+
     if (variantsWithPrice.length > 0) {
       const cheapestVariant = variantsWithPrice[0]
       const priceAmount = cheapestVariant.price / 100 // Convert from cents
@@ -102,7 +102,7 @@ function ProductPreviewClient({
       }
     }
   }
-  
+
   // Method 4: Fallback to product.price if no variant prices found
   if (!cheapestPrice && product.price !== null && product.price !== undefined) {
     const priceAmount = product.price / 100 // Convert from cents
@@ -131,23 +131,21 @@ function ProductPreviewClient({
     <LocalizedClientLink href={`/products/${product.handle}`} className={`group ${isList ? 'w-full' : 'h-full'}`}>
       <div
         data-testid="product-wrapper"
-        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${
-          isList 
-            ? 'relative flex flex-row gap-4 items-start p-4 sm:p-5 border border-gray-100 rounded-lg bg-white' 
-            : 'overflow-hidden relative h-full flex flex-col'
-        }`}
+        className={`shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 ${isList
+          ? 'relative flex flex-row gap-4 items-start p-4 sm:p-5 border border-gray-100 rounded-lg bg-white'
+          : 'overflow-hidden relative h-full flex flex-col'
+          }`}
       >
         {cheapestPrice &&
           cheapestPrice.price_type === "sale" &&
           cheapestPrice.percentage_diff && (
-            <div className={`absolute z-10 bg-black text-white px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold ${
-              isList ? 'top-2 left-2' : 'top-2 left-2'
-            }`}>
+            <div className={`absolute z-10 bg-black text-white px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold ${isList ? 'top-2 left-2' : 'top-2 left-2'
+              }`}>
               -{cheapestPrice.percentage_diff}%
             </div>
           )}
         <HoverActions product={formattedProduct} />
-        
+
         {isList ? (
           <div className="w-40 sm:w-48 h-40 sm:h-48 flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-gray-50 relative">
             {product.thumbnail || product.images?.[0]?.url ? (
@@ -176,27 +174,24 @@ function ProductPreviewClient({
           </div>
         )}
 
-        <div className={`flex flex-col txt-compact-medium ${
-          isList 
-            ? 'flex-1 justify-between px-0 py-0' 
-            : 'mt-3 justify-between px-4 pb-4 flex-1'
-        }`}>
+        <div className={`flex flex-col txt-compact-medium ${isList
+          ? 'flex-1 justify-between px-0 py-0'
+          : 'mt-3 justify-between px-4 pb-4 flex-1'
+          }`}>
           <div className={isList ? 'space-y-2' : 'space-y-1'}>
             {product.brand && (
-              <p className={`${
-                isList 
-                  ? 'text-left text-sm text-gray-500 font-medium uppercase tracking-wide font-urbanist' 
-                  : 'text-ui-fg-subtle text-center font-semibold text-xs uppercase tracking-wide font-urbanist'
-              }`}>
+              <p className={`${isList
+                ? 'text-left text-sm text-gray-500 font-medium uppercase tracking-wide font-urbanist'
+                : 'text-ui-fg-subtle text-center font-semibold text-xs uppercase tracking-wide font-urbanist'
+                }`}>
                 {product.brand.name}
               </p>
             )}
             <p
-              className={`${
-                isList
-                  ? 'text-left text-base sm:text-lg font-semibold text-gray-900 leading-tight font-urbanist'
-                  : 'text-gray-900 text-center text-sm font-medium leading-tight max-h-12 overflow-hidden font-urbanist'
-              }`}
+              className={`${isList
+                ? 'text-left text-base sm:text-lg font-semibold text-gray-900 leading-tight font-urbanist'
+                : 'text-gray-900 text-center text-sm font-medium leading-tight max-h-12 overflow-hidden font-urbanist'
+                }`}
               data-testid="product-title"
             >
               {product.title}
@@ -205,7 +200,7 @@ function ProductPreviewClient({
               <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
             )}
           </div>
-          
+
           {isList ? (
             <div className="flex items-center justify-between gap-4 w-full mt-4">
               <div className="flex flex-col">
@@ -351,258 +346,257 @@ export default function CategoryPage({
 
 
   return (
-    <div className="px-5 pb-8">
+    <div className="pb-8">
       {/* Category Header */}
       <div className="mb-12 pb-8 border-b border-gray-200 bg-gray-100 pt-8">
         <div className="max-w-8xl mx-auto px-5">
           <div className="flex flex-col items-center gap-6">
-          {/* Breadcrumbs */}
-          {parentCategories && parentCategories.length > 0 && (
-            <div className="flex flex-row text-sm gap-2 mb-2">
-              {parentCategories.map((parent, index) => (
-                <React.Fragment key={parent.handle}>
-                  <LocalizedClientLink
-                    className="text-gray-600 hover:text-gray-900 transition-colors"
-                    href={`/categories/${parent.handle}`}
-                  >
-                    {parent.name}
-                  </LocalizedClientLink>
-                  {index < parentCategories.length - 1 && (
-                    <span className="text-gray-400">/</span>
-                  )}
-                </React.Fragment>
-              ))}
-              <span className="text-gray-400">/</span>
-              <span className="text-gray-900 font-medium">{categoryName}</span>
-            </div>
-          )}
-
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold leading-tight text-gray-900 font-urbanist">
-              {categoryName}
-            </h1>
-
-            {categoryDescription && (
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-                {categoryDescription}
-              </p>
+            {/* Breadcrumbs */}
+            {parentCategories && parentCategories.length > 0 && (
+              <div className="flex flex-row text-sm gap-2 mb-2">
+                {parentCategories.map((parent, index) => (
+                  <React.Fragment key={parent.handle}>
+                    <LocalizedClientLink
+                      className="text-gray-600 hover:text-gray-900 transition-colors"
+                      href={`/categories/${parent.handle}`}
+                    >
+                      {parent.name}
+                    </LocalizedClientLink>
+                    {index < parentCategories.length - 1 && (
+                      <span className="text-gray-400">/</span>
+                    )}
+                  </React.Fragment>
+                ))}
+                <span className="text-gray-400">/</span>
+                <span className="text-gray-900 font-medium">{categoryName}</span>
+              </div>
             )}
 
-            <div className="pt-2">
-              <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider font-urbanist">
-                {loading ? "Loading..." : `${count} ${count === 1 ? "product" : "products"} available`}
-              </p>
-            </div>
-          </div>
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold leading-tight text-gray-900 font-urbanist">
+                {categoryName}
+              </h1>
 
-          {/* Subcategories */}
-          {categoryChildren && categoryChildren.length > 0 && (
-            <div className="mt-6 w-full max-w-3xl">
-              <h2 className="text-sm font-semibold mb-3 text-gray-700 uppercase tracking-wider font-urbanist">Subcategories</h2>
-              <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {categoryChildren.map((child) => (
-                  <li key={child.id}>
-                    <LocalizedClientLink
-                      href={`/categories/${child.handle}`}
-                      className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
-                    >
-                      {child.name}
-                    </LocalizedClientLink>
-                  </li>
-                ))}
-              </ul>
+              {categoryDescription && (
+                <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                  {categoryDescription}
+                </p>
+              )}
+
+              <div className="pt-2">
+                <p className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider font-urbanist">
+                  {loading ? "Loading..." : `${count} ${count === 1 ? "product" : "products"} available`}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Subcategories */}
+            {categoryChildren && categoryChildren.length > 0 && (
+              <div className="mt-6 w-full max-w-3xl">
+                <h2 className="text-sm font-semibold mb-3 text-gray-700 uppercase tracking-wider font-urbanist">Subcategories</h2>
+                <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {categoryChildren.map((child) => (
+                    <li key={child.id}>
+                      <LocalizedClientLink
+                        href={`/categories/${child.handle}`}
+                        className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                      >
+                        {child.name}
+                      </LocalizedClientLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="max-w-8xl mx-auto px-5">
         <div className="flex flex-col md:flex-row gap-8">
-        {/* Mobile Drawer */}
-        {showMobileFilters && (
-          <div
-            id="mobile-filter-drawer"
-            role="dialog"
-            aria-modal="true"
-            className="fixed inset-0 lg:hidden"
-            style={{ zIndex: 9998 }}
-          >
+          {/* Mobile Drawer */}
+          {showMobileFilters && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-40"
-              onClick={() => setShowMobileFilters(false)}
+              id="mobile-filter-drawer"
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 lg:hidden"
               style={{ zIndex: 9998 }}
-            />
+            >
+              <div
+                className="fixed inset-0 bg-black bg-opacity-40"
+                onClick={() => setShowMobileFilters(false)}
+                style={{ zIndex: 9998 }}
+              />
 
-            <div className={`fixed top-0 left-0 h-full w-80 max-w-[85%] bg-white shadow-xl transform transition-transform`} style={{ zIndex: 9999 }}>
-              <div className="flex items-center justify-between p-5 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900 font-urbanist">Filters</h2>
-                <button
-                  onClick={() => setShowMobileFilters(false)}
-                  aria-label="Close filters"
-                  className="p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              <div className={`fixed top-0 left-0 h-full w-80 max-w-[85%] bg-white shadow-xl transform transition-transform`} style={{ zIndex: 9999 }}>
+                <div className="flex items-center justify-between p-5 border-b border-gray-200">
+                  <h2 className="text-lg font-bold text-gray-900 font-urbanist">Filters</h2>
+                  <button
+                    onClick={() => setShowMobileFilters(false)}
+                    aria-label="Close filters"
+                    className="p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
 
-              <div className="h-full overflow-auto p-4">
-                <FilterSidebar
-                  filters={{
-                    brand: filters.brand ? [filters.brand] : [],
-                    category: [],
-                    rimStyle: filters.rimStyle,
-                    gender: filters.gender,
-                    shapes: filters.shapes,
-                    size: filters.size,
-                    frameMaterial: filters.frameMaterial,
-                    shapeFilter: filters.shapeFilter,
-                    shape: filters.shape,
-                    minPrice: filters.minPrice || undefined,
-                    maxPrice: filters.maxPrice || undefined,
-                  }}
-                  filterOptions={filterOptions}
-                  priceRange={priceRange}
-                  priceValues={priceValues}
-                  onPriceChange={handlePriceChange}
-                  onFilterChange={handleFilterChange}
-                  onClearFilters={() => { clearFilters(); setShowMobileFilters(false) }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Sidebar Filters - visible on lg and up */}
-        <aside className="hidden lg:block lg:w-72 flex-shrink-0 self-start lg:sticky lg:top-20" style={{ zIndex: 20 }}>
-          <FilterSidebar
-            filters={{
-              brand: filters.brand ? [filters.brand] : [],
-              category: [],
-              rimStyle: filters.rimStyle,
-              gender: filters.gender,
-              shapes: filters.shapes,
-              size: filters.size,
-              frameMaterial: filters.frameMaterial,
-              shapeFilter: filters.shapeFilter,
-              shape: filters.shape,
-              minPrice: filters.minPrice || undefined,
-              maxPrice: filters.maxPrice || undefined,
-            }}
-            filterOptions={filterOptions}
-            priceRange={priceRange}
-            priceValues={priceValues}
-            onPriceChange={handlePriceChange}
-            onFilterChange={handleFilterChange}
-            onClearFilters={clearFilters}
-          />
-        </aside>
-
-        {/* Main Content */}
-        <div className="flex-1">
-          {/* Sort and Results Count */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
-            <div>
-              <p className="text-sm sm:text-base font-medium text-gray-700 text-center sm:text-left font-urbanist">
-                {loading ? (
-                  <span className="text-gray-500">Loading...</span>
-                ) : (
-                  <span>
-                    <span className="font-semibold text-gray-900">{count}</span>{" "}
-                    {count === 1 ? "product" : "products"} found
-                  </span>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-              <button
-                onClick={() => setShowMobileFilters(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors lg:hidden flex-shrink-0 font-medium text-sm font-urbanist"
-                aria-label="Open filters"
-                aria-haspopup="dialog"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <span>Filters</span>
-              </button>
-              <label className="text-sm font-medium text-gray-700 hidden sm:inline font-urbanist">
-                Sort by:
-              </label>
-              <select
-                value={`${filters.order}_${filters.orderDirection}`}
-                onChange={(e) => {
-                  const [order, direction] = e.target.value.split("_")
-                  handleSortChange(order, direction)
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 w-full sm:w-auto flex-1 sm:flex-none min-w-[180px] text-sm font-medium font-urbanist"
-              >
-                <option value="created_at_desc">Newest First</option>
-                <option value="created_at_asc">Oldest First</option>
-                <option value="title_asc">Name A-Z</option>
-                <option value="title_desc">Name Z-A</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-              </select>
-              <GridLayoutSelector value={gridLayout} onChange={setGridLayout} storageKey="category-grid-layout" />
-            </div>
-          </div>
-
-          {/* Products Grid with Infinite Scroll */}
-          <InfiniteScroll
-            onLoadMore={loadMore}
-            isLoading={isLoadingMore}
-            hasMore={!isReachingEnd}
-          >
-            {error ? (
-              <div className="text-center py-16">
-                <p className="text-red-600 font-medium mb-4 font-urbanist">
-                  Error loading products. Please try again.
-                </p>
-                <button
-                  onClick={() => mutate()}
-                  className="px-6 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm font-urbanist"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : loading ? (
-              <div className="flex items-center justify-center" style={{ minHeight: '80vh' }}>
-                <div className="flex flex-col items-center justify-center gap-4">
-                  <div className="relative w-12 h-12">
-                    <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-200 rounded-full"></div>
-                    <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                  <p className="text-gray-700 text-base font-medium font-urbanist">Loading products...</p>
+                <div className="h-full overflow-auto p-4">
+                  <FilterSidebar
+                    filters={{
+                      brand: filters.brand ? [filters.brand] : [],
+                      category: [],
+                      rimStyle: filters.rimStyle,
+                      gender: filters.gender,
+                      shapes: filters.shapes,
+                      size: filters.size,
+                      frameMaterial: filters.frameMaterial,
+                      shapeFilter: filters.shapeFilter,
+                      shape: filters.shape,
+                      minPrice: filters.minPrice || undefined,
+                      maxPrice: filters.maxPrice || undefined,
+                    }}
+                    filterOptions={filterOptions}
+                    priceRange={priceRange}
+                    priceValues={priceValues}
+                    onPriceChange={handlePriceChange}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={() => { clearFilters(); setShowMobileFilters(false) }}
+                  />
                 </div>
               </div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-gray-500 font-medium text-lg font-urbanist">No products found</p>
-                <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
+            </div>
+          )}
+
+          {/* Sidebar Filters - visible on lg and up */}
+          <aside className="hidden lg:block lg:w-72 flex-shrink-0 self-start lg:sticky lg:top-20" style={{ zIndex: 20 }}>
+            <FilterSidebar
+              filters={{
+                brand: filters.brand ? [filters.brand] : [],
+                category: [],
+                rimStyle: filters.rimStyle,
+                gender: filters.gender,
+                shapes: filters.shapes,
+                size: filters.size,
+                frameMaterial: filters.frameMaterial,
+                shapeFilter: filters.shapeFilter,
+                shape: filters.shape,
+                minPrice: filters.minPrice || undefined,
+                maxPrice: filters.maxPrice || undefined,
+              }}
+              filterOptions={filterOptions}
+              priceRange={priceRange}
+              priceValues={priceValues}
+              onPriceChange={handlePriceChange}
+              onFilterChange={handleFilterChange}
+              onClearFilters={clearFilters}
+            />
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Sort and Results Count */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
+              <div>
+                <p className="text-sm sm:text-base font-medium text-gray-700 text-center sm:text-left font-urbanist">
+                  {loading ? (
+                    <span className="text-gray-500">Loading...</span>
+                  ) : (
+                    <span>
+                      <span className="font-semibold text-gray-900">{count}</span>{" "}
+                      {count === 1 ? "product" : "products"} found
+                    </span>
+                  )}
+                </p>
               </div>
-            ) : (
-              <div className={`grid gap-6 ${
-                gridLayout === "grid-1" ? "grid-cols-1" :
-                gridLayout === "grid-2" ? "grid-cols-1 sm:grid-cols-2" :
-                gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
-                "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              }`}>
-                {products.map((product: any) => (
-                  <ProductPreviewClient
-                    key={product.id}
-                    product={product}
-                    region={region}
-                    countryCode={countryCode}
-                    gridLayout={gridLayout}
-                  />
-                ))}
+              <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+                <button
+                  onClick={() => setShowMobileFilters(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors lg:hidden flex-shrink-0 font-medium text-sm font-urbanist"
+                  aria-label="Open filters"
+                  aria-haspopup="dialog"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  <span>Filters</span>
+                </button>
+                <label className="text-sm font-medium text-gray-700 hidden sm:inline font-urbanist">
+                  Sort by:
+                </label>
+                <select
+                  value={`${filters.order}_${filters.orderDirection}`}
+                  onChange={(e) => {
+                    const [order, direction] = e.target.value.split("_")
+                    handleSortChange(order, direction)
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 w-full sm:w-auto flex-1 sm:flex-none min-w-[180px] text-sm font-medium font-urbanist"
+                >
+                  <option value="created_at_desc">Newest First</option>
+                  <option value="created_at_asc">Oldest First</option>
+                  <option value="title_asc">Name A-Z</option>
+                  <option value="title_desc">Name Z-A</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                </select>
+                <GridLayoutSelector value={gridLayout} onChange={setGridLayout} storageKey="category-grid-layout" />
               </div>
-            )}
-          </InfiniteScroll>
-        </div>
+            </div>
+
+            {/* Products Grid with Infinite Scroll */}
+            <InfiniteScroll
+              onLoadMore={loadMore}
+              isLoading={isLoadingMore}
+              hasMore={!isReachingEnd}
+            >
+              {error ? (
+                <div className="text-center py-16">
+                  <p className="text-red-600 font-medium mb-4 font-urbanist">
+                    Error loading products. Please try again.
+                  </p>
+                  <button
+                    onClick={() => mutate()}
+                    className="px-6 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium text-sm font-urbanist"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : loading ? (
+                <div className="flex items-center justify-center" style={{ minHeight: '80vh' }}>
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <div className="relative w-12 h-12">
+                      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-200 rounded-full"></div>
+                      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <p className="text-gray-700 text-base font-medium font-urbanist">Loading products...</p>
+                  </div>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-gray-500 font-medium text-lg font-urbanist">No products found</p>
+                  <p className="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
+                </div>
+              ) : (
+                <div className={`grid gap-6 ${gridLayout === "grid-1" ? "grid-cols-1" :
+                  gridLayout === "grid-2" ? "grid-cols-1 sm:grid-cols-2" :
+                    gridLayout === "grid-3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
+                      "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  }`}>
+                  {products.map((product: any) => (
+                    <ProductPreviewClient
+                      key={product.id}
+                      product={product}
+                      region={region}
+                      countryCode={countryCode}
+                      gridLayout={gridLayout}
+                    />
+                  ))}
+                </div>
+              )}
+            </InfiniteScroll>
+          </div>
         </div>
       </div>
     </div>
