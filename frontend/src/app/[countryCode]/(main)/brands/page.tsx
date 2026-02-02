@@ -198,9 +198,9 @@ export default async function BrandsPage(props: Props) {
                   className="w-full h-48 object-contain mb-4 rounded"
                 />
               )}
-              <h3 className="text-xl font-semibold mb-2">{brand.name}</h3>
+              <h3 className="text-xl font-semibold mb-2 text-center">{brand.name}</h3>
               {brand.products && brand.products.length > 0 && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 text-center">
                   {brand.products.length}{" "}
                   {brand.products.length === 1 ? "product" : "products"}
                 </p>
