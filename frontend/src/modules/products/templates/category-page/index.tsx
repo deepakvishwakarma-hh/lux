@@ -391,7 +391,7 @@ export default function CategoryPage({
             </div>
 
             {/* Subcategories */}
-            {categoryChildren && categoryChildren.length > 0 && (
+            {/* {categoryChildren && categoryChildren.length > 0 && (
               <div className="mt-6 w-full max-w-3xl">
                 <h2 className="text-sm font-semibold mb-3 text-gray-700 uppercase tracking-wider font-urbanist">Subcategories</h2>
                 <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -407,7 +407,7 @@ export default function CategoryPage({
                   ))}
                 </ul>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
